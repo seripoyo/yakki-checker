@@ -6,6 +6,8 @@
 // ===== グローバル変数 =====
 const API_BASE_URL = 'http://localhost:5000';
 let currentCheckData = null;
+let guideData = null;
+let isGuideLoaded = false;
 
 // ===== DOM要素の取得 =====
 const elements = {
@@ -422,7 +424,282 @@ function switchTab(tabName) {
     } else if (tabName === 'guide') {
         elements.tabGuide.classList.add('active');
         elements.guideContent.classList.add('active');
+        
+        // ガイドタブが初回クリックされた場合、ガイドコンテンツを読み込み
+        if (!isGuideLoaded) {
+            loadGuideContent();
+        }
     }
+}
+
+// ===== ガイドコンテンツの読み込み =====
+async function loadGuideContent() {
+    console.log('ガイドコンテンツの読み込み開始');
+    
+    try {
+        // ローディング表示
+        showGuideLoading(true);
+        
+        // ガイドデータの取得
+        const data = await fetchGuideContents();
+        
+        // データを保存
+        guideData = data;
+        isGuideLoaded = true;
+        
+        // ガイドのレンダリング
+        renderGuide(data);
+        
+        console.log('ガイドコンテンツの読み込み完了');
+        
+    } catch (error) {
+        console.error('ガイドコンテンツの読み込みエラー:', error);
+        renderGuideError(error);
+    } finally {
+        showGuideLoading(false);
+    }
+}
+
+// ===== ガイドコンテンツのAPI取得 =====
+async function fetchGuideContents() {
+    console.log('ガイドAPI呼び出し開始');
+    
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/guide`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!response.ok) {
+            throw new Error(`ガイドAPI呼び出しエラー: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('ガイドAPI応答受信:', data);
+        
+        return data;
+        
+    } catch (error) {
+        console.error('ガイドAPI通信エラー:', error);
+        throw error;
+    }
+}
+
+// ===== ガイドコンテンツのレンダリング =====
+function renderGuide(apiResponse) {
+    console.log('ガイドレンダリング開始');
+    
+    const guideContainer = elements.guideContent;
+    
+    // データソースに応じたメッセージ表示
+    let statusHtml = '';
+    if (apiResponse.source === 'notion') {
+        statusHtml = `
+            <div class="guide-status success">
+                <span class="status-icon">✅</span>
+                <span>Notionから最新のガイドデータを取得しました (${apiResponse.count}件)</span>
+            </div>
+        `;
+    } else if (apiResponse.source === 'fallback') {
+        statusHtml = `
+            <div class="guide-status warning">
+                <span class="status-icon">⚠️</span>
+                <span>Notion接続エラーのため、静的ガイドデータを表示しています</span>
+            </div>
+        `;
+    }
+    
+    // ガイドデータが空の場合
+    if (!apiResponse.data || apiResponse.data.length === 0) {
+        guideContainer.innerHTML = `
+            ${statusHtml}
+            <div class="guide-empty">
+                <h3>📚 薬機法ガイド</h3>
+                <p>現在ガイドデータが取得できませんでした。しばらく待ってから再度お試しください。</p>
+            </div>
+        `;
+        return;
+    }
+    
+    // カテゴリ別にデータを整理
+    const categorizedData = categorizeGuideData(apiResponse.data);
+    
+    // アコーディオン形式のHTMLを生成
+    const accordionHtml = Object.entries(categorizedData).map(([category, items]) => {
+        const itemsHtml = items.map((item, index) => `
+            <div class="guide-item" id="guide-item-${item.id}">
+                <div class="guide-item-header" onclick="toggleGuideItem('${item.id}')">
+                    <h4 class="guide-item-title">${escapeHtml(item.title)}</h4>
+                    <span class="guide-item-toggle">▼</span>
+                </div>
+                <div class="guide-item-content" id="guide-content-${item.id}">
+                    <div class="guide-item-body">
+                        ${formatGuideContent(item.content)}
+                    </div>
+                    ${item.priority ? `<div class="guide-item-priority priority-${item.priority}">優先度: ${item.priority}</div>` : ''}
+                    ${item.last_edited_time ? `<div class="guide-item-date">最終更新: ${formatDate(item.last_edited_time)}</div>` : ''}
+                </div>
+            </div>
+        `).join('');
+        
+        return `
+            <div class="guide-category">
+                <h3 class="guide-category-title">
+                    <span class="category-icon">${getCategoryIcon(category)}</span>
+                    ${escapeHtml(category)}
+                </h3>
+                <div class="guide-category-items">
+                    ${itemsHtml}
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    // 最終HTML構築
+    guideContainer.innerHTML = `
+        <div class="guide-header">
+            <h2 class="guide-title">📚 薬機法簡単ガイド</h2>
+            <p class="guide-description">美容系商品の広告作成時に注意すべきポイントをまとめました。</p>
+            ${statusHtml}
+        </div>
+        <div class="guide-accordion">
+            ${accordionHtml}
+        </div>
+        <div class="guide-footer">
+            <p class="guide-note">
+                <strong>⚠️ 重要:</strong> このガイドは参考情報です。実際の広告作成時は必ず専門家にご相談ください。
+            </p>
+            <button class="btn btn-primary" onclick="handleConsultButtonClick()">
+                <span class="btn-icon">👨‍💼</span>専門家に相談する
+            </button>
+        </div>
+    `;
+    
+    console.log('ガイドレンダリング完了');
+}
+
+// ===== ガイドデータのカテゴリ分け =====
+function categorizeGuideData(data) {
+    const categories = {};
+    
+    data.forEach(item => {
+        const category = item.category || 'その他';
+        if (!categories[category]) {
+            categories[category] = [];
+        }
+        categories[category].push(item);
+    });
+    
+    // 優先度順にソート
+    Object.keys(categories).forEach(category => {
+        categories[category].sort((a, b) => {
+            const priorityOrder = { '高': 1, '中': 2, '低': 3 };
+            return (priorityOrder[a.priority] || 4) - (priorityOrder[b.priority] || 4);
+        });
+    });
+    
+    return categories;
+}
+
+// ===== ガイドコンテンツのフォーマット =====
+function formatGuideContent(content) {
+    if (!content) return '';
+    
+    // 改行とマークダウン形式のテキストを適切にHTMLに変換
+    return content
+        .replace(/\n\n/g, '</p><p>')
+        .replace(/\n/g, '<br>')
+        .replace(/^/, '<p>')
+        .replace(/$/, '</p>')
+        .replace(/^<p><\/p>$/, '')
+        .replace(/# (.*)/g, '<h4>$1</h4>')
+        .replace(/## (.*)/g, '<h5>$1</h5>')
+        .replace(/• (.*)/g, '<li>$1</li>')
+        .replace(/(<li>.*<\/li>)/g, '<ul>$1</ul>')
+        .replace(/<\/ul><ul>/g, '');
+}
+
+// ===== カテゴリアイコンの取得 =====
+function getCategoryIcon(category) {
+    const icons = {
+        '基本知識': '📖',
+        'NG表現': '❌',
+        'OK表現': '✅',
+        'チェックポイント': '✔️',
+        'その他': '📄'
+    };
+    return icons[category] || '📄';
+}
+
+// ===== 日付フォーマット =====
+function formatDate(dateString) {
+    if (!dateString) return '';
+    
+    try {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('ja-JP', {
+            year: 'numeric',
+            month: 'numeric',
+            day: 'numeric'
+        });
+    } catch (error) {
+        return dateString;
+    }
+}
+
+// ===== ガイドアイテムの開閉 =====
+function toggleGuideItem(itemId) {
+    const content = document.getElementById(`guide-content-${itemId}`);
+    const toggle = document.querySelector(`#guide-item-${itemId} .guide-item-toggle`);
+    
+    if (content && toggle) {
+        const isOpen = content.style.display === 'block';
+        content.style.display = isOpen ? 'none' : 'block';
+        toggle.textContent = isOpen ? '▼' : '▲';
+        
+        // アニメーション効果
+        if (!isOpen) {
+            content.style.animation = 'slideDown 0.3s ease';
+        }
+    }
+}
+
+// ===== ガイドローディング状態の制御 =====
+function showGuideLoading(show) {
+    const guideContainer = elements.guideContent;
+    
+    if (show) {
+        guideContainer.innerHTML = `
+            <div class="guide-loading">
+                <div class="loading-spinner"></div>
+                <p>薬機法ガイドを読み込み中...</p>
+            </div>
+        `;
+    }
+}
+
+// ===== ガイドエラー表示 =====
+function renderGuideError(error) {
+    const guideContainer = elements.guideContent;
+    
+    guideContainer.innerHTML = `
+        <div class="guide-error">
+            <h3>❌ ガイドの読み込みに失敗しました</h3>
+            <p>エラー詳細: ${escapeHtml(error.message)}</p>
+            <button class="btn btn-secondary" onclick="retryLoadGuide()">
+                <span class="btn-icon">🔄</span>再試行
+            </button>
+        </div>
+    `;
+}
+
+// ===== ガイド読み込み再試行 =====
+function retryLoadGuide() {
+    isGuideLoaded = false;
+    guideData = null;
+    loadGuideContent();
 }
 
 // ===== ローディング状態の制御 =====
