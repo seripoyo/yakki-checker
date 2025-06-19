@@ -185,6 +185,8 @@ async function handleCheckButtonClick() {
         
         // API通信（専用クライアント使用）
         console.log('API通信開始:', { text, type });
+        console.log('APIクライアント確認:', window.yakkiApi ? '✅ 利用可能' : '❌ 未初期化');
+        
         const data = await window.yakkiApi.checkText(text, type);
         console.log('API応答受信:', data);
         

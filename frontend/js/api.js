@@ -248,15 +248,19 @@ class YakkiApiClient {
 // グローバルAPI クライアントインスタンス
 window.yakkiApi = new YakkiApiClient();
 
-// 開発環境での自動接続テスト
+// 開発環境での自動接続テスト（非同期で実行、エラーでも継続）
 if (window.location.hostname === 'localhost') {
-    window.yakkiApi.testConnection().then(connected => {
-        if (connected) {
-            console.log('✅ バックエンドAPI接続確認済み');
-        } else {
-            console.warn('⚠️ バックエンドAPIに接続できません');
-        }
-    });
+    setTimeout(() => {
+        window.yakkiApi.testConnection().then(connected => {
+            if (connected) {
+                console.log('✅ バックエンドAPI接続確認済み');
+            } else {
+                console.warn('⚠️ バックエンドAPIに接続できません - 手動で確認してください');
+            }
+        }).catch(error => {
+            console.warn('⚠️ API接続テスト中にエラー:', error.message);
+        });
+    }, 1000); // 1秒後に実行
 }
 
 console.log('薬機法リスクチェッカー api.js 読み込み完了');
