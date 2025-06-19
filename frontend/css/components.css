@@ -1,0 +1,475 @@
+/* 薬機法リスクチェッカー コンポーネントスタイル */
+
+/* ===== ハイライト表示 ===== */
+mark {
+    background-color: #fef3c7; /* 黄色のハイライト */
+    color: #92400e;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-weight: 500;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+mark:hover {
+    background-color: #fde68a;
+    transform: scale(1.02);
+}
+
+mark.high-risk {
+    background-color: #fecaca; /* 赤色のハイライト */
+    color: #991b1b;
+    border: 1px solid #f87171;
+}
+
+mark.medium-risk {
+    background-color: #fed7aa; /* オレンジ色のハイライト */
+    color: #9a3412;
+    border: 1px solid #fb923c;
+}
+
+mark.low-risk {
+    background-color: #bbf7d0; /* 緑色のハイライト */
+    color: #166534;
+    border: 1px solid #4ade80;
+}
+
+/* ハイライトのツールチップ風エフェクト */
+mark::after {
+    content: attr(data-risk);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 10;
+}
+
+mark:hover::after {
+    opacity: 1;
+}
+
+/* ===== 指摘事項カード ===== */
+.issue-card {
+    background: white;
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-4);
+    margin-bottom: var(--spacing-4);
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-fast);
+    cursor: pointer;
+}
+
+.issue-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+}
+
+.issue-card.high-risk {
+    border-left: 4px solid var(--risk-high);
+}
+
+.issue-card.medium-risk {
+    border-left: 4px solid var(--risk-medium);
+}
+
+.issue-card.low-risk {
+    border-left: 4px solid var(--risk-low);
+}
+
+.issue-fragment {
+    font-weight: 600;
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--spacing-2);
+    color: var(--color-gray-800);
+}
+
+.issue-fragment.high-risk {
+    color: var(--risk-high);
+}
+
+.issue-fragment.medium-risk {
+    color: var(--risk-medium);
+}
+
+.issue-fragment.low-risk {
+    color: var(--risk-low);
+}
+
+.issue-risk-level {
+    display: inline-block;
+    padding: var(--spacing-1) var(--spacing-2);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--spacing-3);
+}
+
+.issue-risk-level.high {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--risk-high);
+}
+
+.issue-risk-level.medium {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: var(--risk-medium);
+}
+
+.issue-risk-level.low {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--risk-low);
+}
+
+.issue-reason {
+    margin-bottom: var(--spacing-4);
+    color: var(--color-gray-700);
+    line-height: 1.6;
+}
+
+.issue-suggestions {
+    margin-top: var(--spacing-4);
+}
+
+.issue-suggestions h5 {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    margin-bottom: var(--spacing-2);
+    color: var(--color-gray-700);
+}
+
+.suggestions-list {
+    list-style: none;
+    space-y: var(--spacing-1);
+}
+
+.suggestions-list li {
+    padding: var(--spacing-2) var(--spacing-3);
+    background-color: var(--color-gray-50);
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+    color: var(--color-gray-700);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    position: relative;
+    padding-left: var(--spacing-6);
+}
+
+.suggestions-list li::before {
+    content: "💡";
+    position: absolute;
+    left: var(--spacing-2);
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.suggestions-list li:hover {
+    background-color: var(--color-primary);
+    color: white;
+    border-color: var(--color-primary);
+}
+
+/* ===== アニメーション効果 ===== */
+.fade-in {
+    animation: fadeInUp 0.5s ease;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.slide-down {
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        max-height: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        max-height: 200px;
+        transform: translateY(0);
+    }
+}
+
+/* ===== 成功・エラーメッセージ ===== */
+.message {
+    padding: var(--spacing-4);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-4);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+}
+
+.message-success {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: var(--color-success);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.message-error {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--color-danger);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.message-warning {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: var(--color-warning);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.message-info {
+    background-color: rgba(6, 182, 212, 0.1);
+    color: var(--color-info);
+    border: 1px solid rgba(6, 182, 212, 0.3);
+}
+
+.message-icon {
+    font-size: var(--font-size-lg);
+    flex-shrink: 0;
+}
+
+.message-close {
+    margin-left: auto;
+    background: none;
+    border: none;
+    font-size: var(--font-size-lg);
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity var(--transition-fast);
+}
+
+.message-close:hover {
+    opacity: 1;
+}
+
+/* ===== プログレスバー ===== */
+.progress {
+    width: 100%;
+    height: 8px;
+    background-color: var(--color-gray-200);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    margin: var(--spacing-4) 0;
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--color-primary), var(--color-info));
+    border-radius: var(--radius-sm);
+    transition: width 0.3s ease;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* ===== モーダル・オーバーレイ ===== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--transition-normal);
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal {
+    background: white;
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-8);
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+    transform: scale(0.9);
+    transition: transform var(--transition-normal);
+}
+
+.modal-overlay.active .modal {
+    transform: scale(1);
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-6);
+    padding-bottom: var(--spacing-4);
+    border-bottom: 1px solid var(--color-gray-200);
+}
+
+.modal-title {
+    font-size: var(--font-size-xl);
+    font-weight: 600;
+    color: var(--color-gray-800);
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: var(--font-size-xl);
+    cursor: pointer;
+    color: var(--color-gray-500);
+    transition: color var(--transition-fast);
+}
+
+.modal-close:hover {
+    color: var(--color-gray-800);
+}
+
+/* ===== カード・コンテナ ===== */
+.card {
+    background: white;
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-6);
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-fast);
+}
+
+.card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.card-header {
+    margin-bottom: var(--spacing-4);
+    padding-bottom: var(--spacing-3);
+    border-bottom: 1px solid var(--color-gray-200);
+}
+
+.card-title {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--color-gray-800);
+    margin: 0;
+}
+
+.card-subtitle {
+    font-size: var(--font-size-sm);
+    color: var(--color-gray-600);
+    margin-top: var(--spacing-1);
+}
+
+.card-body {
+    margin-bottom: var(--spacing-4);
+}
+
+.card-footer {
+    padding-top: var(--spacing-3);
+    border-top: 1px solid var(--color-gray-200);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* ===== バッジ・ラベル ===== */
+.badge {
+    display: inline-block;
+    padding: var(--spacing-1) var(--spacing-2);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.badge-primary {
+    background-color: var(--color-primary);
+    color: white;
+}
+
+.badge-success {
+    background-color: var(--color-success);
+    color: white;
+}
+
+.badge-warning {
+    background-color: var(--color-warning);
+    color: white;
+}
+
+.badge-danger {
+    background-color: var(--color-danger);
+    color: white;
+}
+
+.badge-outline {
+    background-color: transparent;
+    border: 1px solid currentColor;
+}
+
+/* ===== レスポンシブヘルパー ===== */
+.d-none { display: none !important; }
+.d-block { display: block !important; }
+.d-flex { display: flex !important; }
+.d-grid { display: grid !important; }
+
+.text-center { text-align: center !important; }
+.text-left { text-align: left !important; }
+.text-right { text-align: right !important; }
+
+.mt-auto { margin-top: auto !important; }
+.mb-auto { margin-bottom: auto !important; }
+.mx-auto { margin-left: auto !important; margin-right: auto !important; }
+
+@media (max-width: 768px) {
+    .d-md-none { display: none !important; }
+    .d-md-block { display: block !important; }
+    .d-md-flex { display: flex !important; }
+    
+    .suggestions-list li {
+        font-size: var(--font-size-xs);
+        padding: var(--spacing-1) var(--spacing-2);
+        padding-left: var(--spacing-5);
+    }
+    
+    .issue-card {
+        padding: var(--spacing-3);
+    }
+    
+    .modal {
+        padding: var(--spacing-6);
+        width: 95%;
+    }
+}

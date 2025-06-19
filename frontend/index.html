@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>薬機法リスクチェッカー - 化粧品・コスメ広告の適合性チェックツール</title>
+    <meta name="description" content="美容系広告文の薬機法適合性を手軽にチェック。AI による3段階リスク評価と代替表現提案で、制作スピードを向上させます。">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+    <!-- ヘッダー -->
+    <header class="header">
+        <div class="container">
+            <h1 class="header-title">
+                <span class="icon">⚖️</span>
+                薬機法リスクチェッカー
+            </h1>
+            <p class="header-subtitle">化粧品・コスメ広告の薬機法適合性チェックツール</p>
+        </div>
+    </header>
+
+    <!-- メインコンテンツ -->
+    <main class="main">
+        <div class="container">
+            <!-- タブナビゲーション -->
+            <nav class="tab-navigation">
+                <button id="tab-checker" class="tab-button active" data-tab="checker">
+                    📝 リスクチェッカー
+                </button>
+                <button id="tab-guide" class="tab-button" data-tab="guide">
+                    📖 薬機法簡単ガイド
+                </button>
+            </nav>
+
+            <!-- タブコンテンツ -->
+            <div class="tab-content">
+                <!-- リスクチェッカータブ -->
+                <section id="checker-content" class="tab-panel active">
+                    <div class="checker-form">
+                        <div class="form-group">
+                            <label for="text-type" class="form-label">文章の種類を選択してください</label>
+                            <select id="text-type" class="form-select">
+                                <option value="">-- 選択してください --</option>
+                                <option value="キャッチコピー">キャッチコピー</option>
+                                <option value="商品説明文">商品説明文</option>
+                                <option value="お客様の声">お客様の声</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="text-input" class="form-label">チェックしたい文章を入力してください</label>
+                            <textarea 
+                                id="text-input" 
+                                class="form-textarea" 
+                                placeholder="例：このクリームでシミが完全に消えます！アンチエイジング効果で若々しいお肌に..."
+                                rows="6"
+                            ></textarea>
+                            <div class="character-count">
+                                <span id="char-count">0</span> / 500文字
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button id="check-button" class="btn btn-primary" disabled>
+                                <span class="btn-icon">🔍</span>
+                                チェック開始
+                            </button>
+                            <button id="clear-button" class="btn btn-secondary">
+                                <span class="btn-icon">🗑️</span>
+                                クリア
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- ローディングスピナー -->
+                    <div id="loading-spinner" class="loading-spinner" style="display: none;">
+                        <div class="spinner"></div>
+                        <p>薬機法チェック中...</p>
+                    </div>
+
+                    <!-- 結果表示エリア -->
+                    <div id="result-area" class="result-area" style="display: none;">
+                        <!-- 総合リスクレベル -->
+                        <div id="overall-risk" class="risk-summary">
+                            <h3 class="risk-title">総合リスクレベル</h3>
+                            <div id="risk-badge" class="risk-badge">
+                                <span id="risk-level-text">低</span>
+                            </div>
+                        </div>
+
+                        <!-- リスク件数サマリー -->
+                        <div id="risk-counts" class="risk-counts">
+                            <h3 class="section-title">検出結果サマリー</h3>
+                            <div class="counts-grid">
+                                <div class="count-item">
+                                    <span class="count-label">総検出数</span>
+                                    <span id="total-count" class="count-value">0</span>
+                                </div>
+                                <div class="count-item high">
+                                    <span class="count-label">高リスク</span>
+                                    <span id="high-count" class="count-value">0</span>
+                                </div>
+                                <div class="count-item medium">
+                                    <span class="count-label">中リスク</span>
+                                    <span id="medium-count" class="count-value">0</span>
+                                </div>
+                                <div class="count-item low">
+                                    <span class="count-label">低リスク</span>
+                                    <span id="low-count" class="count-value">0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 詳細結果（2カラム表示） -->
+                        <div class="result-details">
+                            <h3 class="section-title">詳細結果</h3>
+                            <div class="details-grid">
+                                <!-- 左カラム：入力文表示エリア -->
+                                <div class="left-column">
+                                    <h4 class="column-title">入力文（問題箇所をハイライト）</h4>
+                                    <div id="highlighted-text" class="highlighted-text">
+                                        <!-- JavaScriptで動的に生成 -->
+                                    </div>
+                                </div>
+
+                                <!-- 右カラム：解説エリア -->
+                                <div class="right-column">
+                                    <h4 class="column-title">指摘事項</h4>
+                                    <div id="issues-list" class="issues-list">
+                                        <!-- JavaScriptで動的に生成 -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 全文リライト案 -->
+                        <div id="rewritten-section" class="rewritten-section">
+                            <h3 class="section-title">🎯 修正版テキスト</h3>
+                            <div id="rewritten-text" class="rewritten-text">
+                                <!-- JavaScriptで動的に生成 -->
+                            </div>
+                            <button id="copy-rewritten" class="btn btn-outline copy-btn">
+                                <span class="btn-icon">📋</span>
+                                修正版をコピー
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 薬機法簡単ガイドタブ -->
+                <section id="guide-content" class="tab-panel">
+                    <div class="guide-content">
+                        <h2 class="guide-title">💡 薬機法簡単ガイド</h2>
+                        
+                        <div class="guide-section">
+                            <h3>薬機法とは？</h3>
+                            <p>薬機法（医薬品医療機器等法）は、化粧品や医薬品の品質、有効性、安全性を確保するための法律です。美容系商品の広告では、効果効能の表現に厳格な制限があります。</p>
+                        </div>
+
+                        <div class="guide-section">
+                            <h3>🚫 化粧品で使用できない表現例</h3>
+                            <div class="expression-examples">
+                                <div class="example-item ng">
+                                    <span class="example-icon">❌</span>
+                                    <div class="example-content">
+                                        <strong>「シミが消える」「シワがなくなる」</strong>
+                                        <p>医薬品的な効果を暗示する表現</p>
+                                    </div>
+                                </div>
+                                <div class="example-item ng">
+                                    <span class="example-icon">❌</span>
+                                    <div class="example-content">
+                                        <strong>「アンチエイジング効果」「老化防止」</strong>
+                                        <p>老化に関する直接的な表現</p>
+                                    </div>
+                                </div>
+                                <div class="example-item ng">
+                                    <span class="example-icon">❌</span>
+                                    <div class="example-content">
+                                        <strong>「医学的に証明された」「臨床試験で実証」</strong>
+                                        <p>科学的根拠を過度に強調する表現</p>
+                                    </div>
+                                </div>
+                                <div class="example-item ng">
+                                    <span class="example-icon">❌</span>
+                                    <div class="example-content">
+                                        <strong>「完全に」「絶対に」「確実に」</strong>
+                                        <p>効果を断定的に表現する言葉</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="guide-section">
+                            <h3>✅ 化粧品で使用可能な表現例</h3>
+                            <div class="expression-examples">
+                                <div class="example-item ok">
+                                    <span class="example-icon">✅</span>
+                                    <div class="example-content">
+                                        <strong>「うるおいを与える」「乾燥を防ぐ」</strong>
+                                        <p>化粧品の基本的な効能効果</p>
+                                    </div>
+                                </div>
+                                <div class="example-item ok">
+                                    <span class="example-icon">✅</span>
+                                    <div class="example-content">
+                                        <strong>「肌を整える」「肌にハリを与える」</strong>
+                                        <p>適切な効果の表現</p>
+                                    </div>
+                                </div>
+                                <div class="example-item ok">
+                                    <span class="example-icon">✅</span>
+                                    <div class="example-content">
+                                        <strong>「メイクアップ効果により」</strong>
+                                        <p>見た目の効果を明確化</p>
+                                    </div>
+                                </div>
+                                <div class="example-item ok">
+                                    <span class="example-icon">✅</span>
+                                    <div class="example-content">
+                                        <strong>「使用感には個人差があります」</strong>
+                                        <p>効果の個人差を明記</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="guide-section">
+                            <h3>📋 チェックのポイント</h3>
+                            <ul class="checklist">
+                                <li>医薬品的な効果を暗示していないか</li>
+                                <li>効果を断定的に表現していないか</li>
+                                <li>科学的根拠を過度に強調していないか</li>
+                                <li>化粧品の効能効果の範囲内か</li>
+                                <li>個人差について言及しているか</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- フッター -->
+    <footer class="footer">
+        <div class="container">
+            <div class="disclaimer">
+                <h4>⚠️ 免責事項</h4>
+                <ul class="disclaimer-list">
+                    <li>本アプリのチェック結果は、広告表現の適法性を保証するものではありません。</li>
+                    <li>あくまで作成担当者のための参考情報としてご利用ください。</li>
+                    <li>本ツール使用時の最終的な広告表現の判断は、必ず貴社の法務・薬事担当者または専門家にご相談ください。</li>
+                </ul>
+            </div>
+            
+            <div class="business-link">
+                <p>人間による詳細なチェックをご希望の方は：</p>
+                <a href="#" class="btn btn-business" id="consult-button">
+                    <span class="btn-icon">👨‍⚖️</span>
+                    薬機法チェックを依頼する
+                </a>
+            </div>
+
+            <div class="footer-info">
+                <p>&copy; 2025 薬機法リスクチェッカー. All rights reserved.</p>
+                <p>バージョン 1.0.0</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript読み込み -->
+    <script src="js/api.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/script.js"></script>
+</body>
+</html>
