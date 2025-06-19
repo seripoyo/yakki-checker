@@ -1,6 +1,6 @@
 # 薬機法リスクチェッカー バックエンド
 
-薬機法リスクチェッカーのFlask APIサーバー
+薬機法リスクチェッカーのFlask APIサーバー（Claude API連携版）
 
 ## 🚀 クイックスタート
 
@@ -10,10 +10,11 @@ cd backend
 pip install -r requirements.txt
 ```
 
-### 2. 環境変数の設定（任意）
+### 2. 環境変数の設定（必須）
 ```bash
 cp .env.example .env
-# .envファイルを編集（必要に応じて）
+# .envファイルを編集してCLAUDE_API_KEYを設定
+export CLAUDE_API_KEY='your_claude_api_key_here'
 ```
 
 ### 3. サーバーの起動
@@ -22,6 +23,11 @@ python app.py
 ```
 
 サーバーは `http://localhost:5000` で起動します。
+
+## ⚠️ 重要な注意点
+
+- **Claude API キーが必須**: 環境変数 `CLAUDE_API_KEY` の設定が必要
+- APIキーが未設定の場合、アプリケーションは起動しません
 
 ## 📡 API エンドポイント
 
