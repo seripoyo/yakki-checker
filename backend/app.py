@@ -12,22 +12,32 @@ Claude APIとローカルCSVデータを活用して高精度な
 import os
 import json
 import logging
-import pandas as pd
+
+# ログ設定を先に行う
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+try:
+    import pandas as pd
+    PANDAS_AVAILABLE = True
+except ImportError:
+    PANDAS_AVAILABLE = False
+    logger.warning("pandas not available - CSV features will be limited")
 import requests
 from datetime import datetime
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import anthropic
+from dotenv import load_dotenv
+
+# 環境変数を読み込み
+load_dotenv()
 
 # Flaskアプリケーションの初期化
 app = Flask(__name__)
 
 # CORS設定 - フロントエンドからのアクセスを許可
 CORS(app, origins=['*'])  # 開発環境用（本番では具体的なドメインを指定）
-
-# ログ設定
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 # アプリケーション設定
 app.config['JSON_AS_ASCII'] = False  # 日本語文字化け防止
@@ -83,7 +93,11 @@ def initialize_app():
     csv_file_path = os.path.join(os.path.dirname(__file__), 'data', 'ng_expressions.csv')
     
     try:
-        if not os.path.exists(csv_file_path):
+        if not PANDAS_AVAILABLE:
+            logger.warning("pandas not available - using default data only")
+            ng_expressions_data = create_default_ng_data()
+            csv_reference_text = format_ng_data_for_prompt(ng_expressions_data)
+        elif not os.path.exists(csv_file_path):
             logger.warning(f"CSVファイルが見つかりません: {csv_file_path}")
             # デフォルトのNG表現データを使用
             ng_expressions_data = create_default_ng_data()
@@ -120,33 +134,58 @@ def create_default_ng_data():
          "代替表現2": "使用感には個人差があります",
          "代替表現3": "お肌の状態によって"},
     ]
-    return pd.DataFrame(default_data)
+    if PANDAS_AVAILABLE:
+        return pd.DataFrame(default_data)
+    else:
+        return default_data
 
 def format_csv_for_prompt(df):
     """
-    DataFrameをプロンプト用の文字列形式に変換
+    DataFrameまたはリストをプロンプト用の文字列形式に変換
     """
-    if df.empty:
+    if PANDAS_AVAILABLE and hasattr(df, 'empty') and df.empty:
+        return "参考データなし"
+    elif not PANDAS_AVAILABLE and not df:
         return "参考データなし"
     
     reference_text = "=== 薬機法NG表現参考データ ===\n"
     
-    for _, row in df.iterrows():
-        reference_text += f"NG表現: {row.get('NG表現', 'N/A')}\n"
-        reference_text += f"カテゴリ: {row.get('カテゴリ', 'N/A')}\n"
-        reference_text += f"リスクレベル: {row.get('リスクレベル', 'N/A')}\n"
-        
-        # 代替表現があれば追加
-        alternatives = []
-        for i in range(1, 4):
-            alt_key = f"代替表現{i}"
-            if alt_key in row and pd.notna(row[alt_key]):
-                alternatives.append(row[alt_key])
-        
-        if alternatives:
-            reference_text += f"代替表現: {' | '.join(alternatives)}\n"
-        
-        reference_text += "---\n"
+    if PANDAS_AVAILABLE and hasattr(df, 'iterrows'):
+        # pandas DataFrame の場合
+        for _, row in df.iterrows():
+            reference_text += f"NG表現: {row.get('NG表現', 'N/A')}\n"
+            reference_text += f"カテゴリ: {row.get('カテゴリ', 'N/A')}\n"
+            reference_text += f"リスクレベル: {row.get('リスクレベル', 'N/A')}\n"
+            
+            # 代替表現があれば追加
+            alternatives = []
+            for i in range(1, 4):
+                alt_key = f"代替表現{i}"
+                if alt_key in row and pd.notna(row[alt_key]):
+                    alternatives.append(row[alt_key])
+            
+            if alternatives:
+                reference_text += f"代替表現: {' | '.join(alternatives)}\n"
+            
+            reference_text += "---\n"
+    else:
+        # 通常のリストの場合
+        for row in df:
+            reference_text += f"NG表現: {row.get('NG表現', 'N/A')}\n"
+            reference_text += f"カテゴリ: {row.get('カテゴリ', 'N/A')}\n"
+            reference_text += f"リスクレベル: {row.get('リスクレベル', 'N/A')}\n"
+            
+            # 代替表現があれば追加
+            alternatives = []
+            for i in range(1, 4):
+                alt_key = f"代替表現{i}"
+                if alt_key in row and row[alt_key]:
+                    alternatives.append(row[alt_key])
+            
+            if alternatives:
+                reference_text += f"代替表現: {' | '.join(alternatives)}\n"
+            
+            reference_text += "---\n"
     
     return reference_text
 
@@ -225,6 +264,7 @@ def health_check():
         "claude_api": "connected" if claude_client else "disconnected",
         "notion_api": "connected" if notion_api_key and notion_database_id else "disconnected",
         "ng_data_count": len(ng_expressions_data) if ng_expressions_data is not None else 0,
+        "pandas_available": PANDAS_AVAILABLE,
         "timestamp": datetime.now().isoformat()
     })
 
@@ -347,7 +387,7 @@ def call_claude_api(text, text_type):
         
         # Claude APIリクエスト
         response = claude_client.messages.create(
-            model="claude-3-sonnet-20240229",
+            model="claude-3-opus-20240229",
             max_tokens=2000,
             temperature=0.1,  # 一貫性を重視
             system=system_prompt,
