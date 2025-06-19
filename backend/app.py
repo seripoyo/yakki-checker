@@ -13,6 +13,7 @@ import os
 import json
 import logging
 import pandas as pd
+import requests
 from datetime import datetime
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -35,13 +36,15 @@ app.config['JSON_AS_ASCII'] = False  # 日本語文字化け防止
 claude_client = None
 ng_expressions_data = None
 csv_reference_text = ""
+notion_api_key = None
+notion_database_id = None
 
 def initialize_app():
     """
     アプリケーションの初期化処理
     APIキーの確認とCSVファイルの読み込み
     """
-    global claude_client, ng_expressions_data, csv_reference_text
+    global claude_client, ng_expressions_data, csv_reference_text, notion_api_key, notion_database_id
     
     logger.info("薬機法リスクチェッカー 初期化開始")
     
@@ -65,6 +68,16 @@ def initialize_app():
     except Exception as e:
         logger.error(f"Claude API クライアント初期化失敗: {str(e)}")
         exit(1)
+    
+    # Notion API キーの確認（オプション）
+    notion_api_key = os.getenv('NOTION_API_KEY')
+    notion_database_id = os.getenv('NOTION_DATABASE_ID')
+    
+    if notion_api_key and notion_database_id:
+        logger.info("Notion API 設定確認完了")
+    else:
+        logger.warning("Notion API設定が不完全です（NOTION_API_KEY, NOTION_DATABASE_IDが必要）")
+        logger.warning("薬機法ガイド機能は無効化されます")
     
     # 2. CSVファイルの読み込み
     csv_file_path = os.path.join(os.path.dirname(__file__), 'data', 'ng_expressions.csv')
@@ -210,6 +223,7 @@ def health_check():
         "service": "薬機法リスクチェッカー API",
         "version": "2.0.0",
         "claude_api": "connected" if claude_client else "disconnected",
+        "notion_api": "connected" if notion_api_key and notion_database_id else "disconnected",
         "ng_data_count": len(ng_expressions_data) if ng_expressions_data is not None else 0,
         "timestamp": datetime.now().isoformat()
     })
@@ -267,6 +281,48 @@ def check_text():
             "error": "Internal server error",
             "message": str(e)
         }), 500
+
+@app.route('/api/guide', methods=['GET'])
+def get_guide():
+    """
+    薬機法ガイドコンテンツ取得エンドポイント
+    Notionデータベースから薬機法ガイド情報を取得
+    """
+    try:
+        # Notion API設定の確認
+        if not notion_api_key or not notion_database_id:
+            logger.warning("Notion API設定が不完全 - フォールバックデータを返却")
+            return jsonify(get_fallback_guide_data())
+        
+        logger.info("Notion API呼び出し開始")
+        
+        # Notion API呼び出し
+        guide_data = fetch_notion_database()
+        
+        logger.info(f"Notion APIからガイドデータ取得完了: {len(guide_data)}件")
+        
+        return jsonify({
+            "status": "success",
+            "data": guide_data,
+            "source": "notion",
+            "count": len(guide_data),
+            "timestamp": datetime.now().isoformat()
+        })
+    
+    except Exception as e:
+        logger.error(f"Notion API呼び出しエラー: {str(e)}")
+        
+        # フォールバック: 静的データを返却
+        fallback_data = get_fallback_guide_data()
+        
+        return jsonify({
+            "status": "fallback",
+            "data": fallback_data,
+            "source": "fallback",
+            "error_message": str(e),
+            "count": len(fallback_data),
+            "timestamp": datetime.now().isoformat()
+        })
 
 def call_claude_api(text, text_type):
     """
@@ -405,6 +461,228 @@ def create_fallback_response(text, error_message):
         ],
         "rewritten_text": text
     }
+
+def fetch_notion_database():
+    """
+    Notion APIからデータベースコンテンツを取得
+    
+    Returns:
+        list: 整形されたガイドデータのリスト
+    """
+    try:
+        # Notion API エンドポイント
+        url = f"https://api.notion.com/v1/databases/{notion_database_id}/query"
+        
+        # リクエストヘッダー
+        headers = {
+            "Authorization": f"Bearer {notion_api_key}",
+            "Notion-Version": "2022-06-28",
+            "Content-Type": "application/json"
+        }
+        
+        # リクエストボディ（フィルタリングやソートが必要な場合）
+        payload = {
+            "page_size": 100,  # 最大100件取得
+            "sorts": [
+                {
+                    "property": "作成日時",
+                    "direction": "descending"
+                }
+            ]
+        }
+        
+        logger.info(f"Notion API Request: {url}")
+        
+        # Notion API呼び出し
+        response = requests.post(url, headers=headers, json=payload, timeout=30)
+        
+        if response.status_code != 200:
+            logger.error(f"Notion API Error: {response.status_code} - {response.text}")
+            raise Exception(f"Notion API returned status {response.status_code}")
+        
+        data = response.json()
+        
+        # データの整形
+        guide_items = []
+        
+        for page in data.get("results", []):
+            try:
+                # ページのプロパティから情報抽出
+                properties = page.get("properties", {})
+                
+                # タイトルの抽出（通常は "名前" または "タイトル" プロパティ）
+                title = extract_title_from_properties(properties)
+                
+                # コンテンツの抽出（ページの子ブロックから取得）
+                content = extract_content_from_page(page.get("id"))
+                
+                # カテゴリなどの追加情報
+                category = extract_property_value(properties, "カテゴリ")
+                priority = extract_property_value(properties, "優先度")
+                
+                guide_item = {
+                    "id": page.get("id"),
+                    "title": title,
+                    "content": content,
+                    "category": category,
+                    "priority": priority,
+                    "created_time": page.get("created_time"),
+                    "last_edited_time": page.get("last_edited_time")
+                }
+                
+                guide_items.append(guide_item)
+                
+            except Exception as e:
+                logger.warning(f"ページの処理中にエラー: {str(e)}")
+                continue
+        
+        return guide_items
+        
+    except requests.RequestException as e:
+        logger.error(f"Notion API通信エラー: {str(e)}")
+        raise Exception(f"Notion API通信に失敗しました: {str(e)}")
+    
+    except Exception as e:
+        logger.error(f"Notion データ処理エラー: {str(e)}")
+        raise Exception(f"Notionデータの処理に失敗しました: {str(e)}")
+
+def extract_title_from_properties(properties):
+    """
+    Notionページのプロパティからタイトルを抽出
+    """
+    # 一般的なタイトルプロパティ名を順番に確認
+    title_candidates = ["名前", "タイトル", "Title", "Name"]
+    
+    for candidate in title_candidates:
+        if candidate in properties:
+            prop = properties[candidate]
+            if prop.get("type") == "title" and prop.get("title"):
+                return "".join([text.get("plain_text", "") for text in prop["title"]])
+    
+    # フォールバック: 最初のtitleタイプのプロパティを使用
+    for prop_name, prop_value in properties.items():
+        if prop_value.get("type") == "title" and prop_value.get("title"):
+            return "".join([text.get("plain_text", "") for text in prop_value["title"]])
+    
+    return "無題"
+
+def extract_property_value(properties, property_name):
+    """
+    Notionページの特定のプロパティから値を抽出
+    """
+    if property_name not in properties:
+        return None
+    
+    prop = properties[property_name]
+    prop_type = prop.get("type")
+    
+    if prop_type == "rich_text" and prop.get("rich_text"):
+        return "".join([text.get("plain_text", "") for text in prop["rich_text"]])
+    elif prop_type == "select" and prop.get("select"):
+        return prop["select"].get("name")
+    elif prop_type == "multi_select" and prop.get("multi_select"):
+        return [item.get("name") for item in prop["multi_select"]]
+    elif prop_type == "number":
+        return prop.get("number")
+    elif prop_type == "checkbox":
+        return prop.get("checkbox")
+    elif prop_type == "date" and prop.get("date"):
+        return prop["date"].get("start")
+    
+    return None
+
+def extract_content_from_page(page_id):
+    """
+    Notionページの子ブロックからコンテンツを抽出
+    """
+    try:
+        # ページの子ブロック取得
+        url = f"https://api.notion.com/v1/blocks/{page_id}/children"
+        headers = {
+            "Authorization": f"Bearer {notion_api_key}",
+            "Notion-Version": "2022-06-28"
+        }
+        
+        response = requests.get(url, headers=headers, timeout=15)
+        
+        if response.status_code != 200:
+            logger.warning(f"ブロック取得エラー: {response.status_code}")
+            return ""
+        
+        blocks_data = response.json()
+        content_parts = []
+        
+        for block in blocks_data.get("results", []):
+            block_type = block.get("type")
+            
+            if block_type == "paragraph" and block.get("paragraph", {}).get("rich_text"):
+                text = "".join([text.get("plain_text", "") for text in block["paragraph"]["rich_text"]])
+                if text.strip():
+                    content_parts.append(text.strip())
+            
+            elif block_type == "heading_1" and block.get("heading_1", {}).get("rich_text"):
+                text = "".join([text.get("plain_text", "") for text in block["heading_1"]["rich_text"]])
+                if text.strip():
+                    content_parts.append(f"# {text.strip()}")
+            
+            elif block_type == "heading_2" and block.get("heading_2", {}).get("rich_text"):
+                text = "".join([text.get("plain_text", "") for text in block["heading_2"]["rich_text"]])
+                if text.strip():
+                    content_parts.append(f"## {text.strip()}")
+            
+            elif block_type == "bulleted_list_item" and block.get("bulleted_list_item", {}).get("rich_text"):
+                text = "".join([text.get("plain_text", "") for text in block["bulleted_list_item"]["rich_text"]])
+                if text.strip():
+                    content_parts.append(f"• {text.strip()}")
+        
+        return "\n\n".join(content_parts) if content_parts else ""
+        
+    except Exception as e:
+        logger.warning(f"コンテンツ抽出エラー: {str(e)}")
+        return ""
+
+def get_fallback_guide_data():
+    """
+    Notion API が利用できない場合のフォールバックガイドデータ
+    """
+    return [
+        {
+            "id": "fallback-1",
+            "title": "薬機法の基本",
+            "content": "薬機法（医薬品医療機器等法）は、化粧品や医薬品の品質、有効性、安全性を確保するための法律です。美容系商品の広告では、効果効能の表現に厳格な制限があります。",
+            "category": "基本知識",
+            "priority": "高",
+            "created_time": datetime.now().isoformat(),
+            "last_edited_time": datetime.now().isoformat()
+        },
+        {
+            "id": "fallback-2", 
+            "title": "化粧品で使用できない表現",
+            "content": "• 「シミが消える」「シワがなくなる」- 医薬品的な効果を暗示\n• 「アンチエイジング効果」「老化防止」- 老化に関する直接的な表現\n• 「医学的に証明された」「臨床試験で実証」- 科学的根拠の過度な強調\n• 「完全に」「絶対に」「確実に」- 効果を断定的に表現",
+            "category": "NG表現",
+            "priority": "高",
+            "created_time": datetime.now().isoformat(),
+            "last_edited_time": datetime.now().isoformat()
+        },
+        {
+            "id": "fallback-3",
+            "title": "化粧品で使用可能な表現",
+            "content": "• 「うるおいを与える」「乾燥を防ぐ」- 化粧品の基本的な効能効果\n• 「肌を整える」「肌にハリを与える」- 適切な効果の表現\n• 「メイクアップ効果により」- 見た目の効果を明確化\n• 「使用感には個人差があります」- 効果の個人差を明記",
+            "category": "OK表現", 
+            "priority": "高",
+            "created_time": datetime.now().isoformat(),
+            "last_edited_time": datetime.now().isoformat()
+        },
+        {
+            "id": "fallback-4",
+            "title": "チェックのポイント",
+            "content": "• 医薬品的な効果を暗示していないか\n• 効果を断定的に表現していないか\n• 科学的根拠を過度に強調していないか\n• 化粧品の効能効果の範囲内か\n• 個人差について言及しているか",
+            "category": "チェックポイント",
+            "priority": "中",
+            "created_time": datetime.now().isoformat(),
+            "last_edited_time": datetime.now().isoformat()
+        }
+    ]
 
 @app.errorhandler(404)
 def not_found(error):
