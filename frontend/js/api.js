@@ -70,6 +70,26 @@ class YakkiApiClient {
     }
 
     /**
+     * 薬機法ガイド取得 API呼び出し
+     * @returns {Promise<Object>} ガイドデータ
+     */
+    async getGuide() {
+        try {
+            console.log('薬機法ガイド API呼び出し開始');
+            
+            const response = await this.fetchWithTimeout(`${this.baseUrl}/api/guide`);
+            const data = await response.json();
+            
+            console.log('薬機法ガイド API呼び出し成功:', data);
+            return data;
+            
+        } catch (error) {
+            console.error('薬機法ガイド API呼び出し失敗:', error);
+            throw this.enhanceError(error);
+        }
+    }
+
+    /**
      * タイムアウト付きfetch
      * @param {string} url - リクエストURL
      * @param {Object} options - fetchオプション

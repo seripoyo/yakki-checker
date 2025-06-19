@@ -465,18 +465,8 @@ async function fetchGuideContents() {
     console.log('ガイドAPI呼び出し開始');
     
     try {
-        const response = await fetch(`${API_BASE_URL}/api/guide`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-        
-        if (!response.ok) {
-            throw new Error(`ガイドAPI呼び出しエラー: ${response.status}`);
-        }
-        
-        const data = await response.json();
+        // APIクライアントを使用してガイドデータを取得
+        const data = await window.yakkiApi.getGuide();
         console.log('ガイドAPI応答受信:', data);
         
         return data;
