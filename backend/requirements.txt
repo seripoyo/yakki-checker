@@ -1,0 +1,28 @@
+# 薬機法リスクチェッカー バックエンド依存関係
+# Python Flask API サーバー用ライブラリ
+
+# ウェブフレームワーク
+Flask==2.3.3
+Werkzeug==2.3.7
+
+# CORS（クロスオリジンリソース共有）対応
+Flask-CORS==4.0.0
+
+# HTTP通信ライブラリ（AI API呼び出し用）
+requests==2.31.0
+
+# データ処理ライブラリ（CSV読み込み用）
+pandas==2.0.3
+
+# 環境変数管理
+python-dotenv==1.0.0
+
+# 日付・時刻処理
+python-dateutil==2.8.2
+
+# JSON処理強化
+jsonschema==4.17.3
+
+# 開発・デバッグ用（任意）
+pytest==7.4.0
+pytest-flask==1.2.0
