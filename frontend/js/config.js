@@ -4,10 +4,8 @@
  */
 
 const API_CONFIG = {
-    // 本番環境のAPI URL（デプロイ後に更新してください）
-    // 例: 'https://your-app-name.onrender.com'
-    // 例: 'https://your-app-name.herokuapp.com'
-    BACKEND_URL: 'https://your-backend-url.onrender.com',
+    // 本番環境のAPI URL
+    BACKEND_URL: 'https://yakki-checker.onrender.com',
     
     // 開発環境のAPI URL
     DEV_BACKEND_URL: 'http://localhost:5000',
