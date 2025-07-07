@@ -369,9 +369,14 @@ def call_claude_api(text, text_type):
         
         logger.info("Claude API呼び出し開始")
         
+        # Claude クライアントの確認
+        if claude_client is None:
+            logger.error("Claude クライアントが初期化されていません")
+            raise Exception("Claude API クライアントが利用できません")
+        
         # Claude APIリクエスト
         response = claude_client.messages.create(
-            model="claude-3-opus-20240229",
+            model="claude-3-5-sonnet-20241022",  # 最新モデルに更新
             max_tokens=2000,
             temperature=0.1,  # 一貫性を重視
             system=system_prompt,
