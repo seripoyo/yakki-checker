@@ -1,0 +1,37 @@
+# Render.com デプロイ設定ファイル
+# このファイルを使用すると、Renderに自動的にサービスが設定されます
+
+services:
+  # バックエンドAPI
+  - type: web
+    name: yakki-checker-backend
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
+    envVars:
+      - key: DEBUG
+        value: False
+      - key: CLAUDE_API_KEY
+        sync: false  # 手動で設定
+      - key: NOTION_API_KEY
+        sync: false  # 手動で設定（オプション）
+      - key: NOTION_DATABASE_ID
+        sync: false  # 手動で設定（オプション）
+    autoDeploy: true
+    healthCheckPath: /
+
+  # フロントエンド静的サイト
+  - type: static
+    name: yakki-checker-frontend
+    rootDir: .
+    buildCommand: ""  # 静的ファイルなのでビルドなし
+    staticPublishPath: .
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: SAMEORIGIN
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+    autoDeploy: true
