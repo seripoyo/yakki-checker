@@ -63,22 +63,19 @@ def initialize_app():
     claude_api_key = os.getenv('CLAUDE_API_KEY')
     if not claude_api_key:
         logger.error("CLAUDE_API_KEY環境変数が設定されていません")
-        print("=" * 60)
-        print("❌ エラー: CLAUDE_API_KEY環境変数が設定されていません")
-        print("=" * 60)
-        print("以下のコマンドでAPIキーを設定してください:")
-        print("export CLAUDE_API_KEY='your_api_key_here'")
-        print("または .env ファイルに CLAUDE_API_KEY=your_api_key_here を記述")
-        print("=" * 60)
-        exit(1)
+        # Gunicornで動作するようにexit()を使わない
+        claude_client = None
     
     # Claude クライアントの初期化
-    try:
-        claude_client = anthropic.Anthropic(api_key=claude_api_key)
-        logger.info("Claude API クライアント初期化完了")
-    except Exception as e:
-        logger.error(f"Claude API クライアント初期化失敗: {str(e)}")
-        exit(1)
+    if claude_api_key:
+        try:
+            claude_client = anthropic.Anthropic(api_key=claude_api_key)
+            logger.info("Claude API クライアント初期化完了")
+        except Exception as e:
+            logger.error(f"Claude API クライアント初期化失敗: {str(e)}")
+            claude_client = None
+    else:
+        claude_client = None
     
     # Notion API キーの確認（オプション）
     notion_api_key = os.getenv('NOTION_API_KEY')
@@ -724,9 +721,10 @@ def method_not_allowed(error):
         "message": "The method is not allowed for the requested URL"
     }), 405
 
+# Gunicornでもフラスコ開発サーバーでも初期化が実行されるようにモジュールレベルで呼び出す
+initialize_app()
+
 if __name__ == '__main__':
-    # アプリケーション初期化
-    initialize_app()
     
     # 開発サーバーの起動
     port = int(os.environ.get('PORT', 5000))
