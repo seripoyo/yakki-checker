@@ -350,24 +350,24 @@ body {
 
 /* ===== 結果表示エリア ===== */
 .result-area {
-    background: white;
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-md);
-    overflow: hidden;
+    /* 背景を透明にして個別セクションで背景を設定 */
 }
 
 .section-title {
-    font-size: var(--font-size-xl);
+    font-size: var(--font-size-lg);
     font-weight: 600;
     margin-bottom: var(--spacing-4);
-    color: var(--color-gray-800);
+    color: var(--color-gray-700);
 }
 
 /* リスクサマリー */
 .risk-summary {
     padding: var(--spacing-6);
     text-align: center;
-    border-bottom: 1px solid var(--color-gray-200);
+    background: white;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-md);
+    margin-bottom: var(--spacing-6);
 }
 
 .risk-title {
@@ -408,7 +408,10 @@ body {
 /* リスク件数 */
 .risk-counts {
     padding: var(--spacing-6);
-    border-bottom: 1px solid var(--color-gray-200);
+    background: white;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-md);
+    margin-bottom: var(--spacing-6);
 }
 
 .counts-grid {
@@ -456,13 +459,17 @@ body {
 /* 詳細結果 */
 .result-details {
     padding: var(--spacing-6);
-    border-bottom: 1px solid var(--color-gray-200);
+    background: white;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-md);
+    margin-bottom: var(--spacing-6);
 }
 
 .details-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: var(--spacing-6);
+    align-items: start;
 }
 
 .column-title {
@@ -476,20 +483,26 @@ body {
 
 .highlighted-text {
     padding: var(--spacing-4);
-    background-color: var(--color-gray-50);
+    background-color: white;
     border: 1px solid var(--color-gray-200);
     border-radius: var(--radius-md);
-    line-height: 1.8;
+    line-height: 2;
     font-size: var(--font-size-base);
+    white-space: pre-wrap;
 }
 
 .issues-list {
-    space-y: var(--spacing-4);
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-4);
 }
 
 /* リライトセクション */
 .rewritten-section {
     padding: var(--spacing-6);
+    background: white;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-md);
 }
 
 .rewritten-text {
@@ -540,7 +553,9 @@ body {
 }
 
 .expression-examples {
-    space-y: var(--spacing-3);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3);
 }
 
 .example-item {
@@ -581,7 +596,9 @@ body {
 
 .checklist {
     list-style: none;
-    space-y: var(--spacing-2);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2);
 }
 
 .checklist li {
@@ -618,7 +635,9 @@ body {
 
 .disclaimer-list {
     list-style: none;
-    space-y: var(--spacing-2);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2);
 }
 
 .disclaimer-list li {
@@ -688,6 +707,10 @@ body {
     }
     
     .details-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .issues-list {
         grid-template-columns: 1fr;
     }
     
