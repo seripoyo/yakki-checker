@@ -32,7 +32,13 @@ load_dotenv()
 app = Flask(__name__)
 
 # CORS設定 - フロントエンドからのアクセスを許可
-CORS(app, origins=['*'])  # 開発環境用（本番では具体的なドメインを指定）
+CORS(app, origins=[
+    'https://seripoyo.github.io',
+    'http://localhost:3000', 
+    'http://localhost:8000',
+    'http://127.0.0.1:3000',
+    'http://127.0.0.1:8000'
+])
 
 # アプリケーション設定
 app.config['JSON_AS_ASCII'] = False  # 日本語文字化け防止
