@@ -4,9 +4,10 @@
  */
 
 class YakkiApiClient {
-    constructor(baseUrl = 'http://localhost:5000') {
-        this.baseUrl = baseUrl;
-        this.timeout = 30000; // 30秒タイムアウト
+    constructor(baseUrl = null) {
+        // config.jsで定義されたgetApiUrl関数を使用
+        this.baseUrl = baseUrl || getApiUrl();
+        this.timeout = API_CONFIG.API_TIMEOUT || 30000;
     }
 
     /**
