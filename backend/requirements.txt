@@ -11,9 +11,6 @@ Flask-CORS==4.0.0
 # Claude API クライアント（メイン）
 anthropic==0.3.11
 
-# データ処理ライブラリ（CSV読み込み用）
-pandas==2.1.4
-
 # 環境変数管理
 python-dotenv==1.0.0
 
