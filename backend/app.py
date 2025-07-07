@@ -242,7 +242,7 @@ def health_check():
         "claude_api": "connected" if claude_client else "disconnected",
         "notion_api": "connected" if notion_api_key and notion_database_id else "disconnected",
         "ng_data_count": len(ng_expressions_data) if ng_expressions_data is not None else 0,
-        "pandas_available": PANDAS_AVAILABLE,
+        "csv_module": "enabled",
         "timestamp": datetime.now().isoformat()
     })
 
