@@ -490,7 +490,7 @@ body {
 
 .issues-list {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
     gap: var(--spacing-4);
 }
 
