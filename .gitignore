@@ -1,0 +1,78 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# 環境設定
+.env
+.env.local
+.env.*.local
+
+# ログファイル
+*.log
+backend.log
+frontend.log
+
+# プロセスIDファイル
+*.pid
+
+# IDEとエディタ
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# デバッグファイル
+*.pdb
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# テスト
+.pytest_cache/
+.coverage
+htmlcov/
+
+# データベース
+*.db
+*.sqlite3
+
+# 一時ファイル
+*.tmp
+temp/
+tmp/
+
+# Node.js（将来的な拡張用）
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 本番用設定
+config.production.json

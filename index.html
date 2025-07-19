@@ -40,11 +40,24 @@
                 <section id="checker-content" class="tab-panel active">
                     <div class="checker-form">
                         <div class="form-group">
+                            <label for="product-category" class="form-label">商品カテゴリを選択してください</label>
+                            <select id="product-category" class="form-select">
+                                <option value="">-- 選択してください --</option>
+                                <option value="化粧品">化粧品（一般化粧品）</option>
+                                <option value="薬用化粧品">薬用化粧品（医薬部外品）</option>
+                                <option value="医薬部外品">医薬部外品（化粧品以外）</option>
+                                <option value="サプリメント">サプリメント・健康食品</option>
+                                <option value="美容機器・健康器具・その他">美容機器・健康器具・その他</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
                             <label for="text-type" class="form-label">文章の種類を選択してください</label>
                             <select id="text-type" class="form-select">
                                 <option value="">-- 選択してください --</option>
                                 <option value="キャッチコピー">キャッチコピー</option>
-                                <option value="商品説明文">商品説明文</option>
+                                <option value="LP見出し・タイトル">LP見出し・タイトル</option>
+                                <option value="商品説明文・広告文・通常テキスト">商品説明文・広告文・通常テキスト</option>
                                 <option value="お客様の声">お客様の声</option>
                             </select>
                         </div>
@@ -135,16 +148,23 @@
                             </div>
                         </div>
 
-                        <!-- 全文リライト案 -->
+                        <!-- 全文リライト案（3つのバリエーション） -->
                         <div id="rewritten-section" class="rewritten-section">
                             <h3 class="section-title">🎯 修正版テキスト</h3>
-                            <div id="rewritten-text" class="rewritten-text">
+                            <div id="rewritten-texts-container" class="rewritten-texts-container">
                                 <!-- JavaScriptで動的に生成 -->
                             </div>
-                            <button id="copy-rewritten" class="btn btn-outline copy-btn">
-                                <span class="btn-icon">📋</span>
-                                修正版をコピー
-                            </button>
+                            
+                            <!-- 従来版（後方互換性） -->
+                            <div id="legacy-rewritten" style="display: none;">
+                                <div id="rewritten-text" class="rewritten-text">
+                                    <!-- JavaScriptで動的に生成 -->
+                                </div>
+                                <button id="copy-rewritten" class="btn btn-outline copy-btn">
+                                    <span class="btn-icon">📋</span>
+                                    修正版をコピー
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </section>

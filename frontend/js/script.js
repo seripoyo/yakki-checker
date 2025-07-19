@@ -12,6 +12,7 @@ let isGuideLoaded = false;
 // ===== DOM要素の取得 =====
 const elements = {
     // フォーム要素
+    productCategory: document.getElementById('product-category'),
     textType: document.getElementById('text-type'),
     textInput: document.getElementById('text-input'),
     checkButton: document.getElementById('check-button'),
@@ -48,21 +49,47 @@ const elements = {
 
 // ===== 初期化処理 =====
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('薬機法リスクチェッカー 初期化開始');
+    console.log('🚀 薬機法リスクチェッカー 初期化開始');
+    
+    // DOM要素の存在確認
+    console.log('🔍 DOM要素確認:');
+    Object.keys(elements).forEach(key => {
+        const element = elements[key];
+        if (element) {
+            console.log(`✅ ${key}:`, element);
+        } else {
+            console.error(`❌ ${key}: 要素が見つかりません`);
+        }
+    });
     
     // イベントリスナーの設定
+    console.log('🔧 イベントリスナー設定開始');
     setupEventListeners();
     
     // 初期状態の設定
+    console.log('⚙️ 初期状態設定開始');
     setupInitialState();
     
-    console.log('薬機法リスクチェッカー 初期化完了');
+    // API クライアント確認
+    console.log('🌐 APIクライアント確認:', window.yakkiApi ? '✅ 利用可能' : '❌ 未初期化');
+    
+    console.log('🎉 薬機法リスクチェッカー 初期化完了');
 });
 
 // ===== イベントリスナーの設定 =====
 function setupEventListeners() {
+    console.log('🔧 イベントリスナー設定開始');
+    
+    // DOM要素の存在確認
+    if (!elements.checkButton) {
+        console.error('❌ checkButton要素が見つかりません');
+        return;
+    }
+    
     // チェック開始ボタン
+    console.log('✅ checkButton要素確認:', elements.checkButton);
     elements.checkButton.addEventListener('click', handleCheckButtonClick);
+    console.log('✅ checkButtonクリックイベントリスナー追加完了');
     
     // クリアボタン
     elements.clearButton.addEventListener('click', handleClearButtonClick);
@@ -70,6 +97,9 @@ function setupEventListeners() {
     // テキスト入力の監視
     elements.textInput.addEventListener('input', handleTextInput);
     elements.textInput.addEventListener('paste', handleTextInput);
+    
+    // 商品カテゴリ選択の監視
+    elements.productCategory.addEventListener('change', updateCheckButtonState);
     
     // 文章種類選択の監視
     elements.textType.addEventListener('change', updateCheckButtonState);
@@ -155,22 +185,34 @@ function updateCharacterCount() {
 // ===== チェックボタンの状態更新 =====
 function updateCheckButtonState() {
     const hasText = elements.textInput.value.trim().length > 0;
+    const hasCategory = elements.productCategory.value !== '';
     const hasType = elements.textType.value !== '';
     
-    elements.checkButton.disabled = !(hasText && hasType);
+    elements.checkButton.disabled = !(hasText && hasCategory && hasType);
 }
 
 // ===== チェック開始ボタンクリック処理 =====
 async function handleCheckButtonClick() {
-    console.log('チェック開始ボタンがクリックされました');
+    console.log('🚀 チェック開始ボタンがクリックされました');
+    console.log('📝 ボタン状態:', {
+        disabled: elements.checkButton.disabled,
+        textValue: elements.textInput.value,
+        typeValue: elements.textType.value
+    });
     
     try {
         // バリデーション
         const text = elements.textInput.value.trim();
+        const category = elements.productCategory.value;
         const type = elements.textType.value;
         
         if (!text) {
             showMessage('チェックしたい文章を入力してください。', 'warning');
+            return;
+        }
+        
+        if (!category) {
+            showMessage('商品カテゴリを選択してください。', 'warning');
             return;
         }
         
@@ -184,11 +226,21 @@ async function handleCheckButtonClick() {
         elements.resultArea.style.display = 'none';
         
         // API通信（専用クライアント使用）
-        console.log('API通信開始:', { text, type });
-        console.log('APIクライアント確認:', window.yakkiApi ? '✅ 利用可能' : '❌ 未初期化');
+        console.log('🌐 API通信開始:', { text, category, type });
+        console.log('🔌 APIクライアント確認:', window.yakkiApi ? '✅ 利用可能' : '❌ 未初期化');
         
-        const data = await window.yakkiApi.checkText(text, type);
-        console.log('API応答受信:', data);
+        if (!window.yakkiApi) {
+            throw new Error('APIクライアントが初期化されていません');
+        }
+        
+        console.log('📡 checkText関数呼び出し中...');
+        const data = await window.yakkiApi.checkText(text, category, type);
+        console.log('📨 API応答受信:', data);
+        
+        // レスポンス構造の検証
+        if (!validateApiResponse(data)) {
+            throw new Error('APIレスポンスの形式が不正です');
+        }
         
         // 結果の保存と表示
         currentCheckData = data;
@@ -199,9 +251,51 @@ async function handleCheckButtonClick() {
     } catch (error) {
         console.error('チェック処理エラー:', error);
         handleApiError(error);
+        
+        // エラー時に結果エリアを非表示
+        elements.resultArea.style.display = 'none';
     } finally {
         showLoading(false);
     }
+}
+
+// ===== APIレスポンス検証 =====
+function validateApiResponse(data) {
+    if (!data || typeof data !== 'object') {
+        console.error('レスポンスがオブジェクトではありません:', data);
+        return false;
+    }
+    
+    // 必須フィールドの確認
+    const requiredFields = ['overall_risk', 'risk_counts', 'issues'];
+    for (const field of requiredFields) {
+        if (!(field in data)) {
+            console.error(`必須フィールド '${field}' がありません:`, data);
+            return false;
+        }
+    }
+    
+    // リライト関連フィールドの確認（新旧両対応）
+    if (!data.rewritten_texts && !data.rewritten_text) {
+        console.error('rewritten_texts または rewritten_text が必要です:', data);
+        return false;
+    }
+    
+    // リスクレベルの確認
+    const validRiskLevels = ['高', '中', '低'];
+    if (!validRiskLevels.includes(data.overall_risk)) {
+        console.error('overall_risk が不正です:', data.overall_risk);
+        return false;
+    }
+    
+    // issues配列の確認
+    if (!Array.isArray(data.issues)) {
+        console.error('issues が配列ではありません:', data.issues);
+        return false;
+    }
+    
+    console.log('✅ APIレスポンス検証成功');
+    return true;
 }
 
 // ===== API通信エラーハンドリング =====
@@ -222,28 +316,60 @@ function handleApiError(error) {
 
 // ===== チェック結果の表示 =====
 function displayCheckResult(data, originalText) {
-    console.log('結果表示開始');
+    console.log('🎯 結果表示開始:', data);
+    console.log('📊 elements.resultArea:', elements.resultArea);
     
-    // 総合リスクレベルの表示
-    displayOverallRisk(data.overall_risk);
-    
-    // リスク件数の表示
-    displayRiskCounts(data.risk_counts);
-    
-    // ハイライト付きテキストの表示
-    displayHighlightedText(originalText, data.issues);
-    
-    // 指摘事項リストの表示
-    displayIssuesList(data.issues);
-    
-    // 修正版テキストの表示
-    displayRewrittenText(data.rewritten_text);
-    
-    // 結果エリアを表示
-    elements.resultArea.style.display = 'block';
-    elements.resultArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    
-    console.log('結果表示完了');
+    try {
+        // 総合リスクレベルの表示
+        console.log('📈 総合リスク表示開始:', data.overall_risk);
+        displayOverallRisk(data.overall_risk);
+        console.log('✅ 総合リスク表示完了');
+        
+        // リスク件数の表示
+        console.log('📊 リスク件数表示開始:', data.risk_counts);
+        displayRiskCounts(data.risk_counts);
+        console.log('✅ リスク件数表示完了');
+        
+        // ハイライト付きテキストの表示
+        console.log('🎨 ハイライトテキスト表示開始');
+        displayHighlightedText(originalText, data.issues);
+        console.log('✅ ハイライトテキスト表示完了');
+        
+        // 指摘事項リストの表示
+        console.log('📋 指摘事項リスト表示開始');
+        displayIssuesList(data.issues);
+        console.log('✅ 指摘事項リスト表示完了');
+        
+        // 修正版テキストの表示（新旧形式両対応）
+        console.log('📝 修正版テキスト表示開始');
+        if (data.rewritten_texts) {
+            console.log('🆕 新形式（3つのバリエーション）:', data.rewritten_texts);
+            displayRewrittenTexts(data.rewritten_texts);
+            console.log('✅ 新形式表示完了');
+        } else if (data.rewritten_text) {
+            console.log('🔄 旧形式（1つのリライト案）:', data.rewritten_text);
+            displayLegacyRewrittenText(data.rewritten_text);
+            console.log('✅ 旧形式表示完了');
+        } else {
+            console.warn('⚠️ 修正版テキストがレスポンスに含まれていません');
+        }
+        
+        // 結果エリアを表示
+        console.log('👁️ 結果エリア表示設定開始');
+        if (elements.resultArea) {
+            elements.resultArea.style.display = 'block';
+            console.log('✅ resultArea display設定完了:', elements.resultArea.style.display);
+            elements.resultArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            console.log('✅ スクロール完了');
+        } else {
+            console.error('❌ elements.resultAreaが見つかりません');
+        }
+        
+        console.log('🎉 結果表示完了');
+    } catch (error) {
+        console.error('❌ 結果表示エラー:', error);
+        throw error;
+    }
 }
 
 // ===== 総合リスクレベルの表示 =====
@@ -345,9 +471,136 @@ function displayIssuesList(issues) {
     elements.issuesList.innerHTML = issuesHtml;
 }
 
-// ===== 修正版テキストの表示 =====
-function displayRewrittenText(rewrittenText) {
-    elements.rewrittenText.textContent = rewrittenText;
+// ===== 修正版テキストの表示（3つのバリエーション） =====
+function displayRewrittenTexts(rewrittenTexts) {
+    console.log('📝 displayRewrittenTexts開始:', rewrittenTexts);
+    
+    const rewrittenContainer = document.getElementById('rewritten-texts-container');
+    const legacyContainer = document.getElementById('legacy-rewritten');
+    
+    console.log('🔍 DOM要素確認:', {
+        rewrittenContainer: rewrittenContainer,
+        legacyContainer: legacyContainer
+    });
+    
+    if (!rewrittenContainer) {
+        console.error('❌ rewritten-texts-container要素が見つかりません');
+        return;
+    }
+    
+    // レガシーコンテナを非表示にして新コンテナを表示
+    if (legacyContainer) {
+        legacyContainer.style.display = 'none';
+        console.log('✅ legacyContainer非表示設定完了');
+    }
+    rewrittenContainer.style.display = 'block';
+    console.log('✅ rewrittenContainer表示設定完了');
+    
+    const texts = {
+        conservative: rewrittenTexts.conservative || '',
+        balanced: rewrittenTexts.balanced || '',
+        appealing: rewrittenTexts.appealing || ''
+    };
+    
+    console.log('📄 テキストデータ:', texts);
+    
+    const labels = {
+        conservative: '保守的版',
+        balanced: 'バランス版', 
+        appealing: '訴求力重視版'
+    };
+    
+    const descriptions = {
+        conservative: '最も安全で確実な表現',
+        balanced: '安全性と訴求力のバランス',
+        appealing: '法的リスクを最小限にしつつ訴求力を最大化'
+    };
+    
+    let html = '<h4>💡 3つの修正版提案</h4>';
+    
+    Object.keys(texts).forEach((type, index) => {
+        console.log(`🔄 処理中: ${type} = "${texts[type]}"`);
+        if (texts[type]) {
+            try {
+                const escapedText = escapeHtml(texts[type]);
+                console.log(`✅ エスケープ完了: ${type} = "${escapedText}"`);
+                
+                html += `
+                    <div class="rewritten-variant" data-type="${type}">
+                        <div class="variant-header">
+                            <h5 class="variant-title">${labels[type]}</h5>
+                            <p class="variant-description">${descriptions[type]}</p>
+                        </div>
+                        <div class="variant-content">
+                            <div class="rewritten-text" id="rewritten-${type}">${escapedText}</div>
+                            <button class="btn btn-secondary copy-variant-btn" onclick="copyVariantText('${type}')">
+                                <span class="btn-icon">📋</span>${labels[type]}をコピー
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                console.error(`❌ ${type}のHTML生成エラー:`, error);
+            }
+        } else {
+            console.warn(`⚠️ ${type}のテキストが空です`);
+        }
+    });
+    
+    console.log('🏗️ 生成HTML:', html);
+    rewrittenContainer.innerHTML = html;
+    console.log('✅ displayRewrittenTexts完了');
+}
+
+// ===== 旧形式対応（後方互換性） =====
+function displayLegacyRewrittenText(rewrittenText) {
+    const legacyContainer = document.getElementById('legacy-rewritten');
+    const newContainer = document.getElementById('rewritten-texts-container');
+    
+    // 新コンテナを非表示にして旧コンテナを表示
+    if (newContainer) newContainer.style.display = 'none';
+    if (legacyContainer) {
+        legacyContainer.style.display = 'block';
+        const textElement = document.getElementById('rewritten-text');
+        if (textElement) {
+            textElement.textContent = rewrittenText;
+        }
+    }
+}
+
+// ===== バリエーション別コピー機能 =====
+function copyVariantText(type) {
+    const textElement = document.getElementById(`rewritten-${type}`);
+    if (!textElement) {
+        showMessage('コピーするテキストが見つかりません', 'warning');
+        return;
+    }
+    
+    const text = textElement.textContent;
+    if (!text) {
+        showMessage('コピーするテキストがありません', 'warning');
+        return;
+    }
+    
+    const labels = {
+        conservative: '保守的版',
+        balanced: 'バランス版', 
+        appealing: '訴求力重視版'
+    };
+    
+    navigator.clipboard.writeText(text).then(() => {
+        showMessage(`${labels[type]}をクリップボードにコピーしました！`, 'success');
+        const button = document.querySelector(`[onclick="copyVariantText('${type}')"]`);
+        if (button) {
+            const originalHTML = button.innerHTML;
+            button.innerHTML = '<span class="btn-icon">✅</span>コピー完了';
+            setTimeout(() => {
+                button.innerHTML = originalHTML;
+            }, 2000);
+        }
+    }).catch(() => {
+        showMessage('コピーに失敗しました', 'error');
+    });
 }
 
 // ===== 指摘事項へのスクロール =====
@@ -397,6 +650,7 @@ function handleClearButtonClick() {
     // フォームクリア
     elements.textInput.value = '';
     elements.textType.value = '';
+    elements.productCategory.value = '';
     
     // 状態リセット
     updateCharacterCount();

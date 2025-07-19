@@ -30,23 +30,31 @@ class YakkiApiClient {
     /**
      * 薬機法チェック API呼び出し
      * @param {string} text - チェックしたい文章
+     * @param {string} category - 商品カテゴリ
      * @param {string} type - 文章の種類
      * @returns {Promise<Object>} チェック結果
      */
-    async checkText(text, type) {
+    async checkText(text, category, type) {
         try {
-            console.log('薬機法チェック API呼び出し開始:', { text: text.substring(0, 50) + '...', type });
+            console.log('🔍 薬機法チェック API呼び出し開始');
+            console.log('📋 入力データ:', { text: text.substring(0, 50) + '...', category, type });
+            console.log('🌐 API URL:', `${this.baseUrl}/api/check`);
             
             // リクエストボディの構築
             const requestBody = {
                 text: text.trim(),
+                category: category,
                 type: type
             };
+            console.log('📦 リクエストボディ:', requestBody);
 
             // バリデーション
+            console.log('✅ リクエストバリデーション実行中...');
             this.validateCheckRequest(requestBody);
+            console.log('✅ リクエストバリデーション完了');
 
             // API呼び出し
+            console.log('📡 fetchWithTimeout開始...');
             const response = await this.fetchWithTimeout(`${this.baseUrl}/api/check`, {
                 method: 'POST',
                 headers: {
@@ -54,14 +62,19 @@ class YakkiApiClient {
                 },
                 body: JSON.stringify(requestBody)
             });
+            console.log('📡 fetchWithTimeout完了、レスポンス受信:', response.status);
 
             // レスポンス処理
+            console.log('📄 JSONパース開始...');
             const data = await response.json();
+            console.log('📄 JSONパース完了:', data);
             
             // レスポンスバリデーション
+            console.log('✅ レスポンスバリデーション実行中...');
             this.validateCheckResponse(data);
+            console.log('✅ レスポンスバリデーション完了');
             
-            console.log('薬機法チェック API呼び出し成功');
+            console.log('🎉 薬機法チェック API呼び出し成功');
             return data;
 
         } catch (error) {
@@ -133,7 +146,12 @@ class YakkiApiClient {
             throw new Error('テキストが長すぎます（500文字以内）');
         }
 
-        const validTypes = ['キャッチコピー', '商品説明文', 'お客様の声'];
+        const validCategories = ['化粧品', '薬用化粧品', '医薬部外品', 'サプリメント', '美容機器・健康器具・その他'];
+        if (!validCategories.includes(requestBody.category)) {
+            throw new Error('商品カテゴリが正しく指定されていません');
+        }
+
+        const validTypes = ['キャッチコピー', 'LP見出し・タイトル', '商品説明文・広告文・通常テキスト', 'お客様の声'];
         if (!validTypes.includes(requestBody.type)) {
             throw new Error('文章の種類が正しく指定されていません');
         }
@@ -145,7 +163,7 @@ class YakkiApiClient {
      */
     validateCheckResponse(data) {
         // 必須フィールドの確認
-        const requiredFields = ['overall_risk', 'risk_counts', 'issues', 'rewritten_text'];
+        const requiredFields = ['overall_risk', 'risk_counts', 'issues'];
         for (const field of requiredFields) {
             if (!(field in data)) {
                 throw new Error(`レスポンスに必須フィールド '${field}' がありません`);
@@ -186,9 +204,22 @@ class YakkiApiClient {
             }
         }
 
-        // rewritten_textの確認
-        if (typeof data.rewritten_text !== 'string') {
+        // rewritten_textsの確認（新形式）
+        if (data.rewritten_texts && typeof data.rewritten_texts === 'object') {
+            const requiredVariations = ['conservative', 'balanced', 'appealing'];
+            for (const variation of requiredVariations) {
+                if (typeof data.rewritten_texts[variation] !== 'string') {
+                    throw new Error(`修正版テキスト '${variation}' が不正です`);
+                }
+            }
+        }
+        // 後方互換性：rewritten_textの確認（旧形式）
+        else if (data.rewritten_text && typeof data.rewritten_text !== 'string') {
             throw new Error('修正版テキストが不正です');
+        }
+        // どちらも存在しない場合
+        else if (!data.rewritten_texts && !data.rewritten_text) {
+            throw new Error('修正版テキストが見つかりません');
         }
     }
 

@@ -2,37 +2,39 @@
 
 /* ===== ハイライト表示 ===== */
 mark {
-    background-color: #fef3c7; /* 黄色のハイライト */
-    color: #92400e;
-    padding: 2px 4px;
-    border-radius: 3px;
+    background-color: #fff3cd; /* 薄い黄色のハイライト */
+    color: #856404;
+    padding: 0 3px;
+    border-radius: 2px;
     font-weight: 500;
+    text-decoration: underline;
+    text-decoration-style: wavy;
+    text-underline-offset: 3px;
     cursor: pointer;
     position: relative;
     transition: all 0.2s ease;
 }
 
 mark:hover {
-    background-color: #fde68a;
-    transform: scale(1.02);
+    background-color: #ffe69c;
 }
 
 mark.high-risk {
-    background-color: #fecaca; /* 赤色のハイライト */
-    color: #991b1b;
-    border: 1px solid #f87171;
+    background-color: #f8d7da; /* 薄い赤色のハイライト */
+    color: #721c24;
+    text-decoration-color: #ef4444;
 }
 
 mark.medium-risk {
-    background-color: #fed7aa; /* オレンジ色のハイライト */
-    color: #9a3412;
-    border: 1px solid #fb923c;
+    background-color: #fff3cd; /* 薄いオレンジ色のハイライト */
+    color: #856404;
+    text-decoration-color: #f59e0b;
 }
 
 mark.low-risk {
-    background-color: #bbf7d0; /* 緑色のハイライト */
-    color: #166534;
-    border: 1px solid #4ade80;
+    background-color: #d4edda; /* 薄い緑色のハイライト */
+    color: #155724;
+    text-decoration-color: #10b981;
 }
 
 /* ハイライトのツールチップ風エフェクト */
@@ -61,30 +63,32 @@ mark:hover::after {
 /* ===== 指摘事項カード ===== */
 .issue-card {
     background: white;
-    border: 1px solid var(--color-gray-200);
+    border: 2px solid;
     border-radius: var(--radius-lg);
-    padding: var(--spacing-4);
+    padding: var(--spacing-5);
     margin-bottom: var(--spacing-4);
     box-shadow: var(--shadow-sm);
     transition: all var(--transition-fast);
-    cursor: pointer;
 }
 
 .issue-card:hover {
     box-shadow: var(--shadow-md);
-    transform: translateY(-1px);
+    transform: translateY(-2px);
 }
 
 .issue-card.high-risk {
-    border-left: 4px solid var(--risk-high);
+    border-color: rgba(239, 68, 68, 0.3);
+    background-color: rgba(239, 68, 68, 0.03);
 }
 
 .issue-card.medium-risk {
-    border-left: 4px solid var(--risk-medium);
+    border-color: rgba(245, 158, 11, 0.3);
+    background-color: rgba(245, 158, 11, 0.03);
 }
 
 .issue-card.low-risk {
-    border-left: 4px solid var(--risk-low);
+    border-color: rgba(16, 185, 129, 0.3);
+    background-color: rgba(16, 185, 129, 0.03);
 }
 
 .issue-fragment {
@@ -453,6 +457,101 @@ mark:hover::after {
 .mb-auto { margin-bottom: auto !important; }
 .mx-auto { margin-left: auto !important; margin-right: auto !important; }
 
+/* 3つのリライト案用スタイル */
+.rewritten-texts-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-6);
+}
+
+.rewritten-variant {
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-5);
+    background: var(--color-white);
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s ease;
+}
+
+.rewritten-variant:hover {
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-primary);
+}
+
+.variant-header {
+    margin-bottom: var(--spacing-3);
+    border-bottom: 1px solid var(--color-gray-200);
+    padding-bottom: var(--spacing-2);
+}
+
+.variant-title {
+    margin: 0 0 var(--spacing-1) 0;
+    color: var(--color-primary);
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+}
+
+.variant-description {
+    margin: 0;
+    color: var(--color-gray-600);
+    font-size: var(--font-size-sm);
+    font-style: italic;
+}
+
+.variant-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3);
+}
+
+.variant-content .rewritten-text {
+    background: var(--color-gray-50);
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-4);
+    line-height: 1.6;
+    font-size: var(--font-size-base);
+    color: var(--color-gray-800);
+    white-space: pre-wrap;
+}
+
+.copy-variant-btn {
+    align-self: flex-start;
+    min-width: 160px;
+    font-size: var(--font-size-sm);
+}
+
+.copy-variant-btn:hover {
+    background: var(--color-primary);
+    color: var(--color-white);
+    transform: translateY(-1px);
+}
+
+/* バリエーション別の色分け */
+.rewritten-variant[data-type="conservative"] {
+    border-left: 4px solid var(--color-success);
+}
+
+.rewritten-variant[data-type="conservative"] .variant-title {
+    color: var(--color-success);
+}
+
+.rewritten-variant[data-type="balanced"] {
+    border-left: 4px solid var(--color-warning);
+}
+
+.rewritten-variant[data-type="balanced"] .variant-title {
+    color: var(--color-warning);
+}
+
+.rewritten-variant[data-type="appealing"] {
+    border-left: 4px solid var(--color-info);
+}
+
+.rewritten-variant[data-type="appealing"] .variant-title {
+    color: var(--color-info);
+}
+
 @media (max-width: 768px) {
     .d-md-none { display: none !important; }
     .d-md-block { display: block !important; }
@@ -471,5 +570,14 @@ mark:hover::after {
     .modal {
         padding: var(--spacing-6);
         width: 95%;
+    }
+    
+    .rewritten-variant {
+        padding: var(--spacing-3);
+    }
+    
+    .variant-content .rewritten-text {
+        padding: var(--spacing-3);
+        font-size: var(--font-size-sm);
     }
 }
