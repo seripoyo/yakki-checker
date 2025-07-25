@@ -1,265 +1,231 @@
 # 薬機法リスクチェッカー
 
-美容・化粧品業界の広告テキストが薬機法（医薬品医療機器等法）に適合しているかをAIで自動チェックするWebアプリケーションです。
+## 概要
+薬機法（薬機法）に関するテキストのコンプライアンスチェックを行うWEBアプリケーションです。Claude APIを活用して高精度な薬機法抵触リスクの分析と改善提案を提供します。
 
-## 🎯 主な機能
+## 🚨 重要: セキュリティ対策について
 
-- **薬機法リスクチェック**: 広告文の薬機法抵触リスクを3段階で評価
-- **詳細な指摘事項**: 問題のある表現を特定し、具体的な改善案を提案
-- **代替表現の提案**: 薬機法に適合した安全な表現を3つずつ提案
-- **修正版テキスト生成**: 指摘事項を修正した完全な代替文を自動生成
-- **薬機法ガイド**: 基本的な注意点とNG/OK表現例をわかりやすく解説
+### 実装済みセキュリティ機能
 
-## 🛠️ 技術スタック
+#### 1. API認証システム
+- **認証必須**: すべてのAPIエンドポイントでAPIキー認証を実装
+- **ハッシュ化保存**: APIキーはSHA256でハッシュ化して安全に保存
+- **複数キー対応**: 開発・本番環境で異なるAPIキーを設定可能
 
-- **バックエンド**: Python Flask + Claude API + Notion API
-- **フロントエンド**: Vanilla JavaScript (依存関係なし)
-- **データ管理**: CSV + Notion Database
-- **AI**: Anthropic Claude API
+#### 2. レート制限
+- **IP別制限**: 1時間あたり100リクエスト/IPアドレス
+- **クライアントサイド制限**: 連続リクエストの防止（100ms間隔）
+- **自動クリーンアップ**: 古いアクセス記録の自動削除
 
-## 📁 プロジェクト構成
+#### 3. セキュリティヘッダー
+- **XSS対策**: X-XSS-Protection, X-Content-Type-Options設定
+- **クリックジャッキング対策**: X-Frame-Options: DENY
+- **HTTPS強制**: 本番環境でStrict-Transport-Security
+- **CSP**: Content-Security-Policyで外部リソース制限
 
-```
-yakki-checker/
-├── README.md                      # このファイル
-├── TECH_DESIGN.md                 # 技術設計書
-├── yakkihou_checker_prompt.md     # 要件定義書
-├── setup_repo.sh                  # リポジトリ自動セットアップスクリプト
-│
-├── backend/                       # バックエンド (Flask API)
-│   ├── app.py                     # メインアプリケーション
-│   ├── requirements.txt           # Python依存関係
-│   ├── .env.example              # 環境変数設定例
-│   ├── README.md                 # バックエンド詳細説明
-│   └── data/
-│       └── ng_expressions.csv    # NG表現データベース
-│
-└── frontend/                      # フロントエンド (Web UI)
-    ├── index.html                 # メインHTML
-    ├── README.md                 # フロントエンド詳細説明
-    ├── css/
-    │   ├── style.css             # メインスタイル
-    │   └── components.css        # コンポーネントスタイル
-    ├── js/
-    │   ├── script.js             # メインJavaScript
-    │   ├── api.js                # API通信処理
-    │   └── ui.js                 # UI制御
-    └── assets/
-        └── images/               # 画像リソース
-```
+#### 4. 入力値検証・サニタイゼーション
+- **サーバーサイド**: 厳格な入力値バリデーション
+- **クライアントサイド**: HTMLエスケープ処理
+- **文字数制限**: 500文字以内の制限
+- **許可リスト**: カテゴリ・タイプの厳格な検証
 
-## 🚀 セットアップと実行手順
+#### 5. 環境設定の分離
+- **開発/本番分離**: 環境別の設定管理
+- **デバッグモード制御**: 本番環境では詳細エラー非表示
+- **CORS設定**: 環境に応じた適切なオリジン制限
 
-### 1. リポジトリのクローン
-```bash
-git clone https://github.com/seripoyo/yakki-checker.git
-cd yakki-checker
-```
+## 🔧 セットアップ手順
 
-### 2. 環境変数の設定（必須）
-```bash
-# バックエンドディレクトリに移動
-cd backend
-
-# 環境変数テンプレートをコピー
-cp .env.example .env
-
-# .envファイルを編集してAPIキーを設定
-nano .env  # または好きなエディタを使用
-```
-
-### 3. CSVファイルの準備（オプション）
-```bash
-# NG表現データファイルがプロジェクトルートにある場合
-# デフォルトでサンプルデータが使用されるため、この手順は任意です
-```
-
-### 4. バックエンドサーバーの起動
-```bash
-# backend ディレクトリで実行
-cd backend
-pip install -r requirements.txt
-python app.py
-```
-
-サーバーは `http://localhost:5000` で起動します。
-
-### 5. フロントエンドの起動
-```bash
-# 新しいターミナルを開いて frontend ディレクトリで実行
-cd frontend
-
-# HTTPサーバーで起動（方法1: Python使用）
-python -m http.server 8080
-
-# または方法2: Node.js使用
-npx serve -p 8080
-
-# または方法3: VSCode Live Server拡張機能を使用
-```
-
-ブラウザで `http://localhost:8080` にアクセスしてください。
-
-## ⚙️ 環境変数
-
-このアプリケーションを正常に動作させるためには、以下の環境変数の設定が必要です。
-
-### 必須環境変数
-
-| 変数名 | 説明 | 例 |
-|--------|------|-----|
-| `CLAUDE_API_KEY` | AnthropicのClaude APIキー | `sk-ant-api03-...` |
-
-### オプション環境変数（Notion連携用）
-
-| 変数名 | 説明 | 例 |
-|--------|------|-----|
-| `NOTION_API_KEY` | NotionインテグレーションのAPIキー | `secret_...` |
-| `NOTION_DATABASE_ID` | 薬機法ガイド用NotionデータベースID | `a1b2c3d4-...` |
-
-### その他の設定
-
-| 変数名 | デフォルト値 | 説明 |
-|--------|-------------|------|
-| `DEBUG` | `True` | デバッグモード |
-| `PORT` | `5000` | サーバーポート番号 |
-| `LOG_LEVEL` | `INFO` | ログレベル |
-| `DATA_PATH` | `./data/ng_expressions.csv` | CSVデータファイルパス |
-
-### .envファイルの設定方法
-
-1. `backend/.env.example` を `backend/.env` にコピー
-2. 以下の内容を参考に、実際のAPIキーを設定:
-
-```bash
-# 必須: Claude API キー
-CLAUDE_API_KEY=your_claude_api_key_here
-
-# オプション: Notion API連携（ガイド機能用）
-NOTION_API_KEY=your_notion_api_key_here
-NOTION_DATABASE_ID=your_notion_database_id_here
-
-# その他の設定
-DEBUG=True
-PORT=5000
-LOG_LEVEL=INFO
-DATA_PATH=./data/ng_expressions.csv
-```
-
-### APIキーの取得方法
+### 1. 必要なAPIキーの発行
 
 #### Claude API キー（必須）
 1. [Anthropic Console](https://console.anthropic.com/) にアクセス
-2. アカウント作成・ログイン
-3. API Keysページで新しいキーを作成
-4. 作成されたキーを `CLAUDE_API_KEY` に設定
+2. 新しいAPIキーを発行
+3. `.env`ファイルの`CLAUDE_API_KEY`に設定
 
-#### Notion API キー（オプション）
-1. [Notion Integrations](https://www.notion.so/my-integrations) にアクセス
-2. 「新しいインテグレーション」を作成
-3. インテグレーション設定からAPIキーを取得
-4. ガイド用データベースにインテグレーションを招待
-5. データベースURLからIDを取得して設定
-
-## 📡 API エンドポイント
-
-### ヘルスチェック
-```
-GET /
-```
-
-### 薬機法チェック
-```
-POST /api/check
-Content-Type: application/json
-
-{
-  "text": "チェックしたいテキスト",
-  "type": "キャッチコピー | 商品説明文 | お客様の声"
-}
-```
-
-### 薬機法ガイド取得
-```
-GET /api/guide
-```
-
-詳細なAPI仕様は [backend/README.md](./backend/README.md) をご覧ください。
-
-## 🧪 テスト方法
-
-### curlでのテスト例
+#### アクセス認証キー（必須）
+安全なAPIキーを生成してください：
 ```bash
-# ヘルスチェック
-curl http://localhost:5000/
-
-# 薬機法チェック
-curl -X POST http://localhost:5000/api/check \
-  -H "Content-Type: application/json" \
-  -d '{"text":"シミが消えるクリーム","type":"キャッチコピー"}'
-
-# ガイド取得
-curl http://localhost:5000/api/guide
+python3 -c "import secrets; print(secrets.token_urlsafe(32))"
 ```
 
-## 🎨 画面構成
+### 2. 環境設定ファイルの作成
 
-### 1. リスクチェッカータブ
-- **入力エリア**: 文章種類選択、テキスト入力（500文字制限）
-- **結果表示**: 総合リスクレベル、詳細指摘事項、修正版テキスト
+`setting/backend/.env`ファイルを作成し、以下を設定：
 
-### 2. 薬機法簡単ガイドタブ
-- **基本知識**: 薬機法の概要説明
-- **NG表現集**: 避けるべき表現例
-- **OK表現集**: 安全な表現例
-- **チェックポイント**: 注意すべきポイント
+```env
+# Claude API設定
+CLAUDE_API_KEY=your_claude_api_key_here
 
-詳細なUI仕様は [frontend/README.md](./frontend/README.md) をご覧ください。
+# アクセス認証（カンマ区切りで複数指定可能）
+VALID_API_KEYS=your_generated_secure_key_here
 
-## 🔧 開発者向け情報
+# 環境設定
+DEBUG=False
+ENVIRONMENT=production
 
-### 依存関係
-- **Python**: 3.8以上
-- **Flask**: 2.3.3
-- **anthropic**: 0.3.11
-- **pandas**: 2.0.3
-- **requests**: 2.31.0
+# CORS設定（本番環境のドメインを指定）
+ALLOWED_ORIGINS=https://yourdomain.github.io,https://your-xserver-domain.com
 
-### コード品質
-- **型安全性**: TypeScriptは使用せず、JSDocでの型注釈を推奨
-- **リンティング**: ESLintやPrettierの設定は任意
-- **テスト**: 現在未実装（将来的に追加予定）
+# Notion設定（オプション）
+NOTION_API_KEY=your_notion_api_key_here
+NOTION_DATABASE_ID=your_database_id_here
+```
 
-### 拡張方法
-- **新しいチェックロジック**: `backend/app.py` の `call_claude_api()` 関数を拡張
-- **UI改善**: `frontend/css/` 内のスタイルファイルを編集
-- **新機能追加**: モジュラー設計により容易に追加可能
+### 3. 依存関係のインストール
 
-## ⚠️ 重要な注意事項
+```bash
+cd setting/backend
+pip install -r requirements.txt
+```
 
-1. **Claude API キーは必須**: アプリケーションが動作するためには `CLAUDE_API_KEY` の設定が必要です
-2. **専門家への相談**: このツールは参考情報提供のみを目的としています。実際の広告作成時は必ず薬機法の専門家にご相談ください
-3. **本番環境**: 本番環境では適切なセキュリティ設定（CORS制限、HTTPSなど）を実装してください
-4. **責任の制限**: 本ツールの使用による法的問題について、開発者は一切の責任を負いません
+### 4. フロントエンド・バックエンドの起動
 
-## 📝 ライセンス
+#### バックエンド起動
+```bash
+cd setting/backend
+python app.py
+```
 
-MIT License - 詳細は [LICENSE](./LICENSE) ファイルをご覧ください。
+#### フロントエンド起動（開発環境）
+```bash
+cd setting/frontend
+python -m http.server 8000
+```
 
-## 🤝 貢献方法
+アクセス: http://localhost:8000
 
-1. このリポジトリをフォーク
-2. フィーチャーブランチを作成 (`git checkout -b feature/AmazingFeature`)
-3. 変更をコミット (`git commit -m 'Add some AmazingFeature'`)
-4. ブランチにプッシュ (`git push origin feature/AmazingFeature`)
-5. プルリクエストを作成
+## 📁 ディレクトリ構造
 
-## 📞 サポート
+```
+yakki-checker/
+├── index.html              # メインHTML（ルートに配置）
+├── CLAUDE.md               # プロジェクト設定
+├── .gitignore              # Git除外設定
+├── README.md               # このファイル
+├── setting/                # アプリケーション本体
+│   ├── frontend/           # フロントエンド
+│   │   ├── css/
+│   │   ├── js/
+│   │   └── index.html
+│   └── backend/            # バックエンド
+│       ├── app.py          # メインアプリケーション
+│       ├── data/           # 薬機法データ
+│       ├── rule/           # カテゴリ別ルール
+│       ├── .env            # 環境変数（要作成）
+│       └── requirements.txt
+└── doc/                    # ドキュメント
+    └── SECURITY.md         # 詳細セキュリティガイド
+```
 
-- **Issues**: [GitHub Issues](https://github.com/seripoyo/yakki-checker/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/seripoyo/yakki-checker/discussions)
+## 🌐 デプロイメント
+
+### GitHub Pages + Xserver構成
+
+#### GitHub Pages（フロントエンド）
+1. リポジトリをGitHub Pagesで公開
+2. `index.html`がルートに配置されているため自動認識
+3. HTTPSが自動で有効化される
+
+#### Xserver（バックエンド）
+1. FTPで`setting/backend/`をアップロード
+2. `.htaccess`ファイルで追加セキュリティ設定
+3. 環境変数を本番用に設定
+
+### セキュリティ設定（Xserver用）
+
+`.htaccess`に以下を追加：
+```apache
+# 環境変数ファイルの保護
+<Files ".env">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# セキュリティヘッダー
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options nosniff
+    Header always set X-Frame-Options DENY
+    Header always set X-XSS-Protection "1; mode=block"
+</IfModule>
+```
+
+## 🔄 リアルタイム機能
+
+### ファイル監視システム
+- `data/`ディレクトリ: 薬機法データの自動更新
+- `rule/`ディレクトリ: カテゴリ別ルールの自動更新
+- ファイル変更時に自動でキャッシュを無効化・更新
+
+## 📋 セキュリティチェックリスト
+
+### 導入前必須チェック
+- [ ] Claude APIキーを新規発行して設定
+- [ ] アクセス認証キーを生成して設定
+- [ ] `.env`ファイルを適切に設定
+- [ ] 本番環境で`DEBUG=False`に設定
+- [ ] `ALLOWED_ORIGINS`を本番ドメインに限定
+
+### 運用時チェック
+- [ ] APIキーの定期的な更新（3ヶ月毎推奨）
+- [ ] アクセスログの定期確認
+- [ ] 不正アクセスの監視
+- [ ] セキュリティアップデートの適用
+
+### GitHub公開前チェック
+- [ ] `.env`ファイルがコミット対象外であることを確認
+- [ ] 機密情報が含まれるファイルがないことを確認
+- [ ] `requirements.txt`が最新であることを確認
+
+## ⚠️ 注意事項
+
+### APIキーの管理
+- **絶対にAPIキーをGitにコミットしない**
+- 開発環境と本番環境で異なるキーを使用
+- 定期的なローテーションを実施
+
+### 本番環境での運用
+- デバッグモードは必ず無効化
+- 適切なログ監視体制を構築
+- 定期的なセキュリティ監査を実施
+
+## 🔧 開発時の注意点
+
+### APIキーのテスト
+開発環境では以下でAPIキーを設定可能：
+```javascript
+// ブラウザコンソールで実行
+window.yakkiApi.setApiKey('your_development_key');
+```
+
+### ログ確認
+バックエンドログで処理状況を確認：
+```bash
+tail -f backend.log
+```
+
+## 📞 トラブルシューティング
+
+### よくある問題
+
+#### 1. チェックボタンが動作しない
+- バックエンドが起動しているか確認
+- APIキーが正しく設定されているか確認
+- ブラウザコンソールでエラーを確認
+
+#### 2. CORS エラー
+- `ALLOWED_ORIGINS`に正しいドメインが設定されているか確認
+- 本番環境では開発用URLが除外されているか確認
+
+#### 3. Rate Limit エラー
+- 1時間あたり100リクエストの制限を確認
+- IPアドレス単位での制限であることを確認
 
 ---
 
-**開発バージョン**: 2.0.0  
-**最終更新**: 2025年6月19日
+## 📄 詳細ドキュメント
+
+セキュリティに関する詳細情報は [doc/SECURITY.md](doc/SECURITY.md) をご参照ください。
+
+**最終更新：2025年7月26日**
+**バージョン：v2.0.0**

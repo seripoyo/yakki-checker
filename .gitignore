@@ -24,10 +24,27 @@ wheels/
 *.egg
 MANIFEST
 
-# 環境設定
+# 環境設定・機密情報
 .env
 .env.local
 .env.*.local
+.env.production
+.env.development
+*.env
+**/setting/backend/.env
+
+# APIキーやパスワードファイル
+api_keys.txt
+secrets.txt
+passwords.txt
+*.key
+*.pem
+*.crt
+
+# セキュリティ関連
+security_config/
+ssl/
+certs/
 
 # ログファイル
 *.log

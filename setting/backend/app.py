@@ -12,6 +12,11 @@ Claude APIとローカルCSVデータを活用して高精度な
 import os
 import json
 import logging
+import time
+import threading
+import secrets
+import hashlib
+from functools import lru_cache, wraps
 
 # ログ設定を先に行う
 logging.basicConfig(level=logging.INFO)
@@ -25,20 +30,45 @@ from flask_cors import CORS
 import anthropic
 from dotenv import load_dotenv
 
+# ファイル監視用
+try:
+    from watchdog.observers import Observer
+    from watchdog.events import FileSystemEventHandler
+    WATCHDOG_AVAILABLE = True
+except ImportError:
+    WATCHDOG_AVAILABLE = False
+    # FileSystemEventHandlerのダミークラスを定義
+    class FileSystemEventHandler:
+        def on_modified(self, event): pass
+        def on_created(self, event): pass  
+        def on_deleted(self, event): pass
+    logger.warning("watchdogが利用できません。ファイル監視機能は無効です。pip install watchdog で有効化できます。")
+
 # 環境変数を読み込み
 load_dotenv()
 
 # Flaskアプリケーションの初期化
 app = Flask(__name__)
 
-# CORS設定 - フロントエンドからのアクセスを許可
-CORS(app, origins=[
-    'https://seripoyo.github.io',
-    'http://localhost:3000', 
-    'http://localhost:8000',
-    'http://127.0.0.1:3000',
-    'http://127.0.0.1:8000'
-])
+# CORS設定 - 環境に応じたドメイン設定
+allowed_origins = os.getenv('ALLOWED_ORIGINS', '').split(',')
+if not allowed_origins or allowed_origins == ['']:
+    # デフォルト設定（開発環境用）
+    allowed_origins = [
+        'https://seripoyo.github.io',
+        'http://localhost:3000', 
+        'http://localhost:8000',
+        'http://127.0.0.1:3000',
+        'http://127.0.0.1:8000'
+    ]
+
+# 本番環境では開発用URLを除外
+environment = os.getenv('ENVIRONMENT', 'development')
+if environment == 'production':
+    allowed_origins = [origin for origin in allowed_origins if not origin.startswith('http://localhost') and not origin.startswith('http://127.0.0.1')]
+    logger.info(f"本番環境モード - 許可ドメイン: {allowed_origins}")
+
+CORS(app, origins=allowed_origins)
 
 # アプリケーション設定
 app.config['JSON_AS_ASCII'] = False  # 日本語文字化け防止
@@ -50,6 +80,332 @@ csv_reference_text = ""
 markdown_reference_text = ""
 notion_api_key = None
 notion_database_id = None
+
+# ===== ファイル監視・キャッシュ管理クラス =====
+class DataCache:
+    """データファイルのキャッシュとリアルタイム更新を管理"""
+    
+    def __init__(self):
+        self.data_cache = {}
+        self.rule_cache = {}
+        self.file_timestamps = {}
+        self.lock = threading.Lock()
+        self.observer = None
+        
+    def get_file_timestamp(self, file_path):
+        """ファイルのタイムスタンプを取得"""
+        try:
+            return os.path.getmtime(file_path)
+        except OSError:
+            return 0
+    
+    def is_file_modified(self, file_path):
+        """ファイルが変更されたかチェック"""
+        current_timestamp = self.get_file_timestamp(file_path)
+        cached_timestamp = self.file_timestamps.get(file_path, 0)
+        return current_timestamp > cached_timestamp
+    
+    def update_file_timestamp(self, file_path):
+        """ファイルのタイムスタンプを更新"""
+        self.file_timestamps[file_path] = self.get_file_timestamp(file_path)
+    
+    def invalidate_cache(self, cache_type="all"):
+        """キャッシュを無効化"""
+        with self.lock:
+            if cache_type == "all" or cache_type == "data":
+                self.data_cache.clear()
+                logger.info("データキャッシュを無効化しました")
+            if cache_type == "all" or cache_type == "rule":
+                self.rule_cache.clear()
+                logger.info("ルールキャッシュを無効化しました")
+    
+    def get_cached_data_content(self):
+        """キャッシュされたデータコンテンツを取得（必要に応じて更新）"""
+        with self.lock:
+            data_dir = os.path.join(os.path.dirname(__file__), 'data')
+            cache_key = "all_data_content"
+            
+            # データディレクトリ内のファイルをチェック
+            needs_update = False
+            if cache_key not in self.data_cache:
+                needs_update = True
+            else:
+                # 全ファイルの変更チェック
+                try:
+                    for filename in os.listdir(data_dir):
+                        file_path = os.path.join(data_dir, filename)
+                        if os.path.isfile(file_path) and self.is_file_modified(file_path):
+                            needs_update = True
+                            break
+                except OSError:
+                    needs_update = True
+            
+            # 必要に応じてキャッシュを更新
+            if needs_update:
+                logger.info("dataディレクトリの変更を検知 - キャッシュを更新中...")
+                self.data_cache[cache_key] = load_all_data_files_direct()
+                
+                # タイムスタンプを更新
+                try:
+                    for filename in os.listdir(data_dir):
+                        file_path = os.path.join(data_dir, filename)
+                        if os.path.isfile(file_path):
+                            self.update_file_timestamp(file_path)
+                except OSError:
+                    pass
+                
+                logger.info(f"データキャッシュ更新完了: {len(self.data_cache[cache_key])}文字")
+            
+            return self.data_cache[cache_key]
+    
+    def get_cached_rule_content(self, text_type):
+        """キャッシュされたルールコンテンツを取得（必要に応じて更新）"""
+        with self.lock:
+            rule_dir = os.path.join(os.path.dirname(__file__), 'rule')
+            cache_key = f"rule_{text_type}"
+            
+            # ルールファイルのマッピング
+            rule_file_mapping = {
+                'キャッチコピー': 'キャッチコピー.md',
+                'LP見出し・タイトル': 'LP見出し・タイトル.md',
+                '商品説明文・広告文・通常テキスト': '商品説明文.md',
+                'お客様の声': 'お客様の声.md'
+            }
+            
+            filename = rule_file_mapping.get(text_type)
+            if not filename:
+                return ""
+            
+            file_path = os.path.join(rule_dir, filename)
+            
+            # ファイル変更チェック
+            needs_update = False
+            if cache_key not in self.rule_cache:
+                needs_update = True
+            elif self.is_file_modified(file_path):
+                needs_update = True
+            
+            # 必要に応じてキャッシュを更新
+            if needs_update:
+                logger.info(f"ルールファイル '{filename}' の変更を検知 - キャッシュを更新中...")
+                self.rule_cache[cache_key] = load_rule_file_direct(text_type)
+                self.update_file_timestamp(file_path)
+                logger.info(f"ルールキャッシュ更新完了: {filename}")
+            
+            return self.rule_cache[cache_key]
+    
+    def start_file_watcher(self):
+        """ファイル監視を開始"""
+        if not WATCHDOG_AVAILABLE:
+            logger.info("watchdogが利用できないため、ポーリングベースの更新を使用します")
+            return
+        
+        try:
+            data_dir = os.path.join(os.path.dirname(__file__), 'data')
+            rule_dir = os.path.join(os.path.dirname(__file__), 'rule')
+            
+            event_handler = DataFileEventHandler(self)
+            self.observer = Observer()
+            
+            # dataディレクトリを監視
+            if os.path.exists(data_dir):
+                self.observer.schedule(event_handler, data_dir, recursive=False)
+                logger.info(f"ファイル監視開始: {data_dir}")
+            
+            # ruleディレクトリを監視
+            if os.path.exists(rule_dir):
+                self.observer.schedule(event_handler, rule_dir, recursive=False)
+                logger.info(f"ファイル監視開始: {rule_dir}")
+            
+            self.observer.start()
+            logger.info("リアルタイムファイル監視が開始されました")
+            
+        except Exception as e:
+            logger.error(f"ファイル監視の開始に失敗: {str(e)}")
+    
+    def stop_file_watcher(self):
+        """ファイル監視を停止"""
+        if self.observer and self.observer.is_alive():
+            self.observer.stop()
+            self.observer.join()
+            logger.info("ファイル監視を停止しました")
+
+class DataFileEventHandler(FileSystemEventHandler):
+    """ファイル変更イベントハンドラー"""
+    
+    def __init__(self, data_cache):
+        self.data_cache = data_cache
+        self.last_event_time = {}
+        self.debounce_time = 1.0  # 1秒のデバウンス
+    
+    def on_modified(self, event):
+        if event.is_directory:
+            return
+        
+        # デバウンス処理（短時間での重複イベントを防ぐ）
+        current_time = time.time()
+        last_time = self.last_event_time.get(event.src_path, 0)
+        if current_time - last_time < self.debounce_time:
+            return
+        
+        self.last_event_time[event.src_path] = current_time
+        
+        file_path = event.src_path
+        filename = os.path.basename(file_path)
+        
+        logger.info(f"ファイル変更検知: {filename}")
+        
+        # dataディレクトリのファイルが変更された場合
+        if '/data/' in file_path:
+            self.data_cache.invalidate_cache("data")
+            logger.info("dataディレクトリの変更によりキャッシュを無効化")
+        
+        # ruleディレクトリのファイルが変更された場合
+        elif '/rule/' in file_path:
+            self.data_cache.invalidate_cache("rule")
+            logger.info("ruleディレクトリの変更によりキャッシュを無効化")
+    
+    def on_created(self, event):
+        if not event.is_directory:
+            logger.info(f"新規ファイル作成検知: {os.path.basename(event.src_path)}")
+            self.on_modified(event)
+    
+    def on_deleted(self, event):
+        if not event.is_directory:
+            logger.info(f"ファイル削除検知: {os.path.basename(event.src_path)}")
+            # ファイル削除の場合も同様にキャッシュを無効化
+            if '/data/' in event.src_path:
+                self.data_cache.invalidate_cache("data")
+            elif '/rule/' in event.src_path:
+                self.data_cache.invalidate_cache("rule")
+
+# グローバルキャッシュインスタンス
+data_cache = DataCache()
+
+# ===== セキュリティ機能 =====
+
+# 有効なAPIキーを管理（環境変数から読み込み）
+def load_valid_api_keys():
+    """有効なAPIキーをハッシュ化して読み込み"""
+    api_keys_env = os.getenv('VALID_API_KEYS', '')
+    if not api_keys_env:
+        logger.warning("有効なAPIキーが設定されていません。認証が無効化されます。")
+        return set()
+    
+    # 複数のAPIキーをカンマ区切りで設定可能
+    raw_keys = [key.strip() for key in api_keys_env.split(',') if key.strip()]
+    # APIキーをハッシュ化して保存（平文保存を避ける）
+    hashed_keys = {hashlib.sha256(key.encode()).hexdigest() for key in raw_keys}
+    logger.info(f"有効なAPIキー数: {len(hashed_keys)}個")
+    return hashed_keys
+
+# 有効なAPIキーセット
+VALID_API_KEYS = load_valid_api_keys()
+
+# 認証が必要かどうかの設定
+REQUIRE_AUTH = len(VALID_API_KEYS) > 0
+
+def require_api_key(f):
+    """APIキー認証デコレータ"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        # 認証が無効化されている場合はスキップ
+        if not REQUIRE_AUTH:
+            return f(*args, **kwargs)
+        
+        # APIキーの確認
+        api_key = None
+        
+        # Headerから取得
+        if 'X-API-Key' in request.headers:
+            api_key = request.headers['X-API-Key']
+        # クエリパラメータから取得（非推奨だが互換性のため）
+        elif 'api_key' in request.args:
+            api_key = request.args.get('api_key')
+            logger.warning("クエリパラメータでのAPIキー送信は非推奨です。ヘッダーを使用してください。")
+        
+        if not api_key:
+            logger.warning(f"APIキーなしのアクセス試行: {request.remote_addr}")
+            return jsonify({
+                "error": "API key required",
+                "message": "APIキーが必要です。X-API-KeyヘッダーでAPIキーを送信してください。"
+            }), 401
+        
+        # APIキーの検証（ハッシュ化して比較）
+        api_key_hash = hashlib.sha256(api_key.encode()).hexdigest()
+        if api_key_hash not in VALID_API_KEYS:
+            logger.warning(f"無効なAPIキーでのアクセス試行: {request.remote_addr}")
+            return jsonify({
+                "error": "Invalid API key",
+                "message": "無効なAPIキーです。"
+            }), 401
+        
+        logger.info(f"認証成功: {request.remote_addr}")
+        return f(*args, **kwargs)
+    return decorated_function
+
+def add_security_headers(response):
+    """セキュリティヘッダーを追加"""
+    # XSS対策
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    
+    # HTTPS強制（本番環境用）
+    if not app.debug:
+        response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    
+    # Content Security Policy
+    response.headers['Content-Security-Policy'] = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline'; "
+        "style-src 'self' 'unsafe-inline'; "
+        "img-src 'self' data:; "
+        "connect-src 'self' https://api.anthropic.com https://api.notion.com"
+    )
+    
+    return response
+
+# レート制限用の辞書（メモリベース）
+request_counts = {}
+REQUEST_LIMIT = 100  # 1時間あたりのリクエスト数制限
+RATE_LIMIT_WINDOW = 3600  # 1時間（秒）
+
+def rate_limit_check():
+    """シンプルなレート制限チェック"""
+    client_ip = request.remote_addr
+    current_time = time.time()
+    
+    # IPアドレス別のリクエスト履歴を管理
+    if client_ip not in request_counts:
+        request_counts[client_ip] = []
+    
+    # 古いリクエスト記録を削除（ウィンドウ外）
+    request_counts[client_ip] = [
+        timestamp for timestamp in request_counts[client_ip]
+        if current_time - timestamp < RATE_LIMIT_WINDOW
+    ]
+    
+    # 制限チェック
+    if len(request_counts[client_ip]) >= REQUEST_LIMIT:
+        logger.warning(f"レート制限違反: {client_ip}")
+        return False
+    
+    # 新しいリクエストを記録
+    request_counts[client_ip].append(current_time)
+    return True
+
+def require_rate_limit(f):
+    """レート制限デコレータ"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not rate_limit_check():
+            return jsonify({
+                "error": "Rate limit exceeded",
+                "message": f"1時間あたり{REQUEST_LIMIT}回のリクエスト制限を超過しました。しばらく時間をおいてから再試行してください。"
+            }), 429
+        return f(*args, **kwargs)
+    return decorated_function
 
 def initialize_app():
     """
@@ -105,15 +461,23 @@ def initialize_app():
         csv_reference_text = format_ng_data_for_prompt(ng_expressions_data)
         logger.info("デフォルトのNG表現データを使用")
     
-    # 3. マークダウンファイルの読み込み
+    # 3. 全データファイルの読み込み
     try:
-        markdown_reference_text = load_markdown_files()
-        logger.info(f"マークダウンファイル読み込み完了: {len(markdown_reference_text)}文字")
+        markdown_reference_text = load_all_data_files()
+        logger.info(f"全データファイル読み込み完了: {len(markdown_reference_text)}文字")
     except Exception as e:
-        logger.error(f"マークダウンファイル読み込みエラー: {str(e)}")
+        logger.error(f"データファイル読み込みエラー: {str(e)}")
         markdown_reference_text = ""
     
+    # ファイル監視の開始
+    data_cache.start_file_watcher()
+    
     logger.info("薬機法リスクチェッカー 初期化完了")
+
+# セキュリティヘッダーを全レスポンスに適用
+@app.after_request
+def after_request(response):
+    return add_security_headers(response)
 
 def read_csv_file(file_path):
     """
@@ -181,34 +545,117 @@ def format_ng_data_for_prompt(df):
     """
     return format_csv_for_prompt(df)
 
-def load_markdown_files():
+def load_all_data_files():
     """
-    dataディレクトリ内のマークダウンファイルを読み込んで統合
+    dataディレクトリ内の全ファイル（CSV、マークダウン）を読み込んで統合（キャッシュ使用）
+    """
+    return data_cache.get_cached_data_content()
+
+def load_all_data_files_direct():
+    """
+    dataディレクトリ内の全ファイル（CSV、マークダウン）を直接読み込んで統合（キャッシュ更新用）
     """
     data_dir = os.path.join(os.path.dirname(__file__), 'data')
-    markdown_files = ['law1.md', 'law2.md', 'ng.md', '美容・健康関連機器.md']
+    combined_content = "=== 薬機法参考資料（全データファイル） ===\n\n"
     
-    combined_content = "=== 薬機法参考資料（マークダウンファイル） ===\n\n"
-    
-    for filename in markdown_files:
-        file_path = os.path.join(data_dir, filename)
-        try:
-            if os.path.exists(file_path):
-                with open(file_path, 'r', encoding='utf-8') as f:
-                    content = f.read().strip()
-                    if content:  # 空ファイルでない場合のみ追加
-                        combined_content += f"### {filename}の内容\n\n"
-                        combined_content += content + "\n\n"
+    # dataディレクトリ内の全ファイルを取得
+    try:
+        all_files = [f for f in os.listdir(data_dir) if os.path.isfile(os.path.join(data_dir, f))]
+        logger.info(f"dataディレクトリ内のファイル: {all_files}")
+        
+        for filename in all_files:
+            file_path = os.path.join(data_dir, filename)
+            try:
+                # CSVファイルの処理
+                if filename.endswith('.csv'):
+                    combined_content += f"### {filename}の内容（CSV形式）\n\n"
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        csv_content = f.read().strip()
+                        if csv_content:
+                            combined_content += csv_content + "\n\n"
                         combined_content += "---\n\n"
-                    else:
-                        logger.info(f"{filename}は空ファイルのためスキップしました")
-            else:
-                logger.warning(f"{filename}が見つかりません: {file_path}")
-        except Exception as e:
-            logger.error(f"{filename}読み込みエラー: {str(e)}")
-            continue
+                
+                # マークダウンファイルの処理
+                elif filename.endswith('.md'):
+                    combined_content += f"### {filename}の内容（マークダウン形式）\n\n"
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        md_content = f.read().strip()
+                        if md_content:
+                            combined_content += md_content + "\n\n"
+                        combined_content += "---\n\n"
+                
+                # その他のテキストファイル
+                elif filename.endswith(('.txt', '.json')):
+                    combined_content += f"### {filename}の内容\n\n"
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        text_content = f.read().strip()
+                        if text_content:
+                            combined_content += text_content + "\n\n"
+                        combined_content += "---\n\n"
+                        
+            except Exception as e:
+                logger.error(f"{filename}読み込みエラー: {str(e)}")
+                continue
+                
+    except Exception as e:
+        logger.error(f"dataディレクトリアクセスエラー: {str(e)}")
     
     return combined_content
+
+def load_rule_file(text_type):
+    """
+    ユーザーの選択に応じてruleディレクトリの特定マークダウンファイルを読み込み（キャッシュ使用）
+    """
+    return data_cache.get_cached_rule_content(text_type)
+
+def load_rule_file_direct(text_type):
+    """
+    ユーザーの選択に応じてruleディレクトリの特定マークダウンファイルを直接読み込み（キャッシュ更新用）
+    """
+    if not text_type:
+        return ""
+    
+    rule_dir = os.path.join(os.path.dirname(__file__), 'rule')
+    
+    # テキストタイプに応じたファイル名のマッピング
+    rule_file_mapping = {
+        'キャッチコピー': 'キャッチコピー.md',
+        'LP見出し・タイトル': 'LP見出し・タイトル.md',
+        '商品説明文・広告文・通常テキスト': '商品説明文.md',
+        'お客様の声': 'お客様の声.md'
+    }
+    
+    filename = rule_file_mapping.get(text_type)
+    if not filename:
+        logger.warning(f"未対応のテキストタイプ: {text_type}")
+        return ""
+    
+    file_path = os.path.join(rule_dir, filename)
+    rule_content = ""
+    
+    try:
+        if os.path.exists(file_path):
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read().strip()
+                if content:
+                    rule_content = f"=== {text_type}用の薬機法ルール・ガイドライン ===\n\n"
+                    rule_content += content + "\n\n"
+                    rule_content += "---\n\n"
+                    logger.info(f"ルールファイル読み込み完了: {filename}")
+                else:
+                    logger.info(f"{filename}は空ファイルです")
+        else:
+            logger.warning(f"ルールファイルが見つかりません: {file_path}")
+    except Exception as e:
+        logger.error(f"ルールファイル読み込みエラー: {str(e)}")
+    
+    return rule_content
+
+def load_markdown_files():
+    """
+    従来のマークダウンファイル読み込み（後方互換性のため残す）
+    """
+    return load_all_data_files()
 
 def create_system_prompt():
     """
@@ -264,18 +711,18 @@ def create_system_prompt():
   }
 }"""
 
-def create_user_prompt(text, text_type, category, csv_data, markdown_data):
+def create_user_prompt(text, text_type, category, all_data_content, rule_content):
     """
-    Claude API用のユーザープロンプトを生成（カテゴリ別最適化対応）
+    Claude API用のユーザープロンプトを生成（全データファイル・ルールファイル対応）
     """
-    # マークダウンデータを簡潔にまとめて高速化
-    markdown_summary = markdown_data[:2000] + "..." if len(markdown_data) > 2000 else markdown_data
-    csv_summary = csv_data[:1000] + "..." if len(csv_data) > 1000 else csv_data
+    # データ内容を簡潔にまとめて高速化
+    data_summary = all_data_content[:3000] + "..." if len(all_data_content) > 3000 else all_data_content
+    rule_summary = rule_content[:1500] + "..." if len(rule_content) > 1500 else rule_content
     
     # カテゴリ別の詳細ガイダンス
     category_guidance = get_category_guidance(category)
     
-    return f"""【薬機法チェック要請】
+    prompt = f"""【薬機法チェック要請】
 入力文: {text}
 文章種類: {text_type}
 商品カテゴリ: {category}
@@ -283,13 +730,21 @@ def create_user_prompt(text, text_type, category, csv_data, markdown_data):
 【カテゴリ別チェック基準】
 {category_guidance}
 
-【NG表現DB】
-{csv_summary}
-
-【薬機法ガイド抜粋】
-{markdown_summary}
-
-{category}の薬機法管理者として、上記文章をカテゴリ固有の基準で厳格に分析し、指定JSON形式で即座に回答してください。"""
+【全参考データ（dataディレクトリ）】
+{data_summary}
+"""
+    
+    # ルールファイルが存在する場合は追加
+    if rule_summary.strip():
+        prompt += f"""
+【{text_type}専用ルール・ガイドライン】
+{rule_summary}
+"""
+    
+    prompt += f"""
+{category}の薬機法管理者として、上記の全参考データと専用ルールを踏まえ、入力文を厳格に分析し、指定JSON形式で即座に回答してください。"""
+    
+    return prompt
 
 def get_category_guidance(category):
     """
@@ -408,6 +863,8 @@ def health_check():
     })
 
 @app.route('/api/check', methods=['POST'])
+@require_api_key
+@require_rate_limit
 def check_text():
     """
     薬機法リスクチェック メインエンドポイント
@@ -469,6 +926,61 @@ def check_text():
             "message": str(e)
         }), 500
 
+@app.route('/api/cache/refresh', methods=['POST'])
+@require_api_key
+def refresh_cache():
+    """
+    キャッシュを手動でリフレッシュするエンドポイント
+    """
+    try:
+        cache_type = request.json.get('type', 'all') if request.is_json else 'all'
+        
+        # キャッシュを無効化
+        data_cache.invalidate_cache(cache_type)
+        
+        return jsonify({
+            "status": "success",
+            "message": f"{cache_type}キャッシュをリフレッシュしました",
+            "timestamp": datetime.now().isoformat()
+        })
+    
+    except Exception as e:
+        logger.error(f"キャッシュリフレッシュエラー: {str(e)}")
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
+
+@app.route('/api/cache/status', methods=['GET'])
+def cache_status():
+    """
+    キャッシュの状態を確認するエンドポイント
+    """
+    try:
+        data_cache_keys = list(data_cache.data_cache.keys())
+        rule_cache_keys = list(data_cache.rule_cache.keys())
+        
+        return jsonify({
+            "status": "success",
+            "data_cache": {
+                "keys": data_cache_keys,
+                "count": len(data_cache_keys)
+            },
+            "rule_cache": {
+                "keys": rule_cache_keys,
+                "count": len(rule_cache_keys)
+            },
+            "file_watcher_active": data_cache.observer and data_cache.observer.is_alive() if WATCHDOG_AVAILABLE else False,
+            "timestamp": datetime.now().isoformat()
+        })
+    
+    except Exception as e:
+        logger.error(f"キャッシュ状態確認エラー: {str(e)}")
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
+
 @app.route('/api/guide', methods=['GET'])
 def get_guide():
     """
@@ -527,9 +1039,13 @@ def call_claude_api(text, text_type, category):
         Exception: API呼び出しに失敗した場合
     """
     try:
+        # データファイルとルールファイルの読み込み（キャッシュ使用）
+        all_data_content = load_all_data_files()
+        rule_content = load_rule_file(text_type)
+        
         # プロンプトの構築
         system_prompt = create_system_prompt()
-        user_prompt = create_user_prompt(text, text_type, category, csv_reference_text, markdown_reference_text)
+        user_prompt = create_user_prompt(text, text_type, category, all_data_content, rule_content)
         
         logger.info("Claude API呼び出し開始")
         

@@ -4,10 +4,89 @@
  */
 
 class YakkiApiClient {
-    constructor(baseUrl = null) {
+    constructor(baseUrl = null, apiKey = null) {
         // config.jsで定義されたgetApiUrl関数を使用
         this.baseUrl = baseUrl || getApiUrl();
         this.timeout = API_CONFIG.API_TIMEOUT || 30000;
+        this.apiKey = apiKey || this.getApiKeyFromStorage();
+        this.requestCount = 0;
+        this.lastRequestTime = 0;
+        this.minRequestInterval = 100; // 最小リクエスト間隔（ミリ秒）
+    }
+
+    /**
+     * API キーをローカルストレージから取得
+     * @returns {string|null} APIキー
+     */
+    getApiKeyFromStorage() {
+        // 開発環境でのみローカルストレージから取得
+        if (window.location.hostname === 'localhost') {
+            return localStorage.getItem('yakki_api_key') || 'demo_key_for_development_only';
+        }
+        return null;
+    }
+
+    /**
+     * API キーを設定
+     * @param {string} apiKey - APIキー
+     */
+    setApiKey(apiKey) {
+        this.apiKey = apiKey;
+        // 開発環境でのみローカルストレージに保存
+        if (window.location.hostname === 'localhost') {
+            localStorage.setItem('yakki_api_key', apiKey);
+        }
+        console.log('API キーが設定されました');
+    }
+
+    /**
+     * リクエスト制限チェック
+     */
+    checkRateLimit() {
+        const now = Date.now();
+        if (now - this.lastRequestTime < this.minRequestInterval) {
+            throw new Error('リクエストが頻繁すぎます。少し時間をおいてから再試行してください。');
+        }
+        this.lastRequestTime = now;
+        this.requestCount++;
+    }
+
+    /**
+     * セキュアなヘッダーを生成
+     * @returns {Object} HTTPヘッダー
+     */
+    getSecureHeaders() {
+        const headers = {
+            'Content-Type': 'application/json',
+        };
+
+        // APIキーがある場合は追加
+        if (this.apiKey) {
+            headers['X-API-Key'] = this.apiKey;
+        }
+
+        return headers;
+    }
+
+    /**
+     * 入力値のサニタイゼーション
+     * @param {string} text - サニタイズするテキスト
+     * @returns {string} サニタイズされたテキスト
+     */
+    sanitizeInput(text) {
+        if (typeof text !== 'string') {
+            return '';
+        }
+        
+        // HTML特殊文字のエスケープ
+        return text
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#x27;')
+            .replace(/\//g, '&#x2F;')
+            .trim();
     }
 
     /**
@@ -37,14 +116,27 @@ class YakkiApiClient {
     async checkText(text, category, type) {
         try {
             console.log('🔍 薬機法チェック API呼び出し開始');
-            console.log('📋 入力データ:', { text: text.substring(0, 50) + '...', category, type });
+            
+            // レート制限チェック
+            this.checkRateLimit();
+            
+            // 入力値のサニタイゼーション
+            const sanitizedText = this.sanitizeInput(text);
+            const sanitizedCategory = this.sanitizeInput(category);
+            const sanitizedType = this.sanitizeInput(type);
+            
+            console.log('📋 入力データ:', { 
+                text: sanitizedText.substring(0, 50) + '...', 
+                category: sanitizedCategory, 
+                type: sanitizedType 
+            });
             console.log('🌐 API URL:', `${this.baseUrl}/api/check`);
             
             // リクエストボディの構築
             const requestBody = {
-                text: text.trim(),
-                category: category,
-                type: type
+                text: sanitizedText,
+                category: sanitizedCategory,
+                type: sanitizedType
             };
             console.log('📦 リクエストボディ:', requestBody);
 
@@ -57,9 +149,7 @@ class YakkiApiClient {
             console.log('📡 fetchWithTimeout開始...');
             const response = await this.fetchWithTimeout(`${this.baseUrl}/api/check`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: this.getSecureHeaders(),
                 body: JSON.stringify(requestBody)
             });
             console.log('📡 fetchWithTimeout完了、レスポンス受信:', response.status);
@@ -233,6 +323,12 @@ class YakkiApiClient {
             error.message = 'リクエストがタイムアウトしました。ネットワーク接続を確認してください。';
         } else if (error.name === 'TypeError' && error.message.includes('fetch')) {
             error.message = 'サーバーに接続できません。バックエンドが起動しているか確認してください。';
+        } else if (error.message.includes('HTTP 401')) {
+            error.message = 'APIキーが無効です。正しいAPIキーを設定してください。';
+        } else if (error.message.includes('HTTP 403')) {
+            error.message = 'アクセスが拒否されました。権限を確認してください。';
+        } else if (error.message.includes('HTTP 429')) {
+            error.message = 'リクエスト制限に達しました。しばらく時間をおいてから再試行してください。';
         } else if (error.message.includes('HTTP 400')) {
             error.message = '送信データに問題があります。入力内容を確認してください。';
         } else if (error.message.includes('HTTP 404')) {

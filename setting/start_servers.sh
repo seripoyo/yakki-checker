@@ -7,9 +7,9 @@ echo "============================================================"
 echo "薬機法リスクチェッカー サーバー起動中..."
 echo "============================================================"
 
-# プロジェクトルートディレクトリを取得
+# プロジェクトルートディレクトリを取得（settingディレクトリからプロジェクトルートへ）
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "$SCRIPT_DIR"
+cd "$SCRIPT_DIR/.."
 
 # 既存のサーバープロセスを停止
 echo "既存のサーバープロセスを確認・停止中..."
@@ -18,7 +18,7 @@ pkill -f "python3 app.py" 2>/dev/null || true
 sleep 2
 
 echo "1. バックエンドサーバー起動中..."
-cd backend
+cd setting/backend
 
 # 環境変数の確認
 if [ ! -f ".env" ]; then
@@ -28,7 +28,7 @@ if [ ! -f ".env" ]; then
 fi
 
 # バックエンドをバックグラウンドで起動
-nohup python3 app.py > ../backend.log 2>&1 &
+nohup python3 app.py > ../../backend.log 2>&1 &
 BACKEND_PID=$!
 echo "   バックエンド PID: $BACKEND_PID"
 
@@ -45,10 +45,10 @@ done
 
 echo ""
 echo "2. フロントエンドサーバー起動中..."
-cd ../frontend
+cd ../setting/frontend
 
 # フロントエンドをバックグラウンドで起動
-nohup python3 -m http.server 8080 > ../frontend.log 2>&1 &
+nohup python3 -m http.server 8080 > ../../frontend.log 2>&1 &
 FRONTEND_PID=$!
 echo "   フロントエンド PID: $FRONTEND_PID"
 
@@ -89,8 +89,8 @@ echo "   フロントエンド: tail -f frontend.log"
 echo "============================================================"
 
 # PIDs をファイルに保存（停止用）
-echo "$BACKEND_PID" > backend.pid
-echo "$FRONTEND_PID" > frontend.pid
+echo "$BACKEND_PID" > ../../backend.pid
+echo "$FRONTEND_PID" > ../../frontend.pid
 
 echo "サーバーがバックグラウンドで動作中です。"
 echo "ターミナルを閉じてもサーバーは継続動作します。"
