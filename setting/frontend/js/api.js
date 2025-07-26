@@ -214,7 +214,7 @@ class YakkiApiClient {
      */
     async fetchWithTimeout(url, options = {}) {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+        const timeoutId = setTimeout(() => controller.abort('Request timeout'), this.timeout);
 
         try {
             const response = await fetch(url, {
@@ -341,27 +341,39 @@ class YakkiApiClient {
      * @returns {Error} 拡張されたエラー
      */
     enhanceError(error) {
+        // AbortErrorや他の読み取り専用プロパティを持つエラーの場合、新しいErrorオブジェクトを作成
+        let enhancedMessage = error.message;
+        
         if (error.name === 'AbortError') {
-            error.message = 'リクエストがタイムアウトしました。ネットワーク接続を確認してください。';
+            enhancedMessage = 'リクエストがタイムアウトしました。ネットワーク接続を確認してください。';
         } else if (error.name === 'TypeError' && error.message.includes('fetch')) {
-            error.message = 'サーバーに接続できません。バックエンドが起動しているか確認してください。';
+            enhancedMessage = 'サーバーに接続できません。バックエンドが起動しているか確認してください。';
         } else if (error.message.includes('HTTP 401')) {
             // 開発環境での認証失敗時の詳細メッセージ
             if (window.location.hostname === 'localhost') {
-                error.message = 'APIキー認証に失敗しました。開発環境では自動的に "demo_key_for_development_only" が使用されます。バックエンドの.envファイルのVALID_API_KEYSを確認してください。';
+                enhancedMessage = 'APIキー認証に失敗しました。開発環境では自動的に "demo_key_for_development_only" が使用されます。バックエンドの.envファイルのVALID_API_KEYSを確認してください。';
             } else {
-                error.message = 'APIキーが無効です。正しいAPIキーを設定してください。';
+                enhancedMessage = 'APIキーが無効です。正しいAPIキーを設定してください。';
             }
         } else if (error.message.includes('HTTP 403')) {
-            error.message = 'アクセスが拒否されました。権限を確認してください。';
+            enhancedMessage = 'アクセスが拒否されました。権限を確認してください。';
         } else if (error.message.includes('HTTP 429')) {
-            error.message = 'リクエスト制限に達しました。しばらく時間をおいてから再試行してください。';
+            enhancedMessage = 'リクエスト制限に達しました。しばらく時間をおいてから再試行してください。';
         } else if (error.message.includes('HTTP 400')) {
-            error.message = '送信データに問題があります。入力内容を確認してください。';
+            enhancedMessage = '送信データに問題があります。入力内容を確認してください。';
         } else if (error.message.includes('HTTP 404')) {
-            error.message = 'APIエンドポイントが見つかりません。';
+            enhancedMessage = 'APIエンドポイントが見つかりません。';
         } else if (error.message.includes('HTTP 500')) {
-            error.message = 'サーバーエラーが発生しました。しばらく待ってから再試行してください。';
+            enhancedMessage = 'サーバーエラーが発生しました。しばらく待ってから再試行してください。';
+        }
+
+        // メッセージが変更された場合、新しいErrorオブジェクトを作成
+        if (enhancedMessage !== error.message) {
+            const enhancedError = new Error(enhancedMessage);
+            enhancedError.name = error.name;
+            enhancedError.stack = error.stack;
+            enhancedError.originalError = error;
+            return enhancedError;
         }
 
         return error;
