@@ -7,11 +7,12 @@ class YakkiApiClient {
     constructor(baseUrl = null, apiKey = null) {
         // config.jsで定義されたgetApiUrl関数を使用
         this.baseUrl = baseUrl || getApiUrl();
-        this.timeout = API_CONFIG.API_TIMEOUT || 60000; // 60秒に増加（Claude APIが遅い場合があるため）
+        this.timeout = API_CONFIG.API_TIMEOUT || 120000;
         this.apiKey = apiKey || this.getApiKeyFromStorage();
         this.requestCount = 0;
         this.lastRequestTime = 0;
         this.minRequestInterval = 100; // 最小リクエスト間隔（ミリ秒）
+        this.serverStatus = 'unknown'; // 'online', 'sleeping', 'unknown'
     }
 
     /**
@@ -95,6 +96,108 @@ class YakkiApiClient {
     }
 
     /**
+     * サーバー起動チェック（本番環境用）
+     * @returns {Promise<boolean>} サーバーがオンラインかどうか
+     */
+    async wakeUpServer() {
+        console.log('🌟 サーバー起動チェック開始...');
+        
+        // 本番環境でない場合はスキップ
+        if (window.location.hostname === 'localhost') {
+            this.serverStatus = 'online';
+            return true;
+        }
+        
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.HEALTH_CHECK_TIMEOUT);
+            
+            const response = await fetch(`${this.baseUrl}/`, {
+                method: 'GET',
+                signal: controller.signal,
+                headers: {
+                    'Cache-Control': 'no-cache'
+                }
+            });
+            
+            clearTimeout(timeoutId);
+            
+            if (response.ok) {
+                console.log('✅ サーバーはオンラインです');
+                this.serverStatus = 'online';
+                return true;
+            } else {
+                console.log('⚠️ サーバーレスポンスが異常:', response.status);
+                this.serverStatus = 'unknown';
+                return false;
+            }
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                console.log('⏰ サーバー起動中... 少し時間がかかります');
+                this.serverStatus = 'sleeping';
+            } else {
+                console.log('❌ サーバー接続エラー:', error.message);
+                this.serverStatus = 'unknown';
+            }
+            return false;
+        }
+    }
+
+    /**
+     * リトライ機能付きAPIコール
+     * @param {Function} apiCall - API呼び出し関数
+     * @param {string} operationName - 操作名（ログ用）
+     * @returns {Promise} API結果
+     */
+    async callWithRetry(apiCall, operationName = 'API呼び出し') {
+        let lastError;
+        
+        for (let attempt = 1; attempt <= API_CONFIG.MAX_RETRIES; attempt++) {
+            try {
+                console.log(`🔄 ${operationName} - 試行 ${attempt}/${API_CONFIG.MAX_RETRIES}`);
+                
+                // 最初の試行前にサーバー起動チェック
+                if (attempt === 1 && this.serverStatus !== 'online') {
+                    const isOnline = await this.wakeUpServer();
+                    if (!isOnline && this.serverStatus === 'sleeping') {
+                        // サーバーがスリープ中の場合、起動を待つ
+                        console.log('😴 サーバーが起動中です。しばらくお待ちください...');
+                        await this.delay(5000); // 5秒待機
+                    }
+                }
+                
+                const result = await apiCall();
+                console.log(`✅ ${operationName} 成功 (試行 ${attempt})`);
+                this.serverStatus = 'online';
+                return result;
+                
+            } catch (error) {
+                lastError = error;
+                console.log(`❌ ${operationName} 失敗 (試行 ${attempt}):`, error.message);
+                
+                // 最後の試行でない場合は待機
+                if (attempt < API_CONFIG.MAX_RETRIES) {
+                    const delay = API_CONFIG.RETRY_DELAY * attempt; // 指数バックオフ
+                    console.log(`⏳ ${delay}ms 待機してリトライします...`);
+                    await this.delay(delay);
+                }
+            }
+        }
+        
+        // 全ての試行が失敗した場合
+        console.error(`💥 ${operationName} 最終的に失敗:`, lastError);
+        throw lastError;
+    }
+    
+    /**
+     * 遅延実行用のユーティリティ
+     * @param {number} ms - 待機時間（ミリ秒）
+     */
+    delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    /**
      * APIヘルスチェック
      * @returns {Promise<Object>} ヘルスチェック結果
      */
@@ -104,9 +207,11 @@ class YakkiApiClient {
             const response = await this.fetchWithTimeout(`${this.baseUrl}/`);
             const data = await response.json();
             console.log('API ヘルスチェック成功:', data);
+            this.serverStatus = 'online';
             return data;
         } catch (error) {
             console.error('API ヘルスチェック失敗:', error);
+            this.serverStatus = 'unknown';
             throw error;
         }
     }
@@ -120,7 +225,8 @@ class YakkiApiClient {
      * @returns {Promise<Object>} チェック結果
      */
     async checkText(text, category, type, specialPoints = '') {
-        try {
+        // リトライ機能付きでAPIコールを実行
+        return await this.callWithRetry(async () => {
             console.log('🔍 薬機法チェック API呼び出し開始');
             
             // レート制限チェック
@@ -180,10 +286,7 @@ class YakkiApiClient {
             console.log('🎉 薬機法チェック API呼び出し成功');
             return data;
 
-        } catch (error) {
-            console.error('薬機法チェック API呼び出し失敗:', error);
-            throw this.enhanceError(error);
-        }
+        }, '薬機法チェック');
     }
 
     /**

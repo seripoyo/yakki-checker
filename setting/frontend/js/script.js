@@ -237,6 +237,11 @@ async function handleCheckButtonClick() {
         showLoading(true);
         // 簡易チェック結果を表示した場合は、それを維持しながらローディング表示
         
+        // 本番環境でのサーバー起動状況表示
+        if (window.location.hostname !== 'localhost') {
+            showServerStatusMessage('サーバーの起動状況を確認中...');
+        }
+        
         // ストリーミングまたは通常のAPI通信
         console.log('🌐 API通信開始:', { text, category, type, specialPoints });
         console.log('🔌 APIクライアント確認:', window.yakkiApi ? '✅ 利用可能' : '❌ 未初期化');
@@ -810,6 +815,74 @@ function showLoading(show) {
         elements.checkButton.disabled = false;
         elements.checkButton.innerHTML = '<span class="btn-icon">🔍</span>チェック開始';
         updateCheckButtonState();
+        // サーバー状況メッセージも非表示
+        hideServerStatusMessage();
+    }
+}
+
+// ===== サーバー状況表示 =====
+function showServerStatusMessage(message) {
+    // 既存のメッセージを削除
+    hideServerStatusMessage();
+    
+    const statusElement = document.createElement('div');
+    statusElement.id = 'server-status-message';
+    statusElement.className = 'server-status-message';
+    statusElement.innerHTML = `
+        <div class="status-content">
+            <span class="status-icon">🌐</span>
+            <span class="status-text">${message}</span>
+            <div class="status-spinner">
+                <div class="spinner-dot"></div>
+                <div class="spinner-dot"></div>
+                <div class="spinner-dot"></div>
+            </div>
+        </div>
+    `;
+    
+    // 結果エリアの前に挿入
+    elements.resultArea.parentNode.insertBefore(statusElement, elements.resultArea);
+}
+
+function hideServerStatusMessage() {
+    const statusElement = document.getElementById('server-status-message');
+    if (statusElement) {
+        statusElement.remove();
+    }
+}
+
+function updateServerStatusMessage(message, type = 'info') {
+    const statusElement = document.getElementById('server-status-message');
+    if (statusElement) {
+        const textElement = statusElement.querySelector('.status-text');
+        const iconElement = statusElement.querySelector('.status-icon');
+        
+        if (textElement) {
+            textElement.textContent = message;
+        }
+        
+        if (iconElement) {
+            switch (type) {
+                case 'success':
+                    iconElement.textContent = '✅';
+                    break;
+                case 'warning':
+                    iconElement.textContent = '⚠️';
+                    break;
+                case 'error':
+                    iconElement.textContent = '❌';
+                    break;
+                default:
+                    iconElement.textContent = '🌐';
+            }
+        }
+        
+        // 成功時は自動で非表示
+        if (type === 'success') {
+            setTimeout(() => {
+                hideServerStatusMessage();
+            }, 2000);
+        }
     }
 }
 

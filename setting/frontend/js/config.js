@@ -11,7 +11,14 @@ const API_CONFIG = {
     DEV_BACKEND_URL: 'http://localhost:5000',
     
     // タイムアウト設定（ミリ秒）
-    API_TIMEOUT: 60000 // 60秒（Claude APIの応答が遅い場合があるため）
+    API_TIMEOUT: 120000, // 120秒（本番環境でのコールドスタート対応）
+    
+    // リトライ設定
+    MAX_RETRIES: 3,
+    RETRY_DELAY: 2000, // 2秒
+    
+    // ヘルスチェックの設定
+    HEALTH_CHECK_TIMEOUT: 30000 // 30秒
 };
 
 // 環境に応じてAPIのURLを自動選択
