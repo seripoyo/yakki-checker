@@ -75,6 +75,19 @@
                             </div>
                         </div>
 
+                        <div class="form-group">
+                            <label for="special-points" class="form-label">特に訴求したいポイント（任意）</label>
+                            <textarea 
+                                id="special-points" 
+                                class="form-textarea" 
+                                placeholder="例：自然由来成分であることを強調したい、即効性よりも安全性をアピールしたい、他社との差別化ポイントなど"
+                                rows="3"
+                            ></textarea>
+                            <div class="form-note">
+                                ※ 入力いただいた場合、この内容に配慮したリライト案を提示します
+                            </div>
+                        </div>
+
                         <div class="form-actions">
                             <button id="check-button" class="btn btn-primary" disabled>
                                 <span class="btn-icon">🔍</span>
@@ -171,93 +184,677 @@
 
                 <!-- 薬機法簡単ガイドタブ -->
                 <section id="guide-content" class="tab-panel">
-                    <div class="guide-content">
-                        <h2 class="guide-title">💡 薬機法簡単ガイド</h2>
-                        
-                        <div class="guide-section">
-                            <h3>薬機法とは？</h3>
-                            <p>薬機法（医薬品医療機器等法）は、化粧品や医薬品の品質、有効性、安全性を確保するための法律です。美容系商品の広告では、効果効能の表現に厳格な制限があります。</p>
-                        </div>
+<style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", "Hiragino Sans", Arial, sans-serif;
+            line-height: 1.7;
+            color: #2d3748;
+            background-color: #f8fafc;
+            font-size: 16px;
+        }
+        
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        header {
+            background: #fff;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 32px 0;
+        }
+        
+        h1 {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 8px;
+            letter-spacing: -0.025em;
+        }
+        
+        .subtitle {
+            font-size: 1.125rem;
+            color: #64748b;
+            font-weight: 400;
+        }
+        
+        .warning-banner {
+            background-color: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+            padding: 16px 24px;
+            margin: 32px 0;
+            border-radius: 8px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .warning-banner::before {
+            content: "⚠️";
+            font-size: 1.25rem;
+        }
+        
+        .section {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        h2 {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        h2::before {
+            content: attr(data-emoji);
+            font-size: 1.5rem;
+            display: inline-block;
+        }
+        
+        h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin: 32px 0 16px 0;
+        }
+        
+        h4 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+        
+        p {
+            margin-bottom: 16px;
+            color: #4a5568;
+        }
+        
+        .lead {
+            font-size: 1.125rem;
+            line-height: 1.75;
+            color: #4a5568;
+            margin-bottom: 32px;
+        }
+        
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin: 32px 0;
+        }
+        
+        .category-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 24px;
+            transition: all 0.2s ease;
+        }
+        
+        .category-card:hover {
+            border-color: #cbd5e1;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        
+        .category-card h4 {
+            font-size: 1.125rem;
+            color: #1a202c;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .category-card p {
+            font-size: 0.875rem;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+        
+        .category-card .status {
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-top: 12px;
+        }
+        
+        .status-ok {
+            color: #059669;
+        }
+        
+        .status-ng {
+            color: #dc2626;
+        }
+        
+        .example-box {
+            padding: 16px 20px;
+            margin: 12px 0;
+            border-radius: 6px;
+            font-size: 0.9375rem;
+        }
+        
+        .ng-example {
+            background-color: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #7f1d1d;
+        }
+        
+        .ok-example {
+            background-color: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #14532d;
+        }
+        
+        .example-box strong {
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 4px;
+        }
+        
+        ul, ol {
+            margin: 16px 0;
+            padding-left: 24px;
+        }
+        
+        li {
+            margin-bottom: 12px;
+            color: #4a5568;
+            line-height: 1.6;
+        }
+        
+        .table-wrapper {
+            overflow-x: auto;
+            margin: 32px 0;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            font-size: 0.9375rem;
+        }
+        
+        th {
+            background-color: #f8fafc;
+            padding: 16px;
+            text-align: left;
+            font-weight: 600;
+            color: #1a202c;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        td {
+            padding: 16px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        tr:hover {
+            background-color: #f8fafc;
+        }
+        
+        .penalty-section {
+            background-color: #fef3c7;
+            border: 1px solid #fde68a;
+            border-radius: 8px;
+            padding: 24px;
+            margin: 24px 0;
+        }
+        
+        .penalty-section h3 {
+            color: #92400e;
+            margin-top: 0;
+            margin-bottom: 16px;
+        }
+        
+        .penalty-section h4 {
+            color: #78350f;
+            margin-top: 20px;
+            margin-bottom: 12px;
+        }
+        
+        .penalty-section ul {
+            margin: 8px 0;
+        }
+        
+        .penalty-section li {
+            color: #92400e;
+        }
+        
+        .checklist {
+            background-color: #eff6ff;
+            border: 1px solid #dbeafe;
+            border-radius: 8px;
+            padding: 24px;
+            margin: 24px 0;
+        }
+        
+        .checklist h3 {
+            color: #1e3a8a;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+        
+        .check-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 16px;
+            gap: 12px;
+        }
+        
+        .check-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        
+        .check-item label {
+            cursor: pointer;
+            color: #1e40af;
+            line-height: 1.5;
+        }
+        
+        .point-card {
+            background-color: #f0f4ff;
+            border-left: 4px solid #4f46e5;
+            padding: 20px 24px;
+            margin: 16px 0;
+            border-radius: 0 6px 6px 0;
+        }
+        
+        .point-card p {
+            margin: 0;
+            color: #312e81;
+        }
+        
+        .cta-section {
+            text-align: center;
+            padding: 48px 32px;
+            background-color: #fef3c7;
+            border-radius: 12px;
+            margin: 40px 0;
+        }
+        
+        .cta-section h2 {
+            justify-content: center;
+            color: #92400e;
+            margin-bottom: 16px;
+        }
+        
+        .cta-section p {
+            color: #78350f;
+            margin-bottom: 32px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background-color: #f97316;
+            color: white;
+            padding: 14px 32px;
+            font-size: 1.0625rem;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(249, 115, 22, 0.2);
+        }
+        
+        .cta-button:hover {
+            background-color: #ea580c;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(249, 115, 22, 0.3);
+        }
+        
+        .footer {
+            background-color: #1a202c;
+            color: #cbd5e1;
+            text-align: center;
+            padding: 32px 0;
+            margin-top: 64px;
+        }
+        
+        .footer p {
+            color: #cbd5e1;
+            margin: 0;
+            line-height: 1.6;
+        }
+        
+        .highlight {
+            background-color: #fef3c7;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: 500;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 16px;
+            }
+            
+            h1 {
+                font-size: 1.875rem;
+            }
+            
+            h2 {
+                font-size: 1.5rem;
+            }
+            
+            .section {
+                padding: 24px;
+            }
+            
+            .category-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            table {
+                font-size: 0.875rem;
+            }
+            
+            th, td {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>簡単薬機法ガイド</h1>
+            <p class="subtitle">初心者でもわかる！広告表現の基本ルール</p>
+        </div>
+    </header>
 
-                        <div class="guide-section">
-                            <h3>🚫 化粧品で使用できない表現例</h3>
-                            <div class="expression-examples">
-                                <div class="example-item ng">
-                                    <span class="example-icon">❌</span>
-                                    <div class="example-content">
-                                        <strong>「シミが消える」「シワがなくなる」</strong>
-                                        <p>医薬品的な効果を暗示する表現</p>
-                                    </div>
-                                </div>
-                                <div class="example-item ng">
-                                    <span class="example-icon">❌</span>
-                                    <div class="example-content">
-                                        <strong>「アンチエイジング効果」「老化防止」</strong>
-                                        <p>老化に関する直接的な表現</p>
-                                    </div>
-                                </div>
-                                <div class="example-item ng">
-                                    <span class="example-icon">❌</span>
-                                    <div class="example-content">
-                                        <strong>「医学的に証明された」「臨床試験で実証」</strong>
-                                        <p>科学的根拠を過度に強調する表現</p>
-                                    </div>
-                                </div>
-                                <div class="example-item ng">
-                                    <span class="example-icon">❌</span>
-                                    <div class="example-content">
-                                        <strong>「完全に」「絶対に」「確実に」</strong>
-                                        <p>効果を断定的に表現する言葉</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+    <div class="container">
+        <div class="warning-banner">
+            薬機法違反は最大3年の懲役または300万円以下の罰金！正しい知識を身につけましょう
+        </div>
 
-                        <div class="guide-section">
-                            <h3>✅ 化粧品で使用可能な表現例</h3>
-                            <div class="expression-examples">
-                                <div class="example-item ok">
-                                    <span class="example-icon">✅</span>
-                                    <div class="example-content">
-                                        <strong>「うるおいを与える」「乾燥を防ぐ」</strong>
-                                        <p>化粧品の基本的な効能効果</p>
-                                    </div>
-                                </div>
-                                <div class="example-item ok">
-                                    <span class="example-icon">✅</span>
-                                    <div class="example-content">
-                                        <strong>「肌を整える」「肌にハリを与える」</strong>
-                                        <p>適切な効果の表現</p>
-                                    </div>
-                                </div>
-                                <div class="example-item ok">
-                                    <span class="example-icon">✅</span>
-                                    <div class="example-content">
-                                        <strong>「メイクアップ効果により」</strong>
-                                        <p>見た目の効果を明確化</p>
-                                    </div>
-                                </div>
-                                <div class="example-item ok">
-                                    <span class="example-icon">✅</span>
-                                    <div class="example-content">
-                                        <strong>「使用感には個人差があります」</strong>
-                                        <p>効果の個人差を明記</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+        <section class="section">
+            <h2 data-emoji="📖">薬機法とは？</h2>
+            <p class="lead">
+                薬機法（医薬品、医療機器等の品質、有効性及び安全性の確保等に関する法律）は、
+                <span class="highlight">医薬品・化粧品・健康食品などの広告表現を規制する法律</span>です。
+                消費者を誤解から守り、適切な商品選択ができるようにすることが目的です。
+            </p>
+        </section>
 
-                        <div class="guide-section">
-                            <h3>📋 チェックのポイント</h3>
-                            <ul class="checklist">
-                                <li>医薬品的な効果を暗示していないか</li>
-                                <li>効果を断定的に表現していないか</li>
-                                <li>科学的根拠を過度に強調していないか</li>
-                                <li>化粧品の効能効果の範囲内か</li>
-                                <li>個人差について言及しているか</li>
-                            </ul>
-                        </div>
-                    </div>
+        <section class="section">
+            <h2 data-emoji="📦">製品カテゴリー別ルール</h2>
+            <div class="category-grid">
+                <div class="category-card">
+                    <h4>💊 医薬品</h4>
+                    <p>病気の治療・予防を目的とする製品</p>
+                    <p class="status status-ok">✓「治る」「改善」などの表現が可能</p>
+                </div>
+                <div class="category-card">
+                    <h4>💄 化粧品</h4>
+                    <p>美化・清潔・健やかに保つことが目的</p>
+                    <p class="status status-ng">✗ 治療効果は標榜できません</p>
+                </div>
+                <div class="category-card">
+                    <h4>🥗 健康食品</h4>
+                    <p>栄養補給・健康維持を目的とする製品</p>
+                    <p class="status status-ng">✗ 病気への効果は標榜できません</p>
+                </div>
+                <div class="category-card">
+                    <h4>🔧 雑品（美容機器等）</h4>
+                    <p>物理的な効果のみを目的とする製品</p>
+                    <p class="status status-ng">✗ 身体への作用は標榜できません</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 data-emoji="⚠️">絶対に使ってはいけない表現</h2>
+            
+            <h3>1. 病気の治療・予防</h3>
+            <div class="ng-example example-box">
+                <strong>❌ NG例：</strong>アトピーが治る / がん予防 / 糖尿病改善 / 便秘解消 / 花粉症対策 / 冷え性改善
+            </div>
+            <div class="ok-example example-box">
+                <strong>✅ OK例：</strong>健康維持のために / スッキリした毎日を / 健やかな生活をサポート
+            </div>
+
+            <h3>2. 最大級・保証表現</h3>
+            <div class="ng-example example-box">
+                <strong>❌ NG例：</strong>最高の効果 / 世界一 / 絶対安全 / 必ず効く / No.1 / 究極 / 万能
+            </div>
+            <div class="ok-example example-box">
+                <strong>✅ OK例：</strong>多くの方に選ばれています / 満足度93%（※調査概要明記）
+            </div>
+
+            <h3>3. 医師・専門家の推薦</h3>
+            <div class="ng-example example-box">
+                <strong>❌ NG例：</strong>医師推奨 / 〇〇病院採用 / 薬剤師が選ぶ / 皮膚科医おすすめ / 厚生労働省認可
+            </div>
+            <div class="ok-example example-box">
+                <strong>✅ OK例：</strong>専門家と共同開発 / 品質にこだわって製造
+            </div>
+
+            <h3>4. 即効性・持続性</h3>
+            <div class="ng-example example-box">
+                <strong>❌ NG例：</strong>すぐ効く / 3日で効果実感 / 効果が永続 / 一度使えば二度と / 瞬時に / たちまち
+            </div>
+            <div class="ok-example example-box">
+                <strong>✅ OK例：</strong>じっくりケア / 継続することが大切 / 毎日のお手入れに
+            </div>
+
+            <h3>5. 身体の変化・機能への影響</h3>
+            <div class="ng-example example-box">
+                <strong>❌ NG例：</strong>細胞活性化 / 血液サラサラ / 脂肪燃焼 / デトックス / ホルモンバランス調整 / 免疫力向上
+            </div>
+            <div class="ok-example example-box">
+                <strong>✅ OK例：</strong>健康的な毎日を / 内側からキレイに / バランスを整える
+            </div>
+
+            <h3>6. 症状・部位への作用</h3>
+            <div class="ng-example example-box">
+                <strong>❌ NG例：</strong>シミが消える / シワ除去 / たるみ解消 / ニキビ完治 / 白髪が黒髪に / 視力回復
+            </div>
+            <div class="ok-example example-box">
+                <strong>✅ OK例：</strong>肌を整える / ハリのある印象に / 清潔に保つ
+            </div>
+
+            <h3>7. 不安を煽る表現</h3>
+            <div class="ng-example example-box">
+                <strong>❌ NG例：</strong>放置すると危険 / 手遅れになる前に / 〇〇は病気のサイン
+            </div>
+            <div class="ok-example example-box">
+                <strong>✅ OK例：</strong>早めのケアを / 健康が気になる方に
+            </div>
+
+            <h3>8. 用法・用量の指定（健康食品）</h3>
+            <div class="ng-example example-box">
+                <strong>❌ NG例：</strong>1日3回食後に服用 / 就寝前に2粒 / 症状に応じて増減
+            </div>
+            <div class="ok-example example-box">
+                <strong>✅ OK例：</strong>目安として1日2粒 / お召し上がり方：水などと一緒に
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 data-emoji="📊">カテゴリー別NG表現例</h2>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>カテゴリー</th>
+                            <th>NG表現</th>
+                            <th>理由</th>
+                            <th>OK表現</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>化粧品</strong></td>
+                            <td>シミが消える</td>
+                            <td>治療効果は医薬品のみ</td>
+                            <td>日やけによるシミ・ソバカスを防ぐ</td>
+                        </tr>
+                        <tr>
+                            <td><strong>化粧品</strong></td>
+                            <td>アンチエイジング</td>
+                            <td>老化防止は医薬品的効能</td>
+                            <td>エイジングケア（年齢に応じたケア）</td>
+                        </tr>
+                        <tr>
+                            <td><strong>化粧品</strong></td>
+                            <td>細胞活性化</td>
+                            <td>細胞への作用は不可</td>
+                            <td>肌がいきいき</td>
+                        </tr>
+                        <tr>
+                            <td><strong>健康食品</strong></td>
+                            <td>血糖値を下げる</td>
+                            <td>疾病指標の改善は医薬品</td>
+                            <td>甘いものが気になる方に</td>
+                        </tr>
+                        <tr>
+                            <td><strong>健康食品</strong></td>
+                            <td>脂肪燃焼</td>
+                            <td>身体機能への作用</td>
+                            <td>ダイエッターをサポート</td>
+                        </tr>
+                        <tr>
+                            <td><strong>健康食品</strong></td>
+                            <td>デトックス</td>
+                            <td>解毒作用は医薬品的</td>
+                            <td>スッキリした毎日を</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 data-emoji="⚖️">違反した場合の処分</h2>
+            <div class="penalty-section">
+                <h3>薬機法違反のペナルティ</h3>
+                
+                <h4>行政処分</h4>
+                <ul>
+                    <li>措置命令（広告の中止・訂正）</li>
+                    <li>業務停止命令</li>
+                    <li>許可・承認の取り消し</li>
+                </ul>
+                
+                <h4>刑事罰</h4>
+                <ul>
+                    <li>最大3年の懲役または300万円以下の罰金</li>
+                    <li>法人の場合は両罰規定あり</li>
+                </ul>
+                
+                <h4>その他のリスク</h4>
+                <ul>
+                    <li>企業イメージの低下</li>
+                    <li>消費者からの信頼喪失</li>
+                    <li>売上への影響</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 data-emoji="✓">広告作成前のチェックリスト</h2>
+            <div class="checklist">
+                <h3>必ず確認しましょう</h3>
+                <div class="check-item">
+                    <input type="checkbox" id="check1">
+                    <label for="check1">製品カテゴリーを正しく把握していますか？</label>
+                </div>
+                <div class="check-item">
+                    <input type="checkbox" id="check2">
+                    <label for="check2">病気の治療・予防を謳っていませんか？</label>
+                </div>
+                <div class="check-item">
+                    <input type="checkbox" id="check3">
+                    <label for="check3">最大級表現（最高・No.1等）を使っていませんか？</label>
+                </div>
+                <div class="check-item">
+                    <input type="checkbox" id="check4">
+                    <label for="check4">医師・専門家の推薦を示していませんか？</label>
+                </div>
+                <div class="check-item">
+                    <input type="checkbox" id="check5">
+                    <label for="check5">効果の保証（必ず・確実に等）をしていませんか？</label>
+                </div>
+                <div class="check-item">
+                    <input type="checkbox" id="check6">
+                    <label for="check6">承認された効能効果の範囲内ですか？</label>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 data-emoji="💡">覚えておきたい基本ルール</h2>
+            <div class="point-card">
+                <p><strong>化粧品</strong>は「美しく見せる」「清潔にする」が基本。治療はできません。</p>
+            </div>
+            <div class="point-card">
+                <p><strong>健康食品</strong>は「栄養補給」「健康維持」まで。病気への効果は謳えません。</p>
+            </div>
+            <div class="point-card">
+                <p><strong>体験談</strong>も規制対象。「個人の感想です」と書いても違反は違反。</p>
+            </div>
+            <div class="point-card">
+                <p><strong>ビフォーアフター写真</strong>は要注意。効果を保証する表現になりがち。</p>
+            </div>
+            <div class="point-card">
+                <p><strong>成分の効能</strong>も慎重に。「〇〇成分が細胞に働きかける」はNG。</p>
+            </div>
+            <div class="point-card">
+                <p>迷ったら<strong>専門家に相談</strong>。後から違反が発覚すると大変です。</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 data-emoji="📌">まとめ</h2>
+            <p style="font-size: 1.125rem; line-height: 1.8;">
+                薬機法は<span class="highlight">消費者を守るための大切な法律</span>です。
+                正しい知識を持って、誠実な広告表現を心がけましょう。
+            </p>
+            <p style="font-size: 1.125rem; line-height: 1.8; margin-top: 24px;">
+                <strong>「グレーゾーンは避ける」「迷ったら専門家に相談」</strong><br>
+                これが薬機法対策の鉄則です。
+            </p>
+        </section>
+
+        <section class="cta-section">
+            <h2 data-emoji="">薬機法について不安がある方へ</h2>
+            <p>
+                広告表現に迷ったら、専門家のアドバイスを受けることが大切です。<br>
+                法律違反のリスクを避け、安心してビジネスを進めましょう。
+            </p>
+            <a href="#" class="cta-button">専門家に相談する</a>
+        </section>
+    </div>
+
                 </section>
             </div>
         </div>
@@ -268,11 +865,21 @@
         <div class="container">
             <div class="disclaimer">
                 <h4>⚠️ 免責事項</h4>
-                <ul class="disclaimer-list">
-                    <li>本アプリのチェック結果は、広告表現の適法性を保証するものではありません。</li>
-                    <li>あくまで作成担当者のための参考情報としてご利用ください。</li>
-                    <li>本ツール使用時の最終的な広告表現の判断は、必ず貴社の法務・薬事担当者または専門家にご相談ください。</li>
-                </ul>
+                <div class="disclaimer-content">
+                    <p>「薬機法リスクチェッカー」（以下「本サービス」）は、過去の行政指導事例、各種ガイドライン、公的機関が公開する資料等を参考に、広告・販促表現における注意点を可視化する目的で提供されています。</p>
+                    
+                    <h5>■ 法律判断を提供するものではありません</h5>
+                    <p>本サービスは、弁護士または弁護士法人による法的助言・法律判断を提供するものではありません。薬機法・景品表示法その他の関連法令の違反の有無を断定する目的ではなく、参考情報の提供を目的としています。</p>
+                    
+                    <h5>■ 表現修正の提案は法的責任を負うものではありません</h5>
+                    <p>本サービスで表示されるコメントや表現例・表現修正案は、過去の行政指導や公的ガイドラインに基づく一般的な参考情報であり、法令適合性を保証するものではありません。最終的な表現内容の採否は、ご利用者自身の責任においてご判断ください。</p>
+                    
+                    <h5>■ 必要に応じて弁護士等の専門家にご相談ください</h5>
+                    <p>本サービスは広告表現の法的リスクを簡易的に可視化することを目的としています。実際の広告物・販促資料の法令適合性を正確に判断するには、ケースごとに解釈が異なる可能性があるため、必要に応じて弁護士等の専門家のご確認を強く推奨いたします。</p>
+                    
+                    <h5>■ 免責事項の改訂について</h5>
+                    <p>本サービスは予告なく内容を変更・改訂することがあります。最新の免責事項は本ページにてご確認ください。</p>
+                </div>
             </div>
             
             <div class="business-link">

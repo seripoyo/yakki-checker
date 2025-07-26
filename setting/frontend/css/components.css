@@ -585,6 +585,26 @@ mark:hover::after {
     color: white;
 }
 
+.disclaimer-content {
+    text-align: left;
+    line-height: 1.6;
+}
+
+.disclaimer-content p {
+    color: #cbd5e1;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+.disclaimer-content h5 {
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 1.5rem 0 0.5rem 0;
+    padding-bottom: 0.25rem;
+    border-bottom: 1px solid #374151;
+}
+
 .btn-business {
     margin-top: 1rem;
 }
