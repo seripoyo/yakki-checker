@@ -115,6 +115,7 @@ body {
     display: flex;
     align-items: center;
     gap: var(--spacing-3);
+    color: white;
 }
 
 .header-title .icon {
@@ -125,6 +126,7 @@ body {
     font-size: var(--font-size-lg);
     opacity: 0.9;
     font-weight: 300;
+    color: white;
 }
 
 /* ===== タブナビゲーション ===== */
@@ -240,6 +242,13 @@ body {
     font-size: var(--font-size-sm);
     color: var(--color-gray-500);
     margin-top: var(--spacing-2);
+}
+
+.form-note {
+    font-size: var(--font-size-sm);
+    color: var(--color-gray-600);
+    margin-top: var(--spacing-2);
+    font-style: italic;
 }
 
 .form-actions {
