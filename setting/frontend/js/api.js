@@ -21,7 +21,12 @@ class YakkiApiClient {
     getApiKeyFromStorage() {
         // 開発環境でのみローカルストレージから取得
         if (window.location.hostname === 'localhost') {
-            return localStorage.getItem('yakki_api_key') || 'demo_key_for_development_only';
+            const storedKey = localStorage.getItem('yakki_api_key');
+            if (storedKey && storedKey !== 'demo_key_for_development_only') {
+                return storedKey;
+            }
+            // .envファイルのVALID_API_KEYSと一致するキーを返す
+            return 'demo_key_for_development_only';
         }
         return null;
     }
@@ -111,9 +116,10 @@ class YakkiApiClient {
      * @param {string} text - チェックしたい文章
      * @param {string} category - 商品カテゴリ
      * @param {string} type - 文章の種類
+     * @param {string} specialPoints - 特に訴求したいポイント（オプション）
      * @returns {Promise<Object>} チェック結果
      */
-    async checkText(text, category, type) {
+    async checkText(text, category, type, specialPoints = '') {
         try {
             console.log('🔍 薬機法チェック API呼び出し開始');
             
@@ -124,11 +130,13 @@ class YakkiApiClient {
             const sanitizedText = this.sanitizeInput(text);
             const sanitizedCategory = this.sanitizeInput(category);
             const sanitizedType = this.sanitizeInput(type);
+            const sanitizedSpecialPoints = this.sanitizeInput(specialPoints);
             
             console.log('📋 入力データ:', { 
                 text: sanitizedText.substring(0, 50) + '...', 
                 category: sanitizedCategory, 
-                type: sanitizedType 
+                type: sanitizedType,
+                specialPoints: sanitizedSpecialPoints ? sanitizedSpecialPoints.substring(0, 30) + '...' : '(なし)'
             });
             console.log('🌐 API URL:', `${this.baseUrl}/api/check`);
             
@@ -138,6 +146,11 @@ class YakkiApiClient {
                 category: sanitizedCategory,
                 type: sanitizedType
             };
+            
+            // 特に訴求したいポイントが入力されている場合のみ追加
+            if (sanitizedSpecialPoints && sanitizedSpecialPoints.trim()) {
+                requestBody.special_points = sanitizedSpecialPoints;
+            }
             console.log('📦 リクエストボディ:', requestBody);
 
             // バリデーション
@@ -324,7 +337,12 @@ class YakkiApiClient {
         } else if (error.name === 'TypeError' && error.message.includes('fetch')) {
             error.message = 'サーバーに接続できません。バックエンドが起動しているか確認してください。';
         } else if (error.message.includes('HTTP 401')) {
-            error.message = 'APIキーが無効です。正しいAPIキーを設定してください。';
+            // 開発環境での認証失敗時の詳細メッセージ
+            if (window.location.hostname === 'localhost') {
+                error.message = 'APIキー認証に失敗しました。開発環境では自動的に "demo_key_for_development_only" が使用されます。バックエンドの.envファイルのVALID_API_KEYSを確認してください。';
+            } else {
+                error.message = 'APIキーが無効です。正しいAPIキーを設定してください。';
+            }
         } else if (error.message.includes('HTTP 403')) {
             error.message = 'アクセスが拒否されました。権限を確認してください。';
         } else if (error.message.includes('HTTP 429')) {

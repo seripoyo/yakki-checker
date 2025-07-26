@@ -684,6 +684,8 @@ def create_system_prompt():
    - **保守的バージョン**: 最も安全で確実な表現を使用
    - **バランス版**: 安全性と訴求力のバランスを重視
    - **訴求力重視版**: 法的リスクを最小限にしつつ、訴求力を最大化
+   - **重要**: 「特に訴求したいポイント」が指定されている場合、各リライト案でそのポイントを薬機法に準拠しながら可能な限り反映すること
+   - **重要**: 各リライト案には、なぜそのリライトが薬機法的に適切なのかの解説を必ず含めること
 4. **リスク件数集計**: 高・中・低リスクの件数をそれぞれカウント
 
 必ず以下のJSON形式で、キーの名前も厳密に守って出力してください。他の説明文は一切含めないでください：
@@ -705,13 +707,22 @@ def create_system_prompt():
     }
   ],
   "rewritten_texts": {
-    "conservative": "保守的バージョンのリライト文...",
-    "balanced": "バランス版のリライト文...",
-    "appealing": "訴求力重視版のリライト文..."
+    "conservative": {
+      "text": "保守的バージョンのリライト文...",
+      "explanation": "このリライトが薬機法的に適切な理由の詳細解説..."
+    },
+    "balanced": {
+      "text": "バランス版のリライト文...",
+      "explanation": "このリライトが薬機法的に適切な理由の詳細解説..."
+    },
+    "appealing": {
+      "text": "訴求力重視版のリライト文...",
+      "explanation": "このリライトが薬機法的に適切な理由の詳細解説..."
+    }
   }
 }"""
 
-def create_user_prompt(text, text_type, category, all_data_content, rule_content):
+def create_user_prompt(text, text_type, category, all_data_content, rule_content, special_points=''):
     """
     Claude API用のユーザープロンプトを生成（全データファイル・ルールファイル対応）
     """
@@ -726,7 +737,15 @@ def create_user_prompt(text, text_type, category, all_data_content, rule_content
 入力文: {text}
 文章種類: {text_type}
 商品カテゴリ: {category}
+"""
+    
+    # 特に訴求したいポイントが指定されている場合は追加
+    if special_points and special_points.strip():
+        prompt += f"""特に訴求したいポイント: {special_points}
 
+"""
+    
+    prompt += f"""
 【カテゴリ別チェック基準】
 {category_guidance}
 
@@ -741,8 +760,21 @@ def create_user_prompt(text, text_type, category, all_data_content, rule_content
 {rule_summary}
 """
     
+    # 特に訴求したいポイントがある場合の指示を追加
+    final_instruction = f"{category}の薬機法管理者として、上記の全参考データと専用ルールを踏まえ、入力文を厳格に分析し、指定JSON形式で即座に回答してください。"
+    
+    if special_points and special_points.strip():
+        final_instruction += f"""
+
+【最重要指令】リライト案作成時の特別配慮事項：
+「{special_points}」
+
+上記の訴求ポイントを、薬機法に完全準拠しながらも可能な限り反映したリライト案を作成してください。
+単に安全にするだけでなく、このポイントが消費者に伝わるよう、表現技法を駆使して工夫してください。
+各リライト案の解説では、どのようにこの訴求ポイントを薬機法に適合する形で表現したかを必ず説明してください。"""
+    
     prompt += f"""
-{category}の薬機法管理者として、上記の全参考データと専用ルールを踏まえ、入力文を厳格に分析し、指定JSON形式で即座に回答してください。"""
+{final_instruction}"""
     
     return prompt
 
@@ -796,7 +828,7 @@ def get_category_guidance(category):
     
     return guidance_map.get(category, guidance_map["美容機器・健康器具・その他"])
 
-def create_demo_response(text, text_type, category):
+def create_demo_response(text, text_type, category, special_points=''):
     """
     Claude APIが利用できない場合のデモ用レスポンスを生成
     """
@@ -839,9 +871,18 @@ def create_demo_response(text, text_type, category):
         },
         "issues": demo_issues,
         "rewritten_texts": {
-            "conservative": conservative,
-            "balanced": balanced,
-            "appealing": appealing
+            "conservative": {
+                "text": conservative,
+                "explanation": "最も安全な表現を選択し、薬機法に抵触するリスクを最小限に抑えています。一般化粧品で使用可能な基本的な効能効果の範囲内で表現しています。"
+            },
+            "balanced": {
+                "text": balanced,
+                "explanation": "安全性を保ちながらも、消費者にとって魅力的な表現を使用しています。薬機法の範囲内で適切なイメージ訴求を行っています。"
+            },
+            "appealing": {
+                "text": appealing,
+                "explanation": "法的リスクを最小限に抑えつつ、消費者の興味を引く表現を使用しています。感覚的で印象的な言葉を活用して訴求力を高めています。"
+            }
         }
     }
 
@@ -886,6 +927,7 @@ def check_text():
         text = data['text'].strip()
         text_type = data['type']
         category = data.get('category', '化粧品')  # デフォルトは化粧品
+        special_points = data.get('special_points', '').strip()  # 特に訴求したいポイント（オプション）
         
         # テキストの空文字チェック
         if not text:
@@ -910,10 +952,10 @@ def check_text():
             }), 400
         
         # ログ出力
-        logger.info(f"チェック開始 - Category: {category}, Type: {text_type}, Text length: {len(text)}")
+        logger.info(f"チェック開始 - Category: {category}, Type: {text_type}, Text length: {len(text)}, Special points: {'あり' if special_points else 'なし'}")
         
         # Claude API呼び出し
-        result = call_claude_api(text, text_type, category)
+        result = call_claude_api(text, text_type, category, special_points)
         
         logger.info("チェック完了 - Claude APIレスポンス受信")
         
@@ -1023,7 +1065,7 @@ def get_guide():
             "timestamp": datetime.now().isoformat()
         })
 
-def call_claude_api(text, text_type, category):
+def call_claude_api(text, text_type, category, special_points=''):
     """
     Claude APIを呼び出して薬機法チェックを実行
     
@@ -1031,6 +1073,7 @@ def call_claude_api(text, text_type, category):
         text (str): チェック対象のテキスト
         text_type (str): テキストの種類
         category (str): 商品カテゴリ
+        special_points (str): 特に訴求したいポイント（オプション）
     
     Returns:
         dict: Claude APIからの応答（JSON形式）
@@ -1045,14 +1088,14 @@ def call_claude_api(text, text_type, category):
         
         # プロンプトの構築
         system_prompt = create_system_prompt()
-        user_prompt = create_user_prompt(text, text_type, category, all_data_content, rule_content)
+        user_prompt = create_user_prompt(text, text_type, category, all_data_content, rule_content, special_points)
         
         logger.info("Claude API呼び出し開始")
         
         # Claude クライアントの確認
         if claude_client is None:
             logger.warning("Claude APIが利用できません - デモ用の応答を生成します")
-            return create_demo_response(text, text_type, category)
+            return create_demo_response(text, text_type, category, special_points)
         
         # Claude APIリクエスト (高速化最適化)
         response = claude_client.messages.create(
@@ -1204,8 +1247,23 @@ def validate_claude_response(response):
     
     required_rewrite_keys = ["conservative", "balanced", "appealing"]
     for key in required_rewrite_keys:
-        if key not in response["rewritten_texts"] or not isinstance(response["rewritten_texts"][key], str):
-            raise ValueError(f"rewritten_texts.{key}が不正です")
+        if key not in response["rewritten_texts"]:
+            raise ValueError(f"rewritten_texts.{key}が不足しています")
+        
+        rewrite_data = response["rewritten_texts"][key]
+        
+        # 新形式（オブジェクト）と旧形式（文字列）の両方をサポート
+        if isinstance(rewrite_data, str):
+            # 旧形式: 文字列として有効
+            continue
+        elif isinstance(rewrite_data, dict):
+            # 新形式: textとexplanationを含むオブジェクト
+            if "text" not in rewrite_data or not isinstance(rewrite_data["text"], str):
+                raise ValueError(f"rewritten_texts.{key}.textが不正です")
+            if "explanation" not in rewrite_data or not isinstance(rewrite_data["explanation"], str):
+                raise ValueError(f"rewritten_texts.{key}.explanationが不正です")
+        else:
+            raise ValueError(f"rewritten_texts.{key}が不正な形式です")
 
 def create_fallback_response(text, error_message):
     """
