@@ -230,17 +230,8 @@ async function handleCheckButtonClick() {
             return;
         }
         
-        // 簡易チェックを即座に実行
-        const quickResults = window.quickChecker.performQuickCheck(text, category);
-        console.log('⚡ 簡易チェック完了:', quickResults);
-        
-        // 簡易チェック結果の表示
-        if (quickResults.hasIssues) {
-            const quickResultsHtml = window.quickChecker.formatQuickResults(quickResults);
-            // 結果エリアに簡易チェック結果を表示
-            elements.resultArea.innerHTML = quickResultsHtml;
-            elements.resultArea.style.display = 'block';
-        }
+        // 簡易チェック機能を無効化（API結果との競合を回避）
+        console.log('⚡ 簡易チェック機能は無効化されています');
         
         // 入力変更による自動非表示タイマーをクリア
         clearTimeout(window.inputTimeout);
@@ -292,10 +283,25 @@ async function handleCheckButtonClick() {
                     // エラーコールバック
                     (error) => {
                         console.log('ストリーミングエラー、通常APIにフォールバック');
+                        console.error('ストリーミングエラー詳細:', error);
+                        
                         // 通常のAPIにフォールバック
-                        window.yakkiApi.checkText(text, category, type, specialPoints)
+                        updateDetailedProgress({
+                            stage: 'fallback',
+                            progress: 50,
+                            message: '通常の分析方法に切り替えています...'
+                        });
+                        
+                        window.yakkiApi.checkText(text, category, type, specialPoints, (progress) => {
+                            updateDetailedProgress(progress);
+                        })
                             .then(resolve)
-                            .catch(reject);
+                            .catch((fallbackError) => {
+                                console.error('フォールバック処理も失敗:', fallbackError);
+                                // 最後の手段として、エラー表示を行う
+                                showUserFriendlyError(fallbackError);
+                                reject(fallbackError);
+                            });
                     }
                 );
             });
@@ -413,6 +419,11 @@ function displayCheckResult(data, originalText) {
     console.log('🎯 結果表示開始:', data);
     console.log('📊 elements.resultArea:', elements.resultArea);
     
+    // 簡易チェック表示フラグをクリア（API結果で上書き）
+    elements.resultArea.removeAttribute('data-quick-check-displayed');
+    elements.resultArea.setAttribute('data-api-result-displayed', 'true');
+    
+    
     try {
         // 総合リスクレベルの表示
         console.log('📈 総合リスク表示開始:', data.overall_risk);
@@ -490,6 +501,9 @@ function displayCheckResult(data, originalText) {
         
         // 最終確認：結果エリアの状態をチェック
         setTimeout(() => {
+            const rewrittenContainer = document.getElementById('rewritten-texts-container');
+            const rewrittenSection = document.getElementById('rewritten-section');
+            
             console.log('🔍 最終確認 - 結果エリア状態:', {
                 display: elements.resultArea.style.display,
                 visibility: elements.resultArea.style.visibility,
@@ -498,13 +512,32 @@ function displayCheckResult(data, originalText) {
                 children: elements.resultArea.children.length
             });
             
+            // 結果エリアの子要素を詳しく確認
+            console.log('🔍 結果エリア子要素詳細:');
+            Array.from(elements.resultArea.children).forEach((child, index) => {
+                console.log(`  - 子要素${index}: ${child.tagName}#${child.id || 'no-id'} (${child.className})`);
+            });
+            
             // 各要素の内容も確認
             console.log('🔍 各要素の内容確認:');
             console.log('  - 総合リスク:', elements.riskLevelText?.textContent);
             console.log('  - ハイライトテキスト:', elements.highlightedText?.innerHTML ? '有' : '無');
             console.log('  - 指摘事項:', elements.issuesList?.innerHTML ? '有' : '無');
-            console.log('  - 修正版テキスト:', document.getElementById('rewritten-texts-container')?.innerHTML ? '有' : '無');
-        }, 500);
+            console.log('  - rewritten-section存在:', rewrittenSection ? '有' : '無');
+            console.log('  - 修正版テキスト要素存在:', rewrittenContainer ? '有' : '無');
+            console.log('  - 修正版テキスト内容:', rewrittenContainer?.innerHTML ? '有' : '無');
+            console.log('  - 修正版テキスト内容長:', rewrittenContainer?.innerHTML?.length || 0);
+            
+            // デバッグ用：実際の内容の一部を表示
+            if (rewrittenContainer?.innerHTML) {
+                console.log('  - 修正版テキスト内容（先頭100文字）:', rewrittenContainer.innerHTML.substring(0, 100));
+            }
+            
+            // DOM構造の確認
+            console.log('🔍 DOM構造確認:');
+            console.log('  - resultArea→rewritten-section:', !!elements.resultArea.querySelector('#rewritten-section'));
+            console.log('  - resultArea→rewritten-texts-container:', !!elements.resultArea.querySelector('#rewritten-texts-container'));
+        }, 1000); // タイミングを1秒に延長
         
     } catch (error) {
         console.error('❌ 結果表示エラー:', error);
@@ -726,6 +759,35 @@ function displayRewrittenTextsWithContainer(rewrittenContainer, legacyContainer,
     console.log('🏗️ 生成HTML:', html);
     rewrittenContainer.innerHTML = html;
     console.log('✅ displayRewrittenTexts完了');
+    
+    // 即座に設定確認
+    setTimeout(() => {
+        console.log('🔍 設定直後確認 (100ms後):');
+        console.log('  - rewrittenContainer存在:', !!rewrittenContainer);
+        console.log('  - rewrittenContainer内容長:', rewrittenContainer?.innerHTML?.length || 0);
+        console.log('  - rewrittenContainer親要素:', rewrittenContainer?.parentElement?.id || 'なし');
+    }, 100);
+    
+    // 500ms後も確認
+    setTimeout(() => {
+        const container = document.getElementById('rewritten-texts-container');
+        console.log('🔍 500ms後確認:');
+        console.log('  - 新取得要素存在:', !!container);
+        console.log('  - 新取得要素内容長:', container?.innerHTML?.length || 0);
+        console.log('  - 元要素と同一:', rewrittenContainer === container);
+        
+        // 結果エリア全体の変化も確認
+        console.log('🔍 500ms後の結果エリア状態:');
+        console.log('  - 結果エリア子要素数:', elements.resultArea.children.length);
+        console.log('  - 結果エリアクラス:', elements.resultArea.className);
+        console.log('  - API結果表示フラグ:', elements.resultArea.getAttribute('data-api-result-displayed'));
+        console.log('  - 簡易チェックフラグ:', elements.resultArea.getAttribute('data-quick-check-displayed'));
+        
+        // 子要素の詳細
+        Array.from(elements.resultArea.children).forEach((child, index) => {
+            console.log(`  - 子要素${index}: ${child.tagName}#${child.id || 'no-id'} (${child.className})`);
+        });
+    }, 500);
 }
 
 // ===== 相談促進CTA表示 =====
@@ -1169,6 +1231,61 @@ function debugLog(message, data = null) {
     if (window.location.hostname === 'localhost') {
         console.log(`[DEBUG] ${message}`, data);
     }
+}
+
+// ===== ユーザーフレンドリーなエラー表示 =====
+function showUserFriendlyError(error) {
+    console.error('ユーザーエラー表示:', error);
+    
+    let userMessage = '';
+    let suggestedAction = '';
+    
+    // エラーの種類に応じてメッセージをカスタマイズ
+    if (error.message && error.message.includes('Failed to fetch')) {
+        userMessage = 'サーバーとの通信に失敗しました';
+        suggestedAction = 'ネットワーク接続を確認して、しばらく後に再試行してください。';
+    } else if (error.message && error.message.includes('リクエストが頻繁すぎます')) {
+        userMessage = 'リクエストが頻繁すぎます';
+        suggestedAction = '少し待ってから再度お試しください。';
+    } else if (error.message && error.message.includes('timeout')) {
+        userMessage = '処理がタイムアウトしました';
+        suggestedAction = 'サーバーが混雑している可能性があります。しばらく待ってから再試行してください。';
+    } else {
+        userMessage = '予期しないエラーが発生しました';
+        suggestedAction = 'ページを再読み込みしてから再試行してください。';
+    }
+    
+    // エラー結果を表示
+    elements.resultArea.style.display = 'block';
+    elements.resultArea.innerHTML = `
+        <div class="error-result">
+            <div class="error-header">
+                <span class="error-icon">❌</span>
+                <h3>エラーが発生しました</h3>
+            </div>
+            <div class="error-content">
+                <p class="error-message">${userMessage}</p>
+                <p class="error-suggestion">${suggestedAction}</p>
+                <div class="error-actions">
+                    <button class="btn btn-primary" onclick="location.reload()">
+                        <span class="btn-icon">🔄</span>ページを再読み込み
+                    </button>
+                    <button class="btn btn-secondary" onclick="elements.resultArea.style.display='none'">
+                        <span class="btn-icon">✖️</span>閉じる
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // 詳細進捗を非表示
+    hideDetailedProgress();
+    
+    // メッセージも表示
+    showMessage(userMessage, 'error');
+    
+    // スクロール
+    elements.resultArea.scrollIntoView({ behavior: 'smooth' });
 }
 
 // ===== エラーハンドリング =====

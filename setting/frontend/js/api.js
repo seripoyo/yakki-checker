@@ -11,7 +11,7 @@ class YakkiApiClient {
         this.apiKey = apiKey || this.getApiKeyFromStorage();
         this.requestCount = 0;
         this.lastRequestTime = 0;
-        this.minRequestInterval = 100; // 最小リクエスト間隔（ミリ秒）
+        this.minRequestInterval = 1000; // 最小リクエスト間隔（ミリ秒）- 開発環境用に緩和
         this.serverStatus = 'unknown'; // 'online', 'sleeping', 'unknown'
     }
 
@@ -22,12 +22,16 @@ class YakkiApiClient {
     getApiKeyFromStorage() {
         // 開発環境でのみローカルストレージから取得
         if (window.location.hostname === 'localhost') {
+            // 古いキーをクリア
             const storedKey = localStorage.getItem('yakki_api_key');
-            if (storedKey && storedKey !== 'demo_key_for_development_only') {
-                return storedKey;
+            if (storedKey === 'demo_key_for_development_only') {
+                localStorage.removeItem('yakki_api_key');
             }
-            // .envファイルのVALID_API_KEYSと一致するキーを返す
-            return 'demo_key_for_development_only';
+            
+            // 新しいAPIキーを設定・返却
+            const newApiKey = 'Mfe43kjAWKxa8sDSAn64450dKAX261UJg2XV3bCer-8';
+            localStorage.setItem('yakki_api_key', newApiKey);
+            return newApiKey;
         }
         return null;
     }
@@ -50,6 +54,13 @@ class YakkiApiClient {
      */
     checkRateLimit() {
         const now = Date.now();
+        // 開発環境ではレート制限を無効化
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            this.lastRequestTime = now;
+            this.requestCount++;
+            return; // 開発環境ではチェックをスキップ
+        }
+        
         if (now - this.lastRequestTime < this.minRequestInterval) {
             throw new Error('リクエストが頻繁すぎます。少し時間をおいてから再試行してください。');
         }

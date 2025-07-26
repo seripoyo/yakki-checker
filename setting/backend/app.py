@@ -59,8 +59,10 @@ if not allowed_origins or allowed_origins == ['']:
         'https://seripoyo.github.io',
         'http://localhost:3000', 
         'http://localhost:8000',
+        'http://localhost:8080',  # 追加
         'http://127.0.0.1:3000',
-        'http://127.0.0.1:8000'
+        'http://127.0.0.1:8000',
+        'http://127.0.0.1:8080'   # 追加
     ]
 
 # 本番環境では開発用URLを除外
@@ -432,7 +434,8 @@ def add_security_headers(response):
 
 # レート制限用の辞書（メモリベース）
 request_counts = {}
-REQUEST_LIMIT = 100  # 1時間あたりのリクエスト数制限
+# 開発環境では制限を緩和
+REQUEST_LIMIT = 1000 if os.getenv('DEBUG', 'True').lower() == 'true' else 100  # 開発環境では1000回/時間
 RATE_LIMIT_WINDOW = 3600  # 1時間（秒）
 
 def rate_limit_check():
@@ -895,35 +898,76 @@ def get_category_guidance(category):
 def create_demo_response(text, text_type, category, special_points=''):
     """
     Claude APIが利用できない場合のデモ用レスポンスを生成
+    実際の入力テキストを分析して適切な問題箇所を特定
     """
-    # カテゴリ別のデモ応答を生成
-    if category == "化粧品":
+    demo_issues = []
+    overall_risk = "低"
+    
+    # 実際のテキストを分析してNG表現を検出
+    ng_patterns = {
+        "アンチエイジング": {
+            "reason": "「アンチエイジング」は老化に関する直接的な表現で、化粧品では使用できません。",
+            "risk_level": "高",
+            "suggestions": ["エイジングケア（年齢に応じたお手入れ）", "ハリ・ツヤを与える", "うるおいのある肌へ導く"]
+        },
+        "マイナス10歳": {
+            "reason": "年齢に関する具体的な数値表現は、効果を断定的に表現するため薬機法に抵触します。",
+            "risk_level": "高", 
+            "suggestions": ["若々しい印象の肌へ", "ハリのある肌に導く", "つややかな肌へ"]
+        },
+        "美白": {
+            "reason": "「美白」は医薬部外品でのみ使用可能な効能表現で、一般化粧品では使用できません。",
+            "risk_level": "高",
+            "suggestions": ["透明感のある肌へ", "明るい印象の肌に導く", "くすみのない肌へ"]
+        },
+        "シミが消える": {
+            "reason": "「消える」は治療的効果を暗示する表現で、化粧品では使用できません。",
+            "risk_level": "高",
+            "suggestions": ["メラニンの生成を抑え、シミ・そばかすを防ぐ", "透明感を与える", "明るい肌へ導く"]
+        }
+    }
+    
+    # テキスト内のNG表現を検索
+    for pattern, info in ng_patterns.items():
+        if pattern in text:
+            demo_issues.append({
+                "fragment": pattern,
+                "reason": info["reason"],
+                "risk_level": info["risk_level"],
+                "suggestions": info["suggestions"]
+            })
+            if info["risk_level"] == "高":
+                overall_risk = "高"
+            elif info["risk_level"] == "中" and overall_risk == "低":
+                overall_risk = "中"
+    
+    # 問題が見つからない場合のフォールバック
+    if not demo_issues:
         demo_issues = [
             {
-                "fragment": "美白効果",
-                "reason": "「美白」は医薬部外品でのみ使用可能な効能表現で、一般化粧品では使用できません。",
-                "risk_level": "高",
-                "suggestions": ["透明感のある肌へ", "明るい印象の肌に導く", "くすみのない肌へ"]
+                "fragment": "（特に大きな問題は検出されませんでした）",
+                "reason": "この表現は比較的安全ですが、より薬機法に準拠した表現に改善することができます。",
+                "risk_level": "低",
+                "suggestions": ["より適切な表現1", "より適切な表現2", "より適切な表現3"]
             }
         ]
-        overall_risk = "高"
-        conservative = "透明感のある健やかな肌へ"
-        balanced = "明るく透明感のある肌に導く"
-        appealing = "輝くような透明感、理想の肌へ"
+    
+    # 実際のテキストに基づいてリライト案を生成
+    if "アンチエイジング" in text and "マイナス10歳" in text:
+        # アンチエイジング + 年齢関連の場合
+        conservative = "エイジングケアクリーム（年齢に応じたお手入れ）でハリのある健やかな肌へ"
+        balanced = "エイジングケアクリームで若々しい印象の肌に導く"
+        appealing = "エイジングケアクリームで輝くようなハリ・ツヤ肌へ"
+    elif "美白" in text:
+        # 美白関連の場合
+        conservative = "透明感のある健やかな肌へ導くクリーム"
+        balanced = "明るく透明感のある肌に導くクリーム"
+        appealing = "輝くような透明感、理想の肌へ導くクリーム"
     else:
-        # その他のカテゴリ用のデモ応答
-        demo_issues = [
-            {
-                "fragment": "サンプルNG表現",
-                "reason": f"{category}では薬機法上適切ではない表現です。",
-                "risk_level": "中",
-                "suggestions": ["適切な表現1", "適切な表現2", "適切な表現3"]
-            }
-        ]
-        overall_risk = "中"
-        conservative = "デモ用保守的リライト案"
-        balanced = "デモ用バランス型リライト案"
-        appealing = "デモ用訴求力重視リライト案"
+        # その他の場合
+        conservative = "健やかでうるおいのある肌へ導くクリーム"
+        balanced = "ハリ・ツヤのある美しい肌に導くクリーム"
+        appealing = "輝くような美肌へ導く高機能クリーム"
     
     return {
         "overall_risk": overall_risk,
