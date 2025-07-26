@@ -221,11 +221,23 @@ async function handleCheckButtonClick() {
             return;
         }
         
+        // 簡易チェックを即座に実行
+        const quickResults = window.quickChecker.performQuickCheck(text, category);
+        console.log('⚡ 簡易チェック完了:', quickResults);
+        
+        // 簡易チェック結果の表示
+        if (quickResults.hasIssues) {
+            const quickResultsHtml = window.quickChecker.formatQuickResults(quickResults);
+            // 結果エリアに簡易チェック結果を表示
+            elements.resultArea.innerHTML = quickResultsHtml;
+            elements.resultArea.style.display = 'block';
+        }
+        
         // UI状態の更新
         showLoading(true);
-        elements.resultArea.style.display = 'none';
+        // 簡易チェック結果を表示した場合は、それを維持しながらローディング表示
         
-        // API通信（専用クライアント使用）
+        // ストリーミングまたは通常のAPI通信
         console.log('🌐 API通信開始:', { text, category, type, specialPoints });
         console.log('🔌 APIクライアント確認:', window.yakkiApi ? '✅ 利用可能' : '❌ 未初期化');
         
@@ -233,8 +245,44 @@ async function handleCheckButtonClick() {
             throw new Error('APIクライアントが初期化されていません');
         }
         
-        console.log('📡 checkText関数呼び出し中...');
-        const data = await window.yakkiApi.checkText(text, category, type, specialPoints);
+        // ストリーミング機能を試行
+        let data;
+        const useStreaming = window.streamingClient && window.location.hostname === 'localhost';
+        
+        if (useStreaming) {
+            console.log('📡 ストリーミングチェック開始...');
+            data = await new Promise((resolve, reject) => {
+                window.streamingClient.startStreamingCheck(
+                    {
+                        text: text,
+                        category: category,
+                        type: type,
+                        special_points: specialPoints
+                    },
+                    // 進捗コールバック
+                    (progress) => {
+                        console.log('進捗:', progress);
+                        window.streamingClient.updateProgressUI(progress);
+                    },
+                    // 完了コールバック
+                    (result) => {
+                        resolve(result);
+                    },
+                    // エラーコールバック
+                    (error) => {
+                        console.log('ストリーミングエラー、通常APIにフォールバック');
+                        // 通常のAPIにフォールバック
+                        window.yakkiApi.checkText(text, category, type, specialPoints)
+                            .then(resolve)
+                            .catch(reject);
+                    }
+                );
+            });
+        } else {
+            console.log('📡 通常API呼び出し中...');
+            data = await window.yakkiApi.checkText(text, category, type, specialPoints);
+        }
+        
         console.log('📨 API応答受信:', data);
         
         // レスポンス構造の検証

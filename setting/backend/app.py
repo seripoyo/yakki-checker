@@ -17,6 +17,7 @@ import threading
 import secrets
 import hashlib
 from functools import lru_cache, wraps
+from collections import OrderedDict
 
 # ログ設定を先に行う
 logging.basicConfig(level=logging.INFO)
@@ -25,7 +26,7 @@ logger = logging.getLogger(__name__)
 import csv
 import requests
 from datetime import datetime
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Response, stream_with_context
 from flask_cors import CORS
 import anthropic
 from dotenv import load_dotenv
@@ -281,6 +282,69 @@ class DataFileEventHandler(FileSystemEventHandler):
 
 # グローバルキャッシュインスタンス
 data_cache = DataCache()
+
+# ===== チェック結果キャッシュシステム =====
+class CheckCache:
+    """チェック結果のキャッシュシステム"""
+    def __init__(self, max_size=100, ttl=3600):
+        self.cache = OrderedDict()  # 順序を保持して古いものから削除
+        self.max_size = max_size
+        self.ttl = ttl  # Time To Live (秒)
+        self.hits = 0
+        self.misses = 0
+        self.lock = threading.Lock()
+    
+    def get_cache_key(self, text, category, text_type, special_points=None):
+        """キャッシュキーの生成"""
+        content = f"{text}|{category}|{text_type}|{special_points or ''}"
+        return hashlib.sha256(content.encode()).hexdigest()
+    
+    def get(self, key):
+        """キャッシュから取得"""
+        with self.lock:
+            if key in self.cache:
+                data, timestamp = self.cache[key]
+                if time.time() - timestamp < self.ttl:
+                    # キャッシュヒット - 最後に移動
+                    self.cache.move_to_end(key)
+                    self.hits += 1
+                    logger.info(f"キャッシュヒット - ヒット率: {self.get_hit_rate():.1f}%")
+                    return data
+                else:
+                    # 期限切れ
+                    del self.cache[key]
+            
+            self.misses += 1
+            return None
+    
+    def set(self, key, data):
+        """キャッシュに保存"""
+        with self.lock:
+            # サイズ制限チェック
+            if len(self.cache) >= self.max_size:
+                # 最も古いものを削除
+                self.cache.popitem(last=False)
+            
+            self.cache[key] = (data, time.time())
+            logger.info(f"キャッシュ保存 - サイズ: {len(self.cache)}/{self.max_size}")
+    
+    def get_hit_rate(self):
+        """キャッシュヒット率を計算"""
+        total = self.hits + self.misses
+        if total == 0:
+            return 0.0
+        return (self.hits / total) * 100
+    
+    def clear(self):
+        """キャッシュをクリア"""
+        with self.lock:
+            self.cache.clear()
+            self.hits = 0
+            self.misses = 0
+            logger.info("キャッシュをクリアしました")
+
+# チェック結果キャッシュインスタンスの作成
+check_cache = CheckCache(max_size=100, ttl=3600)  # 1時間有効
 
 # ===== セキュリティ機能 =====
 
@@ -954,10 +1018,32 @@ def check_text():
         # ログ出力
         logger.info(f"チェック開始 - Category: {category}, Type: {text_type}, Text length: {len(text)}, Special points: {'あり' if special_points else 'なし'}")
         
+        # キャッシュチェック
+        cache_key = check_cache.get_cache_key(text, category, text_type, special_points)
+        cached_result = check_cache.get(cache_key)
+        
+        if cached_result:
+            logger.info("キャッシュから結果を返します")
+            # キャッシュヒット時は高速レスポンスであることを示すフラグを追加
+            cached_result['from_cache'] = True
+            cached_result['response_time'] = 0.1  # キャッシュヒット時の応答時間
+            return jsonify(cached_result)
+        
+        # 応答時間の計測開始
+        start_time = time.time()
+        
         # Claude API呼び出し
         result = call_claude_api(text, text_type, category, special_points)
         
-        logger.info("チェック完了 - Claude APIレスポンス受信")
+        # 応答時間の計測終了
+        response_time = round(time.time() - start_time, 2)
+        result['response_time'] = response_time
+        result['from_cache'] = False
+        
+        # キャッシュに保存
+        check_cache.set(cache_key, result)
+        
+        logger.info(f"チェック完了 - Claude APIレスポンス受信 (応答時間: {response_time}秒)")
         
         return jsonify(result)
     
@@ -967,6 +1053,81 @@ def check_text():
             "error": "Internal server error",
             "message": str(e)
         }), 500
+
+@app.route('/api/check/stream', methods=['POST'])
+@require_api_key  
+@require_rate_limit
+def check_text_stream():
+    """
+    薬機法リスクチェック ストリーミングエンドポイント
+    結果を段階的に返すことでUXを向上
+    """
+    def generate():
+        try:
+            # リクエストデータの取得
+            data = request.get_json()
+            text = data['text'].strip()
+            text_type = data['type']
+            category = data.get('category', '化粧品')
+            special_points = data.get('special_points', '').strip()
+            
+            # イベント1: 開始通知
+            yield f"data: {json.dumps({'type': 'start', 'message': 'チェックを開始しました'}, ensure_ascii=False)}\n\n"
+            
+            # キャッシュチェック
+            cache_key = check_cache.get_cache_key(text, category, text_type, special_points)
+            cached_result = check_cache.get(cache_key)
+            
+            if cached_result:
+                # キャッシュヒット時は即座に全結果を返す
+                yield f"data: {json.dumps({'type': 'cache_hit', 'message': 'キャッシュから結果を取得'}, ensure_ascii=False)}\n\n"
+                yield f"data: {json.dumps({'type': 'complete', 'result': cached_result}, ensure_ascii=False)}\n\n"
+                return
+            
+            # イベント2: CSVチェック開始
+            yield f"data: {json.dumps({'type': 'csv_check', 'message': 'NG表現データベースをチェック中...'}, ensure_ascii=False)}\n\n"
+            
+            # CSVからNG表現をチェック（簡易版）
+            csv_ng_words = []
+            csv_file_path = os.path.join(os.path.dirname(__file__), 'data', 'ng_expressions.csv')
+            if os.path.exists(csv_file_path):
+                with open(csv_file_path, 'r', encoding='utf-8') as f:
+                    reader = csv.DictReader(f)
+                    for row in reader:
+                        if row['NG表現'] in text:
+                            csv_ng_words.append({
+                                'word': row['NG表現'],
+                                'risk': row.get('リスクレベル', '中')
+                            })
+            
+            if csv_ng_words:
+                yield f"data: {json.dumps({'type': 'ng_words_found', 'words': csv_ng_words}, ensure_ascii=False)}\n\n"
+            
+            # イベント3: AIチェック開始
+            yield f"data: {json.dumps({'type': 'ai_check', 'message': 'AIによる詳細分析を実行中...'}, ensure_ascii=False)}\n\n"
+            
+            # Claude API呼び出し
+            result = call_claude_api(text, text_type, category, special_points)
+            
+            # キャッシュに保存
+            check_cache.set(cache_key, result)
+            
+            # イベント4: 完了
+            yield f"data: {json.dumps({'type': 'complete', 'result': result}, ensure_ascii=False)}\n\n"
+            
+        except Exception as e:
+            logger.error(f"ストリーミングエラー: {str(e)}")
+            yield f"data: {json.dumps({'type': 'error', 'message': str(e)}, ensure_ascii=False)}\n\n"
+    
+    return Response(
+        stream_with_context(generate()),
+        mimetype='text/event-stream',
+        headers={
+            'Cache-Control': 'no-cache',
+            'X-Accel-Buffering': 'no',  # nginxのバッファリングを無効化
+            'Connection': 'keep-alive'
+        }
+    )
 
 @app.route('/api/cache/refresh', methods=['POST'])
 @require_api_key

@@ -726,6 +726,80 @@ mark:hover::after {
     }
 }
 
+/* ===== 簡易チェック結果 ===== */
+.quick-check-alert {
+    background: #fff5f5;
+    border: 2px solid #feb2b2;
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-4);
+    margin-bottom: var(--spacing-4);
+    animation: slideDown 0.3s ease;
+}
+
+.quick-check-alert h4 {
+    color: #c53030;
+    margin: 0 0 var(--spacing-2) 0;
+    font-size: var(--font-size-lg);
+}
+
+.quick-check-time {
+    color: #718096;
+    font-size: var(--font-size-sm);
+    margin: 0 0 var(--spacing-3) 0;
+}
+
+.quick-check-group {
+    background: white;
+    border-left: 4px solid;
+    padding: var(--spacing-3);
+    margin-bottom: var(--spacing-2);
+    border-radius: var(--border-radius);
+}
+
+.quick-check-group.high-risk {
+    border-left-color: var(--risk-high);
+}
+
+.quick-check-group.medium-risk {
+    border-left-color: var(--risk-medium);
+}
+
+.quick-check-group h5 {
+    margin: 0 0 var(--spacing-1) 0;
+    font-size: var(--font-size-base);
+    font-weight: 600;
+}
+
+.risk-message {
+    color: #4a5568;
+    font-size: var(--font-size-sm);
+    margin: 0 0 var(--spacing-2) 0;
+}
+
+.detected-words {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-2);
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.detected-words li {
+    background: #fef2f2;
+    color: #991b1b;
+    padding: var(--spacing-1) var(--spacing-2);
+    border-radius: var(--border-radius-sm);
+    font-size: var(--font-size-sm);
+}
+
+.quick-check-note {
+    color: #718096;
+    font-size: var(--font-size-sm);
+    margin: var(--spacing-3) 0 0 0;
+    font-style: italic;
+}
+
 @media (max-width: 768px) {
     .d-md-none { display: none !important; }
     .d-md-block { display: block !important; }
@@ -754,4 +828,101 @@ mark:hover::after {
         padding: var(--spacing-3);
         font-size: var(--font-size-sm);
     }
+    
+    .quick-check-alert {
+        padding: var(--spacing-3);
+    }
+}
+
+/* ===== ストリーミング進捗表示 ===== */
+.streaming-progress {
+    background: #f0f9ff;
+    border: 2px solid #3b82f6;
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-4);
+    margin-bottom: var(--spacing-4);
+    animation: fadeIn 0.3s ease;
+}
+
+.progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-3);
+}
+
+.progress-header h4 {
+    margin: 0;
+    color: #1e40af;
+    font-size: var(--font-size-lg);
+}
+
+.progress-percentage {
+    color: #3b82f6;
+    font-weight: 600;
+    font-size: var(--font-size-lg);
+}
+
+.progress-bar {
+    width: 100%;
+    height: 12px;
+    background: #e0e7ff;
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: var(--spacing-3);
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #3b82f6, #60a5fa);
+    transition: width 0.5s ease;
+    position: relative;
+}
+
+.progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+    );
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.progress-message {
+    color: #1e40af;
+    font-size: var(--font-size-sm);
+    margin: 0 0 var(--spacing-2) 0;
+    font-style: italic;
+}
+
+.progress-steps {
+    margin-top: var(--spacing-2);
+}
+
+.ng-words-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-1);
+    align-items: center;
+    font-size: var(--font-size-sm);
+}
+
+.ng-words-preview .detected-word {
+    background: #fef2f2;
+    color: #991b1b;
+    padding: 2px 8px;
+    border-radius: var(--border-radius-sm);
+    font-weight: 500;
 }
