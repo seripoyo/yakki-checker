@@ -36,6 +36,11 @@ const elements = {
     rewrittenText: document.getElementById('rewritten-text'),
     copyRewrittenButton: document.getElementById('copy-rewritten'),
     
+    // 修正版テキスト表示エリア
+    rewrittenTextsContainer: document.getElementById('rewritten-texts-container'),
+    legacyRewritten: document.getElementById('legacy-rewritten'),
+    consultationCta: document.getElementById('consultation-cta'),
+    
     // タブ要素
     tabChecker: document.getElementById('tab-checker'),
     tabGuide: document.getElementById('tab-guide'),
@@ -553,19 +558,37 @@ function displayIssuesList(issues) {
 function displayRewrittenTexts(rewrittenTexts) {
     console.log('📝 displayRewrittenTexts開始:', rewrittenTexts);
     
-    const rewrittenContainer = document.getElementById('rewritten-texts-container');
-    const legacyContainer = document.getElementById('legacy-rewritten');
+    // 要素の取得（DOM読み込み後に再度取得）
+    const rewrittenContainer = elements.rewrittenTextsContainer || document.getElementById('rewritten-texts-container');
+    const legacyContainer = elements.legacyRewritten || document.getElementById('legacy-rewritten');
     
     console.log('🔍 DOM要素確認:', {
         rewrittenContainer: rewrittenContainer,
-        legacyContainer: legacyContainer
+        legacyContainer: legacyContainer,
+        elementsRef: {
+            rewrittenTextsContainer: elements.rewrittenTextsContainer,
+            legacyRewritten: elements.legacyRewritten
+        }
     });
     
     if (!rewrittenContainer) {
         console.error('❌ rewritten-texts-container要素が見つかりません');
+        // フォールバック: 直接HTMLから探す
+        const fallbackContainer = document.querySelector('#rewritten-texts-container, .rewritten-texts-container');
+        if (fallbackContainer) {
+            console.log('🔄 フォールバックでコンテナを発見:', fallbackContainer);
+            displayRewrittenTextsWithContainer(fallbackContainer, legacyContainer, rewrittenTexts);
+            return;
+        }
+        console.error('❌ フォールバックでも要素が見つかりませんでした');
         return;
     }
     
+    displayRewrittenTextsWithContainer(rewrittenContainer, legacyContainer, rewrittenTexts);
+}
+
+// ===== 修正版テキスト表示の実装部分 =====
+function displayRewrittenTextsWithContainer(rewrittenContainer, legacyContainer, rewrittenTexts) {
     // レガシーコンテナを非表示にして新コンテナを表示
     if (legacyContainer) {
         legacyContainer.style.display = 'none';
@@ -651,25 +674,41 @@ function displayRewrittenTexts(rewrittenTexts) {
 function showConsultationCTA() {
     console.log('📢 CTA表示開始');
     
-    const ctaElement = document.getElementById('consultation-cta');
+    // 要素の取得（DOM読み込み後に再度取得）
+    const ctaElement = elements.consultationCta || document.getElementById('consultation-cta');
+    
+    console.log('🔍 CTA要素確認:', {
+        ctaElement: ctaElement,
+        elementsRef: elements.consultationCta
+    });
+    
     if (ctaElement) {
         ctaElement.style.display = 'block';
         console.log('✅ CTA表示完了');
     } else {
         console.error('❌ CTA要素が見つかりません');
+        // フォールバック: 直接HTMLから探す
+        const fallbackCta = document.querySelector('#consultation-cta, .consultation-cta');
+        if (fallbackCta) {
+            console.log('🔄 フォールバックでCTAを発見:', fallbackCta);
+            fallbackCta.style.display = 'block';
+            console.log('✅ フォールバックCTA表示完了');
+        } else {
+            console.error('❌ フォールバックでもCTA要素が見つかりませんでした');
+        }
     }
 }
 
 // ===== 旧形式対応（後方互換性） =====
 function displayLegacyRewrittenText(rewrittenText) {
-    const legacyContainer = document.getElementById('legacy-rewritten');
-    const newContainer = document.getElementById('rewritten-texts-container');
+    const legacyContainer = elements.legacyRewritten || document.getElementById('legacy-rewritten');
+    const newContainer = elements.rewrittenTextsContainer || document.getElementById('rewritten-texts-container');
     
     // 新コンテナを非表示にして旧コンテナを表示
     if (newContainer) newContainer.style.display = 'none';
     if (legacyContainer) {
         legacyContainer.style.display = 'block';
-        const textElement = document.getElementById('rewritten-text');
+        const textElement = elements.rewrittenText || document.getElementById('rewritten-text');
         if (textElement) {
             textElement.textContent = rewrittenText;
         }
