@@ -387,6 +387,9 @@ function displayCheckResult(data, originalText) {
             console.error('❌ elements.resultAreaが見つかりません');
         }
         
+        // CTA表示
+        showConsultationCTA();
+        
         console.log('🎉 結果表示完了');
     } catch (error) {
         console.error('❌ 結果表示エラー:', error);
@@ -591,6 +594,19 @@ function displayRewrittenTexts(rewrittenTexts) {
     console.log('✅ displayRewrittenTexts完了');
 }
 
+// ===== 相談促進CTA表示 =====
+function showConsultationCTA() {
+    console.log('📢 CTA表示開始');
+    
+    const ctaElement = document.getElementById('consultation-cta');
+    if (ctaElement) {
+        ctaElement.style.display = 'block';
+        console.log('✅ CTA表示完了');
+    } else {
+        console.error('❌ CTA要素が見つかりません');
+    }
+}
+
 // ===== 旧形式対応（後方互換性） =====
 function displayLegacyRewrittenText(rewrittenText) {
     const legacyContainer = document.getElementById('legacy-rewritten');
@@ -699,6 +715,12 @@ function handleClearButtonClick() {
     // 結果エリア非表示
     elements.resultArea.style.display = 'none';
     currentCheckData = null;
+    
+    // CTA非表示
+    const ctaElement = document.getElementById('consultation-cta');
+    if (ctaElement) {
+        ctaElement.style.display = 'none';
+    }
     
     // フォーカスをテキストエリアに
     elements.textInput.focus();
