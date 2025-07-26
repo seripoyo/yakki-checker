@@ -7,7 +7,7 @@ class YakkiApiClient {
     constructor(baseUrl = null, apiKey = null) {
         // config.jsで定義されたgetApiUrl関数を使用
         this.baseUrl = baseUrl || getApiUrl();
-        this.timeout = API_CONFIG.API_TIMEOUT || 30000;
+        this.timeout = API_CONFIG.API_TIMEOUT || 60000; // 60秒に増加（Claude APIが遅い場合があるため）
         this.apiKey = apiKey || this.getApiKeyFromStorage();
         this.requestCount = 0;
         this.lastRequestTime = 0;
@@ -227,6 +227,14 @@ class YakkiApiClient {
             }
 
             return response;
+        } catch (error) {
+            // AbortErrorの場合、より分かりやすいエラーメッセージを設定
+            if (error.name === 'AbortError') {
+                const timeoutError = new Error('Request timeout');
+                timeoutError.name = 'AbortError';
+                throw timeoutError;
+            }
+            throw error;
         } finally {
             clearTimeout(timeoutId);
         }
@@ -342,28 +350,28 @@ class YakkiApiClient {
      */
     enhanceError(error) {
         // AbortErrorや他の読み取り専用プロパティを持つエラーの場合、新しいErrorオブジェクトを作成
-        let enhancedMessage = error.message;
+        let enhancedMessage = error.message || 'エラーが発生しました';
         
         if (error.name === 'AbortError') {
             enhancedMessage = 'リクエストがタイムアウトしました。ネットワーク接続を確認してください。';
-        } else if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        } else if (error.name === 'TypeError' && error.message && error.message.includes('fetch')) {
             enhancedMessage = 'サーバーに接続できません。バックエンドが起動しているか確認してください。';
-        } else if (error.message.includes('HTTP 401')) {
+        } else if (error.message && error.message.includes('HTTP 401')) {
             // 開発環境での認証失敗時の詳細メッセージ
             if (window.location.hostname === 'localhost') {
                 enhancedMessage = 'APIキー認証に失敗しました。開発環境では自動的に "demo_key_for_development_only" が使用されます。バックエンドの.envファイルのVALID_API_KEYSを確認してください。';
             } else {
                 enhancedMessage = 'APIキーが無効です。正しいAPIキーを設定してください。';
             }
-        } else if (error.message.includes('HTTP 403')) {
+        } else if (error.message && error.message.includes('HTTP 403')) {
             enhancedMessage = 'アクセスが拒否されました。権限を確認してください。';
-        } else if (error.message.includes('HTTP 429')) {
+        } else if (error.message && error.message.includes('HTTP 429')) {
             enhancedMessage = 'リクエスト制限に達しました。しばらく時間をおいてから再試行してください。';
-        } else if (error.message.includes('HTTP 400')) {
+        } else if (error.message && error.message.includes('HTTP 400')) {
             enhancedMessage = '送信データに問題があります。入力内容を確認してください。';
-        } else if (error.message.includes('HTTP 404')) {
+        } else if (error.message && error.message.includes('HTTP 404')) {
             enhancedMessage = 'APIエンドポイントが見つかりません。';
-        } else if (error.message.includes('HTTP 500')) {
+        } else if (error.message && error.message.includes('HTTP 500')) {
             enhancedMessage = 'サーバーエラーが発生しました。しばらく待ってから再試行してください。';
         }
 
