@@ -307,11 +307,20 @@ class YakkiApiClient {
             }
         }
 
-        // rewritten_textsの確認（新形式）
+        // rewritten_textsの確認（新形式・旧形式両対応）
         if (data.rewritten_texts && typeof data.rewritten_texts === 'object') {
             const requiredVariations = ['conservative', 'balanced', 'appealing'];
             for (const variation of requiredVariations) {
-                if (typeof data.rewritten_texts[variation] !== 'string') {
+                const variationData = data.rewritten_texts[variation];
+                
+                // 新形式（オブジェクト）の場合
+                if (typeof variationData === 'object' && variationData !== null) {
+                    if (typeof variationData.text !== 'string' || typeof variationData.explanation !== 'string') {
+                        throw new Error(`修正版テキスト '${variation}' のオブジェクト形式が不正です`);
+                    }
+                }
+                // 旧形式（文字列）の場合
+                else if (typeof variationData !== 'string') {
                     throw new Error(`修正版テキスト '${variation}' が不正です`);
                 }
             }
