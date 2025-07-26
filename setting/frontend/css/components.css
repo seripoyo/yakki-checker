@@ -661,7 +661,7 @@ mark:hover::after {
 
 .cta-body {
     margin-bottom: var(--spacing-8);
-    text-align: left;
+    text-align: center;
 }
 
 .cta-body p {
@@ -677,8 +677,7 @@ mark:hover::after {
 
 .cta-buttons {
     display: flex;
-    flex-direction: column;
-    gap: var(--spacing-4);
+    justify-content: center;
     align-items: center;
 }
 
@@ -706,29 +705,6 @@ mark:hover::after {
     box-shadow: 0 6px 12px rgba(59, 130, 246, 0.35);
 }
 
-.btn-cta-secondary {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-    color: white;
-    font-weight: 600;
-    font-size: var(--font-size-sm);
-    padding: var(--spacing-3) var(--spacing-6);
-    border-radius: var(--border-radius);
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: var(--spacing-2);
-    transition: all var(--transition-fast);
-    box-shadow: 0 2px 4px rgba(245, 158, 11, 0.25);
-    border: none;
-    min-width: 240px;
-    justify-content: center;
-}
-
-.btn-cta-secondary:hover {
-    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(245, 158, 11, 0.35);
-}
 
 @media (max-width: 768px) {
     .consultation-cta {
@@ -744,8 +720,7 @@ mark:hover::after {
         font-size: var(--font-size-base);
     }
     
-    .btn-cta-primary,
-    .btn-cta-secondary {
+    .btn-cta-primary {
         min-width: 100%;
         font-size: var(--font-size-sm);
     }
