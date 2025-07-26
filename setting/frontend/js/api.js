@@ -20,7 +20,7 @@ class YakkiApiClient {
      * @returns {string|null} APIキー
      */
     getApiKeyFromStorage() {
-        // 開発環境でのみローカルストレージから取得
+        // 開発環境（localhost）の場合
         if (window.location.hostname === 'localhost') {
             // 古いキーをクリア
             const storedKey = localStorage.getItem('yakki_api_key');
@@ -33,6 +33,16 @@ class YakkiApiClient {
             localStorage.setItem('yakki_api_key', newApiKey);
             return newApiKey;
         }
+        
+        // 本番環境（GitHub Pages）の場合
+        if (window.location.hostname.includes('github.io')) {
+            // 本番環境用のAPIキーを返す
+            console.log('🔑 本番環境APIキー取得中...');
+            const productionApiKey = 'Mfe43kjAWKxa8sDSAn64450dKAX261UJg2XV3bCer-8';
+            console.log('🔑 本番環境APIキー設定完了:', productionApiKey ? 'キーあり（' + productionApiKey.substring(0, 8) + '...）' : 'キーなし');
+            return productionApiKey;
+        }
+        
         return null;
     }
 
@@ -61,6 +71,7 @@ class YakkiApiClient {
             return; // 開発環境ではチェックをスキップ
         }
         
+        // 本番環境では適度なレート制限を適用
         if (now - this.lastRequestTime < this.minRequestInterval) {
             throw new Error('リクエストが頻繁すぎます。少し時間をおいてから再試行してください。');
         }
@@ -80,6 +91,12 @@ class YakkiApiClient {
         // APIキーがある場合は追加
         if (this.apiKey) {
             headers['X-API-Key'] = this.apiKey;
+            // デバッグ用（本番環境での問題調査）
+            if (window.location.hostname.includes('github.io')) {
+                console.log('🔑 本番環境APIキー設定:', this.apiKey ? 'キーあり（' + this.apiKey.substring(0, 8) + '...）' : 'キーなし');
+            }
+        } else {
+            console.error('❌ APIキーが設定されていません');
         }
 
         return headers;
