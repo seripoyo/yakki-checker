@@ -832,6 +832,130 @@ mark:hover::after {
     .quick-check-alert {
         padding: var(--spacing-3);
     }
+    
+    .detailed-progress-container {
+        padding: var(--spacing-3);
+        margin: var(--spacing-3) 0;
+    }
+    
+    .progress-stages {
+        flex-wrap: wrap;
+        gap: var(--spacing-1);
+    }
+    
+    .progress-stages .stage {
+        min-width: 60px;
+        font-size: 10px;
+        padding: 4px 8px;
+    }
+}
+
+/* ===== 詳細進捗表示 ===== */
+.detailed-progress-container {
+    background: #f0f9ff;
+    border: 2px solid #3b82f6;
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-4);
+    margin: var(--spacing-4) 0;
+    animation: fadeIn 0.3s ease;
+}
+
+.progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-3);
+}
+
+.progress-header h4 {
+    margin: 0;
+    color: #1e40af;
+    font-size: var(--font-size-lg);
+}
+
+.progress-percentage {
+    color: #3b82f6;
+    font-weight: 600;
+    font-size: var(--font-size-lg);
+}
+
+.progress-bar-container {
+    width: 100%;
+    height: 12px;
+    background: #e0e7ff;
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: var(--spacing-3);
+    position: relative;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #3b82f6, #60a5fa);
+    transition: width 0.5s ease;
+    position: relative;
+}
+
+.progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+    );
+    animation: shimmer 1.5s infinite;
+}
+
+.progress-message {
+    color: #1e40af;
+    font-size: var(--font-size-sm);
+    margin: 0 0 var(--spacing-3) 0;
+    font-style: italic;
+    text-align: center;
+}
+
+.progress-stages {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: var(--spacing-2);
+}
+
+.progress-stages .stage {
+    flex: 1;
+    text-align: center;
+    padding: var(--spacing-1) var(--spacing-2);
+    font-size: var(--font-size-xs);
+    color: #6b7280;
+    border-radius: var(--border-radius-sm);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.progress-stages .stage.active {
+    background: #3b82f6;
+    color: white;
+    font-weight: 600;
+}
+
+.progress-stages .stage.completed {
+    background: #10b981;
+    color: white;
+}
+
+.progress-stages .stage.completed::after {
+    content: "✓";
+    position: absolute;
+    top: 50%;
+    right: 4px;
+    transform: translateY(-50%);
+    font-size: 10px;
 }
 
 /* ===== ストリーミング進捗表示 ===== */

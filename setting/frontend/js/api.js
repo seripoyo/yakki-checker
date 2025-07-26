@@ -147,9 +147,10 @@ class YakkiApiClient {
      * リトライ機能付きAPIコール
      * @param {Function} apiCall - API呼び出し関数
      * @param {string} operationName - 操作名（ログ用）
+     * @param {Function} progressCallback - 進捗報告用コールバック
      * @returns {Promise} API結果
      */
-    async callWithRetry(apiCall, operationName = 'API呼び出し') {
+    async callWithRetry(apiCall, operationName = 'API呼び出し', progressCallback = null) {
         let lastError;
         
         for (let attempt = 1; attempt <= API_CONFIG.MAX_RETRIES; attempt++) {
@@ -158,10 +159,23 @@ class YakkiApiClient {
                 
                 // 最初の試行前にサーバー起動チェック
                 if (attempt === 1 && this.serverStatus !== 'online') {
+                    if (progressCallback) progressCallback({
+                        stage: 'preparing',
+                        progress: 2,
+                        message: 'サーバーの状態を確認中...'
+                    });
+                    
                     const isOnline = await this.wakeUpServer();
                     if (!isOnline && this.serverStatus === 'sleeping') {
                         // サーバーがスリープ中の場合、起動を待つ
                         console.log('😴 サーバーが起動中です。しばらくお待ちください...');
+                        
+                        if (progressCallback) progressCallback({
+                            stage: 'preparing',
+                            progress: 5,
+                            message: 'サーバーを起動中...'
+                        });
+                        
                         await this.delay(5000); // 5秒待機
                     }
                 }
@@ -179,6 +193,13 @@ class YakkiApiClient {
                 if (attempt < API_CONFIG.MAX_RETRIES) {
                     const delay = API_CONFIG.RETRY_DELAY * attempt; // 指数バックオフ
                     console.log(`⏳ ${delay}ms 待機してリトライします...`);
+                    
+                    if (progressCallback) progressCallback({
+                        stage: 'preparing',
+                        progress: Math.max(1, (attempt / API_CONFIG.MAX_RETRIES) * 10),
+                        message: `接続に失敗しました。${Math.floor(delay / 1000)}秒後にリトライします...`
+                    });
+                    
                     await this.delay(delay);
                 }
             }
@@ -222,12 +243,20 @@ class YakkiApiClient {
      * @param {string} category - 商品カテゴリ
      * @param {string} type - 文章の種類
      * @param {string} specialPoints - 特に訴求したいポイント（オプション）
+     * @param {Function} progressCallback - 進捗報告用コールバック
      * @returns {Promise<Object>} チェック結果
      */
-    async checkText(text, category, type, specialPoints = '') {
+    async checkText(text, category, type, specialPoints = '', progressCallback = null) {
         // リトライ機能付きでAPIコールを実行
         return await this.callWithRetry(async () => {
             console.log('🔍 薬機法チェック API呼び出し開始');
+            
+            // 進捗報告: 準備段階
+            if (progressCallback) progressCallback({
+                stage: 'preparing',
+                progress: 5,
+                message: 'リクエストを準備中...'
+            });
             
             // レート制限チェック
             this.checkRateLimit();
@@ -237,6 +266,13 @@ class YakkiApiClient {
             const sanitizedCategory = this.sanitizeInput(category);
             const sanitizedType = this.sanitizeInput(type);
             const sanitizedSpecialPoints = this.sanitizeInput(specialPoints);
+            
+            // 進捗報告: データ準備完了
+            if (progressCallback) progressCallback({
+                stage: 'validating',
+                progress: 10,
+                message: 'データを検証中...'
+            });
             
             console.log('📋 入力データ:', { 
                 text: sanitizedText.substring(0, 50) + '...', 
@@ -264,14 +300,28 @@ class YakkiApiClient {
             this.validateCheckRequest(requestBody);
             console.log('✅ リクエストバリデーション完了');
 
-            // API呼び出し
+            // 進捗報告: サーバーへ送信中
+            if (progressCallback) progressCallback({
+                stage: 'sending',
+                progress: 20,
+                message: 'サーバーへリクエストを送信中...'
+            });
+
+            // API呼び出し（進捗付き）
             console.log('📡 fetchWithTimeout開始...');
-            const response = await this.fetchWithTimeout(`${this.baseUrl}/api/check`, {
+            const response = await this.fetchWithTimeoutProgress(`${this.baseUrl}/api/check`, {
                 method: 'POST',
                 headers: this.getSecureHeaders(),
                 body: JSON.stringify(requestBody)
-            });
+            }, progressCallback);
             console.log('📡 fetchWithTimeout完了、レスポンス受信:', response.status);
+
+            // 進捗報告: レスポンス処理中
+            if (progressCallback) progressCallback({
+                stage: 'processing',
+                progress: 90,
+                message: 'レスポンスを処理中...'
+            });
 
             // レスポンス処理
             console.log('📄 JSONパース開始...');
@@ -283,10 +333,17 @@ class YakkiApiClient {
             this.validateCheckResponse(data);
             console.log('✅ レスポンスバリデーション完了');
             
+            // 進捗報告: 完了
+            if (progressCallback) progressCallback({
+                stage: 'completed',
+                progress: 100,
+                message: 'チェック完了！'
+            });
+            
             console.log('🎉 薬機法チェック API呼び出し成功');
             return data;
 
-        }, '薬機法チェック');
+        }, '薬機法チェック', progressCallback);
     }
 
     /**
@@ -340,6 +397,73 @@ class YakkiApiClient {
             throw error;
         } finally {
             clearTimeout(timeoutId);
+        }
+    }
+
+    /**
+     * 進捗報告付きタイムアウト付きfetch
+     * @param {string} url - リクエストURL
+     * @param {Object} options - fetchオプション
+     * @param {Function} progressCallback - 進捗報告用コールバック
+     * @returns {Promise<Response>} fetch結果
+     */
+    async fetchWithTimeoutProgress(url, options = {}, progressCallback = null) {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort('Request timeout'), this.timeout);
+
+        // 進捗のシミュレーション（実際のアップロード進捗は難しいため）
+        const progressInterval = setInterval(() => {
+            if (progressCallback) {
+                // 30%〜80%の間で段階的に進捗を更新
+                const currentProgress = Math.min(80, 30 + Math.random() * 20);
+                progressCallback({
+                    stage: 'uploading',
+                    progress: currentProgress,
+                    message: 'サーバーで処理中...'
+                });
+            }
+        }, 1000);
+
+        try {
+            // 進捗報告: 送信開始
+            if (progressCallback) progressCallback({
+                stage: 'uploading',
+                progress: 30,
+                message: 'データを送信中...'
+            });
+
+            const response = await fetch(url, {
+                ...options,
+                signal: controller.signal
+            });
+
+            clearInterval(progressInterval);
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            // 進捗報告: 受信完了
+            if (progressCallback) progressCallback({
+                stage: 'receiving',
+                progress: 85,
+                message: 'レスポンスを受信中...'
+            });
+
+            return response;
+        } catch (error) {
+            clearInterval(progressInterval);
+            
+            // AbortErrorの場合、より分かりやすいエラーメッセージを設定
+            if (error.name === 'AbortError') {
+                const timeoutError = new Error('Request timeout');
+                timeoutError.name = 'AbortError';
+                throw timeoutError;
+            }
+            throw error;
+        } finally {
+            clearTimeout(timeoutId);
+            clearInterval(progressInterval);
         }
     }
 

@@ -290,7 +290,10 @@ async function handleCheckButtonClick() {
             });
         } else {
             console.log('📡 通常API呼び出し中...');
-            data = await window.yakkiApi.checkText(text, category, type, specialPoints);
+            // プログレスバー付きでAPI呼び出し
+            data = await window.yakkiApi.checkText(text, category, type, specialPoints, (progress) => {
+                updateDetailedProgress(progress);
+            });
         }
         
         console.log('📨 API応答受信:', data);
@@ -849,6 +852,9 @@ function showLoading(show) {
         elements.loadingSpinner.style.display = 'block';
         elements.checkButton.disabled = true;
         elements.checkButton.innerHTML = '<span class="btn-icon">⏳</span>チェック中...';
+        
+        // 詳細進捗バーを初期化
+        initializeDetailedProgress();
     } else {
         elements.loadingSpinner.style.display = 'none';
         elements.checkButton.disabled = false;
@@ -856,6 +862,104 @@ function showLoading(show) {
         updateCheckButtonState();
         // サーバー状況メッセージも非表示
         hideServerStatusMessage();
+        
+        // 詳細進捗バーを非表示
+        hideDetailedProgress();
+    }
+}
+
+// ===== 詳細進捗表示の初期化 =====
+function initializeDetailedProgress() {
+    let progressContainer = document.getElementById('detailed-progress-container');
+    
+    if (!progressContainer) {
+        progressContainer = document.createElement('div');
+        progressContainer.id = 'detailed-progress-container';
+        progressContainer.className = 'detailed-progress-container';
+        progressContainer.innerHTML = `
+            <div class="progress-header">
+                <h4 id="progress-title">薬機法チェック処理中...</h4>
+                <span id="progress-percentage">0%</span>
+            </div>
+            <div class="progress-bar-container">
+                <div id="progress-fill" class="progress-fill" style="width: 0%"></div>
+            </div>
+            <div id="progress-message" class="progress-message">準備中...</div>
+            <div id="progress-stage-indicator" class="progress-stages">
+                <div class="stage" id="stage-preparing">準備</div>
+                <div class="stage" id="stage-validating">検証</div>
+                <div class="stage" id="stage-sending">送信</div>
+                <div class="stage" id="stage-processing">処理</div>
+                <div class="stage" id="stage-completed">完了</div>
+            </div>
+        `;
+        
+        // ローディングスピナーの後に挿入
+        elements.loadingSpinner.appendChild(progressContainer);
+    }
+    
+    progressContainer.style.display = 'block';
+}
+
+// ===== 詳細進捗の更新 =====
+function updateDetailedProgress(progressData) {
+    const { stage, progress, message } = progressData;
+    
+    console.log('📊 進捗更新:', progressData);
+    
+    // プログレスバーの更新
+    const progressFill = document.getElementById('progress-fill');
+    const progressPercentage = document.getElementById('progress-percentage');
+    const progressMessage = document.getElementById('progress-message');
+    
+    if (progressFill) {
+        progressFill.style.width = `${progress}%`;
+    }
+    
+    if (progressPercentage) {
+        progressPercentage.textContent = `${Math.round(progress)}%`;
+    }
+    
+    if (progressMessage) {
+        progressMessage.textContent = message;
+    }
+    
+    // ステージインジケーターの更新
+    const stages = ['preparing', 'validating', 'sending', 'uploading', 'receiving', 'processing', 'completed'];
+    stages.forEach(stageName => {
+        const stageElement = document.getElementById(`stage-${stageName}`);
+        if (stageElement) {
+            stageElement.classList.remove('active', 'completed');
+            
+            if (stageName === stage) {
+                stageElement.classList.add('active');
+            } else if (stages.indexOf(stageName) < stages.indexOf(stage)) {
+                stageElement.classList.add('completed');
+            }
+        }
+    });
+    
+    // ステージに応じてタイトルを更新
+    const progressTitle = document.getElementById('progress-title');
+    if (progressTitle) {
+        const stageTitles = {
+            preparing: '準備中...',
+            validating: 'データ検証中...',
+            sending: 'サーバーへ送信中...',
+            uploading: 'アップロード中...',
+            receiving: 'レスポンス受信中...',
+            processing: '分析処理中...',
+            completed: 'チェック完了！'
+        };
+        progressTitle.textContent = stageTitles[stage] || '処理中...';
+    }
+}
+
+// ===== 詳細進捗の非表示 =====
+function hideDetailedProgress() {
+    const progressContainer = document.getElementById('detailed-progress-container');
+    if (progressContainer) {
+        progressContainer.style.display = 'none';
     }
 }
 
