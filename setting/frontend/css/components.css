@@ -168,7 +168,7 @@ mark:hover::after {
     cursor: pointer;
     transition: all var(--transition-fast);
     position: relative;
-    padding-left: var(--spacing-6);
+        padding-left: 2rem;
 }
 
 .suggestions-list li::before {
