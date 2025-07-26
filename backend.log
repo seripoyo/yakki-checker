@@ -461,3 +461,1130 @@ INFO:__main__:リアルタイムファイル監視が開始されました
 INFO:__main__:薬機法リスクチェッカー 初期化完了
 WARNING:werkzeug: * Debugger is active!
 INFO:werkzeug: * Debugger PIN: 618-899-275
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+============================================================
+薬機法リスクチェッカー API サーバー (Claude API連携版)
+============================================================
+Port: 5000
+Debug: True
+Claude API: ✅ 接続済み
+NG表現データ: 18件
+Health Check: http://localhost:5000/
+API Endpoint: http://localhost:5000/api/check
+============================================================
+INFO:werkzeug: * Restarting with watchdog (inotify)
+INFO:__main__:有効なAPIキー数: 1個
+INFO:__main__:薬機法リスクチェッカー 初期化開始
+INFO:__main__:Claude API クライアント初期化完了
+INFO:__main__:Notion API 設定確認完了
+INFO:__main__:CSVファイル読み込み完了: 18件のNG表現データ
+INFO:__main__:dataディレクトリの変更を検知 - キャッシュを更新中...
+INFO:__main__:dataディレクトリ内のファイル: ['ng.md', 'NG表現言い換え.csv', 'ng_expressions.csv', 'law2.md', '美容・健康関連機器.md', 'law1.md']
+INFO:__main__:データキャッシュ更新完了: 63631文字
+INFO:__main__:全データファイル読み込み完了: 63631文字
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/data
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/rule
+INFO:__main__:リアルタイムファイル監視が開始されました
+INFO:__main__:薬機法リスクチェッカー 初期化完了
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 618-899-275
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+============================================================
+薬機法リスクチェッカー API サーバー (Claude API連携版)
+============================================================
+Port: 5000
+Debug: True
+Claude API: ✅ 接続済み
+NG表現データ: 18件
+Health Check: http://localhost:5000/
+API Endpoint: http://localhost:5000/api/check
+============================================================
+INFO:werkzeug: * Restarting with watchdog (inotify)
+INFO:__main__:有効なAPIキー数: 1個
+INFO:__main__:薬機法リスクチェッカー 初期化開始
+INFO:__main__:Claude API クライアント初期化完了
+INFO:__main__:Notion API 設定確認完了
+INFO:__main__:CSVファイル読み込み完了: 18件のNG表現データ
+INFO:__main__:dataディレクトリの変更を検知 - キャッシュを更新中...
+INFO:__main__:dataディレクトリ内のファイル: ['ng.md', 'NG表現言い換え.csv', 'ng_expressions.csv', 'law2.md', '美容・健康関連機器.md', 'law1.md']
+INFO:__main__:データキャッシュ更新完了: 63631文字
+INFO:__main__:全データファイル読み込み完了: 63631文字
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/data
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/rule
+INFO:__main__:リアルタイムファイル監視が開始されました
+INFO:__main__:薬機法リスクチェッカー 初期化完了
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 618-899-275
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+============================================================
+薬機法リスクチェッカー API サーバー (Claude API連携版)
+============================================================
+Port: 5000
+Debug: True
+Claude API: ✅ 接続済み
+NG表現データ: 18件
+Health Check: http://localhost:5000/
+API Endpoint: http://localhost:5000/api/check
+============================================================
+INFO:werkzeug: * Restarting with watchdog (inotify)
+INFO:__main__:有効なAPIキー数: 1個
+INFO:__main__:薬機法リスクチェッカー 初期化開始
+INFO:__main__:Claude API クライアント初期化完了
+INFO:__main__:Notion API 設定確認完了
+INFO:__main__:CSVファイル読み込み完了: 18件のNG表現データ
+INFO:__main__:dataディレクトリの変更を検知 - キャッシュを更新中...
+INFO:__main__:dataディレクトリ内のファイル: ['ng.md', 'NG表現言い換え.csv', 'ng_expressions.csv', 'law2.md', '美容・健康関連機器.md', 'law1.md']
+INFO:__main__:データキャッシュ更新完了: 63631文字
+INFO:__main__:全データファイル読み込み完了: 63631文字
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/data
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/rule
+INFO:__main__:リアルタイムファイル監視が開始されました
+INFO:__main__:薬機法リスクチェッカー 初期化完了
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 618-899-275
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+============================================================
+薬機法リスクチェッカー API サーバー (Claude API連携版)
+============================================================
+Port: 5000
+Debug: True
+Claude API: ✅ 接続済み
+NG表現データ: 18件
+Health Check: http://localhost:5000/
+API Endpoint: http://localhost:5000/api/check
+============================================================
+INFO:werkzeug: * Restarting with watchdog (inotify)
+INFO:__main__:有効なAPIキー数: 1個
+INFO:__main__:薬機法リスクチェッカー 初期化開始
+INFO:__main__:Claude API クライアント初期化完了
+INFO:__main__:Notion API 設定確認完了
+INFO:__main__:CSVファイル読み込み完了: 18件のNG表現データ
+INFO:__main__:dataディレクトリの変更を検知 - キャッシュを更新中...
+INFO:__main__:dataディレクトリ内のファイル: ['ng.md', 'NG表現言い換え.csv', 'ng_expressions.csv', 'law2.md', '美容・健康関連機器.md', 'law1.md']
+INFO:__main__:データキャッシュ更新完了: 63631文字
+INFO:__main__:全データファイル読み込み完了: 63631文字
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/data
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/rule
+INFO:__main__:リアルタイムファイル監視が開始されました
+INFO:__main__:薬機法リスクチェッカー 初期化完了
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 618-899-275
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+============================================================
+薬機法リスクチェッカー API サーバー (Claude API連携版)
+============================================================
+Port: 5000
+Debug: True
+Claude API: ✅ 接続済み
+NG表現データ: 18件
+Health Check: http://localhost:5000/
+API Endpoint: http://localhost:5000/api/check
+============================================================
+INFO:werkzeug: * Restarting with watchdog (inotify)
+INFO:__main__:有効なAPIキー数: 1個
+INFO:__main__:薬機法リスクチェッカー 初期化開始
+INFO:__main__:Claude API クライアント初期化完了
+INFO:__main__:Notion API 設定確認完了
+INFO:__main__:CSVファイル読み込み完了: 18件のNG表現データ
+INFO:__main__:dataディレクトリの変更を検知 - キャッシュを更新中...
+INFO:__main__:dataディレクトリ内のファイル: ['ng.md', 'NG表現言い換え.csv', 'ng_expressions.csv', 'law2.md', '美容・健康関連機器.md', 'law1.md']
+INFO:__main__:データキャッシュ更新完了: 63631文字
+INFO:__main__:全データファイル読み込み完了: 63631文字
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/data
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/rule
+INFO:__main__:リアルタイムファイル監視が開始されました
+INFO:__main__:薬機法リスクチェッカー 初期化完了
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 618-899-275
+INFO:werkzeug:127.0.0.1 - - [26/Jul/2025 09:05:49] "GET / HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [26/Jul/2025 09:06:33] "GET / HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [26/Jul/2025 09:06:58] "OPTIONS /api/check HTTP/1.1" 200 -
+INFO:__main__:認証成功: 127.0.0.1
+INFO:__main__:チェック開始 - Category: サプリメント, Type: お客様の声, Text length: 38
+INFO:__main__:ルールファイル 'お客様の声.md' の変更を検知 - キャッシュを更新中...
+INFO:__main__:ルールファイル読み込み完了: お客様の声.md
+INFO:__main__:ルールキャッシュ更新完了: お客様の声.md
+INFO:__main__:Claude API呼び出し開始
+INFO:httpx:HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+INFO:__main__:Claude API応答受信: 1161 characters
+INFO:__main__:チェック完了 - Claude APIレスポンス受信
+INFO:werkzeug:127.0.0.1 - - [26/Jul/2025 09:07:12] "POST /api/check HTTP/1.1" 200 -
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+============================================================
+薬機法リスクチェッカー API サーバー (Claude API連携版)
+============================================================
+Port: 5000
+Debug: True
+Claude API: ✅ 接続済み
+NG表現データ: 18件
+Health Check: http://localhost:5000/
+API Endpoint: http://localhost:5000/api/check
+============================================================
+INFO:werkzeug: * Restarting with watchdog (inotify)
+INFO:__main__:有効なAPIキー数: 1個
+INFO:__main__:薬機法リスクチェッカー 初期化開始
+INFO:__main__:Claude API クライアント初期化完了
+INFO:__main__:Notion API 設定確認完了
+INFO:__main__:CSVファイル読み込み完了: 18件のNG表現データ
+INFO:__main__:dataディレクトリの変更を検知 - キャッシュを更新中...
+INFO:__main__:dataディレクトリ内のファイル: ['ng.md', 'NG表現言い換え.csv', 'ng_expressions.csv', 'law2.md', '美容・健康関連機器.md', 'law1.md']
+INFO:__main__:データキャッシュ更新完了: 63631文字
+INFO:__main__:全データファイル読み込み完了: 63631文字
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/data
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/rule
+INFO:__main__:リアルタイムファイル監視が開始されました
+INFO:__main__:薬機法リスクチェッカー 初期化完了
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 618-899-275
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+============================================================
+薬機法リスクチェッカー API サーバー (Claude API連携版)
+============================================================
+Port: 5000
+Debug: True
+Claude API: ✅ 接続済み
+NG表現データ: 18件
+Health Check: http://localhost:5000/
+API Endpoint: http://localhost:5000/api/check
+============================================================
+INFO:werkzeug: * Restarting with watchdog (inotify)
+INFO:__main__:有効なAPIキー数: 1個
+INFO:__main__:薬機法リスクチェッカー 初期化開始
+INFO:__main__:Claude API クライアント初期化完了
+INFO:__main__:Notion API 設定確認完了
+INFO:__main__:CSVファイル読み込み完了: 18件のNG表現データ
+INFO:__main__:dataディレクトリの変更を検知 - キャッシュを更新中...
+INFO:__main__:dataディレクトリ内のファイル: ['ng.md', 'NG表現言い換え.csv', 'ng_expressions.csv', 'law2.md', '美容・健康関連機器.md', 'law1.md']
+INFO:__main__:データキャッシュ更新完了: 63631文字
+INFO:__main__:全データファイル読み込み完了: 63631文字
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/data
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/rule
+INFO:__main__:リアルタイムファイル監視が開始されました
+INFO:__main__:薬機法リスクチェッカー 初期化完了
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 618-899-275
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+============================================================
+薬機法リスクチェッカー API サーバー (Claude API連携版)
+============================================================
+Port: 5000
+Debug: True
+Claude API: ✅ 接続済み
+NG表現データ: 18件
+Health Check: http://localhost:5000/
+API Endpoint: http://localhost:5000/api/check
+============================================================
+INFO:werkzeug: * Restarting with watchdog (inotify)
+INFO:__main__:有効なAPIキー数: 1個
+INFO:__main__:薬機法リスクチェッカー 初期化開始
+INFO:__main__:Claude API クライアント初期化完了
+INFO:__main__:Notion API 設定確認完了
+INFO:__main__:CSVファイル読み込み完了: 18件のNG表現データ
+INFO:__main__:dataディレクトリの変更を検知 - キャッシュを更新中...
+INFO:__main__:dataディレクトリ内のファイル: ['ng.md', 'NG表現言い換え.csv', 'ng_expressions.csv', 'law2.md', '美容・健康関連機器.md', 'law1.md']
+INFO:__main__:データキャッシュ更新完了: 63631文字
+INFO:__main__:全データファイル読み込み完了: 63631文字
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/data
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/rule
+INFO:__main__:リアルタイムファイル監視が開始されました
+INFO:__main__:薬機法リスクチェッカー 初期化完了
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 618-899-275
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+============================================================
+薬機法リスクチェッカー API サーバー (Claude API連携版)
+============================================================
+Port: 5000
+Debug: True
+Claude API: ✅ 接続済み
+NG表現データ: 18件
+Health Check: http://localhost:5000/
+API Endpoint: http://localhost:5000/api/check
+============================================================
+INFO:werkzeug: * Restarting with watchdog (inotify)
+INFO:__main__:有効なAPIキー数: 1個
+INFO:__main__:薬機法リスクチェッカー 初期化開始
+INFO:__main__:Claude API クライアント初期化完了
+INFO:__main__:Notion API 設定確認完了
+INFO:__main__:CSVファイル読み込み完了: 18件のNG表現データ
+INFO:__main__:dataディレクトリの変更を検知 - キャッシュを更新中...
+INFO:__main__:dataディレクトリ内のファイル: ['ng.md', 'NG表現言い換え.csv', 'ng_expressions.csv', 'law2.md', '美容・健康関連機器.md', 'law1.md']
+INFO:__main__:データキャッシュ更新完了: 63631文字
+INFO:__main__:全データファイル読み込み完了: 63631文字
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/data
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/rule
+INFO:__main__:リアルタイムファイル監視が開始されました
+INFO:__main__:薬機法リスクチェッカー 初期化完了
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 618-899-275
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+============================================================
+薬機法リスクチェッカー API サーバー (Claude API連携版)
+============================================================
+Port: 5000
+Debug: True
+Claude API: ✅ 接続済み
+NG表現データ: 18件
+Health Check: http://localhost:5000/
+API Endpoint: http://localhost:5000/api/check
+============================================================
+INFO:werkzeug: * Restarting with watchdog (inotify)
+INFO:__main__:有効なAPIキー数: 1個
+INFO:__main__:薬機法リスクチェッカー 初期化開始
+INFO:__main__:Claude API クライアント初期化完了
+INFO:__main__:Notion API 設定確認完了
+INFO:__main__:CSVファイル読み込み完了: 18件のNG表現データ
+INFO:__main__:dataディレクトリの変更を検知 - キャッシュを更新中...
+INFO:__main__:dataディレクトリ内のファイル: ['ng.md', 'NG表現言い換え.csv', 'ng_expressions.csv', 'law2.md', '美容・健康関連機器.md', 'law1.md']
+INFO:__main__:データキャッシュ更新完了: 63631文字
+INFO:__main__:全データファイル読み込み完了: 63631文字
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/data
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/rule
+INFO:__main__:リアルタイムファイル監視が開始されました
+INFO:__main__:薬機法リスクチェッカー 初期化完了
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 618-899-275
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+============================================================
+薬機法リスクチェッカー API サーバー (Claude API連携版)
+============================================================
+Port: 5000
+Debug: True
+Claude API: ✅ 接続済み
+NG表現データ: 18件
+Health Check: http://localhost:5000/
+API Endpoint: http://localhost:5000/api/check
+============================================================
+INFO:werkzeug: * Restarting with watchdog (inotify)
+INFO:__main__:有効なAPIキー数: 1個
+INFO:__main__:薬機法リスクチェッカー 初期化開始
+INFO:__main__:Claude API クライアント初期化完了
+INFO:__main__:Notion API 設定確認完了
+INFO:__main__:CSVファイル読み込み完了: 18件のNG表現データ
+INFO:__main__:dataディレクトリの変更を検知 - キャッシュを更新中...
+INFO:__main__:dataディレクトリ内のファイル: ['ng.md', 'NG表現言い換え.csv', 'ng_expressions.csv', 'law2.md', '美容・健康関連機器.md', 'law1.md']
+INFO:__main__:データキャッシュ更新完了: 63631文字
+INFO:__main__:全データファイル読み込み完了: 63631文字
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/data
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/rule
+INFO:__main__:リアルタイムファイル監視が開始されました
+INFO:__main__:薬機法リスクチェッカー 初期化完了
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 618-899-275
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+============================================================
+薬機法リスクチェッカー API サーバー (Claude API連携版)
+============================================================
+Port: 5000
+Debug: True
+Claude API: ✅ 接続済み
+NG表現データ: 18件
+Health Check: http://localhost:5000/
+API Endpoint: http://localhost:5000/api/check
+============================================================
+INFO:werkzeug: * Restarting with watchdog (inotify)
+INFO:__main__:有効なAPIキー数: 1個
+INFO:__main__:薬機法リスクチェッカー 初期化開始
+INFO:__main__:Claude API クライアント初期化完了
+INFO:__main__:Notion API 設定確認完了
+INFO:__main__:CSVファイル読み込み完了: 18件のNG表現データ
+INFO:__main__:dataディレクトリの変更を検知 - キャッシュを更新中...
+INFO:__main__:dataディレクトリ内のファイル: ['ng.md', 'NG表現言い換え.csv', 'ng_expressions.csv', 'law2.md', '美容・健康関連機器.md', 'law1.md']
+INFO:__main__:データキャッシュ更新完了: 63631文字
+INFO:__main__:全データファイル読み込み完了: 63631文字
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/data
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/rule
+INFO:__main__:リアルタイムファイル監視が開始されました
+INFO:__main__:薬機法リスクチェッカー 初期化完了
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 618-899-275
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+============================================================
+薬機法リスクチェッカー API サーバー (Claude API連携版)
+============================================================
+Port: 5000
+Debug: True
+Claude API: ✅ 接続済み
+NG表現データ: 18件
+Health Check: http://localhost:5000/
+API Endpoint: http://localhost:5000/api/check
+============================================================
+INFO:werkzeug: * Restarting with watchdog (inotify)
+INFO:__main__:有効なAPIキー数: 1個
+INFO:__main__:薬機法リスクチェッカー 初期化開始
+INFO:__main__:Claude API クライアント初期化完了
+INFO:__main__:Notion API 設定確認完了
+INFO:__main__:CSVファイル読み込み完了: 18件のNG表現データ
+INFO:__main__:dataディレクトリの変更を検知 - キャッシュを更新中...
+INFO:__main__:dataディレクトリ内のファイル: ['ng.md', 'NG表現言い換え.csv', 'ng_expressions.csv', 'law2.md', '美容・健康関連機器.md', 'law1.md']
+INFO:__main__:データキャッシュ更新完了: 63631文字
+INFO:__main__:全データファイル読み込み完了: 63631文字
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/data
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/rule
+INFO:__main__:リアルタイムファイル監視が開始されました
+INFO:__main__:薬機法リスクチェッカー 初期化完了
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 618-899-275
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+============================================================
+薬機法リスクチェッカー API サーバー (Claude API連携版)
+============================================================
+Port: 5000
+Debug: True
+Claude API: ✅ 接続済み
+NG表現データ: 18件
+Health Check: http://localhost:5000/
+API Endpoint: http://localhost:5000/api/check
+============================================================
+INFO:werkzeug: * Restarting with watchdog (inotify)
+INFO:__main__:有効なAPIキー数: 1個
+INFO:__main__:薬機法リスクチェッカー 初期化開始
+INFO:__main__:Claude API クライアント初期化完了
+INFO:__main__:Notion API 設定確認完了
+INFO:__main__:CSVファイル読み込み完了: 18件のNG表現データ
+INFO:__main__:dataディレクトリの変更を検知 - キャッシュを更新中...
+INFO:__main__:dataディレクトリ内のファイル: ['ng.md', 'NG表現言い換え.csv', 'ng_expressions.csv', 'law2.md', '美容・健康関連機器.md', 'law1.md']
+INFO:__main__:データキャッシュ更新完了: 63631文字
+INFO:__main__:全データファイル読み込み完了: 63631文字
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/data
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/rule
+INFO:__main__:リアルタイムファイル監視が開始されました
+INFO:__main__:薬機法リスクチェッカー 初期化完了
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 618-899-275
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+============================================================
+薬機法リスクチェッカー API サーバー (Claude API連携版)
+============================================================
+Port: 5000
+Debug: True
+Claude API: ✅ 接続済み
+NG表現データ: 18件
+Health Check: http://localhost:5000/
+API Endpoint: http://localhost:5000/api/check
+============================================================
+INFO:werkzeug: * Restarting with watchdog (inotify)
+INFO:__main__:有効なAPIキー数: 1個
+INFO:__main__:薬機法リスクチェッカー 初期化開始
+INFO:__main__:Claude API クライアント初期化完了
+INFO:__main__:Notion API 設定確認完了
+INFO:__main__:CSVファイル読み込み完了: 18件のNG表現データ
+INFO:__main__:dataディレクトリの変更を検知 - キャッシュを更新中...
+INFO:__main__:dataディレクトリ内のファイル: ['ng.md', 'NG表現言い換え.csv', 'ng_expressions.csv', 'law2.md', '美容・健康関連機器.md', 'law1.md']
+INFO:__main__:データキャッシュ更新完了: 63631文字
+INFO:__main__:全データファイル読み込み完了: 63631文字
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/data
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/rule
+INFO:__main__:リアルタイムファイル監視が開始されました
+INFO:__main__:薬機法リスクチェッカー 初期化完了
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 618-899-275
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+============================================================
+薬機法リスクチェッカー API サーバー (Claude API連携版)
+============================================================
+Port: 5000
+Debug: True
+Claude API: ✅ 接続済み
+NG表現データ: 18件
+Health Check: http://localhost:5000/
+API Endpoint: http://localhost:5000/api/check
+============================================================
+INFO:werkzeug: * Restarting with watchdog (inotify)
+INFO:__main__:有効なAPIキー数: 1個
+INFO:__main__:薬機法リスクチェッカー 初期化開始
+INFO:__main__:Claude API クライアント初期化完了
+INFO:__main__:Notion API 設定確認完了
+INFO:__main__:CSVファイル読み込み完了: 18件のNG表現データ
+INFO:__main__:dataディレクトリの変更を検知 - キャッシュを更新中...
+INFO:__main__:dataディレクトリ内のファイル: ['ng.md', 'NG表現言い換え.csv', 'ng_expressions.csv', 'law2.md', '美容・健康関連機器.md', 'law1.md']
+INFO:__main__:データキャッシュ更新完了: 63631文字
+INFO:__main__:全データファイル読み込み完了: 63631文字
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/data
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/rule
+INFO:__main__:リアルタイムファイル監視が開始されました
+INFO:__main__:薬機法リスクチェッカー 初期化完了
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 618-899-275
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+============================================================
+薬機法リスクチェッカー API サーバー (Claude API連携版)
+============================================================
+Port: 5000
+Debug: True
+Claude API: ✅ 接続済み
+NG表現データ: 18件
+Health Check: http://localhost:5000/
+API Endpoint: http://localhost:5000/api/check
+============================================================
+INFO:werkzeug: * Restarting with watchdog (inotify)
+INFO:__main__:有効なAPIキー数: 1個
+INFO:__main__:薬機法リスクチェッカー 初期化開始
+INFO:__main__:Claude API クライアント初期化完了
+INFO:__main__:Notion API 設定確認完了
+INFO:__main__:CSVファイル読み込み完了: 18件のNG表現データ
+INFO:__main__:dataディレクトリの変更を検知 - キャッシュを更新中...
+INFO:__main__:dataディレクトリ内のファイル: ['ng.md', 'NG表現言い換え.csv', 'ng_expressions.csv', 'law2.md', '美容・健康関連機器.md', 'law1.md']
+INFO:__main__:データキャッシュ更新完了: 63631文字
+INFO:__main__:全データファイル読み込み完了: 63631文字
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/data
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/rule
+INFO:__main__:リアルタイムファイル監視が開始されました
+INFO:__main__:薬機法リスクチェッカー 初期化完了
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 618-899-275
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+============================================================
+薬機法リスクチェッカー API サーバー (Claude API連携版)
+============================================================
+Port: 5000
+Debug: True
+Claude API: ✅ 接続済み
+NG表現データ: 18件
+Health Check: http://localhost:5000/
+API Endpoint: http://localhost:5000/api/check
+============================================================
+INFO:werkzeug: * Restarting with watchdog (inotify)
+INFO:__main__:有効なAPIキー数: 1個
+INFO:__main__:薬機法リスクチェッカー 初期化開始
+INFO:__main__:Claude API クライアント初期化完了
+INFO:__main__:Notion API 設定確認完了
+INFO:__main__:CSVファイル読み込み完了: 18件のNG表現データ
+INFO:__main__:dataディレクトリの変更を検知 - キャッシュを更新中...
+INFO:__main__:dataディレクトリ内のファイル: ['ng.md', 'NG表現言い換え.csv', 'ng_expressions.csv', 'law2.md', '美容・健康関連機器.md', 'law1.md']
+INFO:__main__:データキャッシュ更新完了: 63631文字
+INFO:__main__:全データファイル読み込み完了: 63631文字
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/data
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/rule
+INFO:__main__:リアルタイムファイル監視が開始されました
+INFO:__main__:薬機法リスクチェッカー 初期化完了
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 618-899-275
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+============================================================
+薬機法リスクチェッカー API サーバー (Claude API連携版)
+============================================================
+Port: 5000
+Debug: True
+Claude API: ✅ 接続済み
+NG表現データ: 18件
+Health Check: http://localhost:5000/
+API Endpoint: http://localhost:5000/api/check
+============================================================
+INFO:werkzeug: * Restarting with watchdog (inotify)
+INFO:__main__:有効なAPIキー数: 1個
+INFO:__main__:薬機法リスクチェッカー 初期化開始
+INFO:__main__:Claude API クライアント初期化完了
+INFO:__main__:Notion API 設定確認完了
+INFO:__main__:CSVファイル読み込み完了: 18件のNG表現データ
+INFO:__main__:dataディレクトリの変更を検知 - キャッシュを更新中...
+INFO:__main__:dataディレクトリ内のファイル: ['ng.md', 'NG表現言い換え.csv', 'ng_expressions.csv', 'law2.md', '美容・健康関連機器.md', 'law1.md']
+INFO:__main__:データキャッシュ更新完了: 63631文字
+INFO:__main__:全データファイル読み込み完了: 63631文字
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/data
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/rule
+INFO:__main__:リアルタイムファイル監視が開始されました
+INFO:__main__:薬機法リスクチェッカー 初期化完了
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 618-899-275
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+============================================================
+薬機法リスクチェッカー API サーバー (Claude API連携版)
+============================================================
+Port: 5000
+Debug: True
+Claude API: ✅ 接続済み
+NG表現データ: 18件
+Health Check: http://localhost:5000/
+API Endpoint: http://localhost:5000/api/check
+============================================================
+INFO:werkzeug: * Restarting with watchdog (inotify)
+INFO:__main__:有効なAPIキー数: 1個
+INFO:__main__:薬機法リスクチェッカー 初期化開始
+INFO:__main__:Claude API クライアント初期化完了
+INFO:__main__:Notion API 設定確認完了
+INFO:__main__:CSVファイル読み込み完了: 18件のNG表現データ
+INFO:__main__:dataディレクトリの変更を検知 - キャッシュを更新中...
+INFO:__main__:dataディレクトリ内のファイル: ['ng.md', 'NG表現言い換え.csv', 'ng_expressions.csv', 'law2.md', '美容・健康関連機器.md', 'law1.md']
+INFO:__main__:データキャッシュ更新完了: 63631文字
+INFO:__main__:全データファイル読み込み完了: 63631文字
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/data
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/rule
+INFO:__main__:リアルタイムファイル監視が開始されました
+INFO:__main__:薬機法リスクチェッカー 初期化完了
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 618-899-275
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+============================================================
+薬機法リスクチェッカー API サーバー (Claude API連携版)
+============================================================
+Port: 5000
+Debug: True
+Claude API: ✅ 接続済み
+NG表現データ: 18件
+Health Check: http://localhost:5000/
+API Endpoint: http://localhost:5000/api/check
+============================================================
+INFO:werkzeug: * Restarting with watchdog (inotify)
+INFO:__main__:有効なAPIキー数: 1個
+INFO:__main__:薬機法リスクチェッカー 初期化開始
+INFO:__main__:Claude API クライアント初期化完了
+INFO:__main__:Notion API 設定確認完了
+INFO:__main__:CSVファイル読み込み完了: 18件のNG表現データ
+INFO:__main__:dataディレクトリの変更を検知 - キャッシュを更新中...
+INFO:__main__:dataディレクトリ内のファイル: ['ng.md', 'NG表現言い換え.csv', 'ng_expressions.csv', 'law2.md', '美容・健康関連機器.md', 'law1.md']
+INFO:__main__:データキャッシュ更新完了: 63631文字
+INFO:__main__:全データファイル読み込み完了: 63631文字
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/data
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/rule
+INFO:__main__:リアルタイムファイル監視が開始されました
+INFO:__main__:薬機法リスクチェッカー 初期化完了
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 618-899-275
+INFO:__main__:Notion API呼び出し開始
+INFO:__main__:Notion API Request: https://api.notion.com/v1/databases/216e28003be48017a871eb7ca7817828/query
+INFO:__main__:Notion APIからガイドデータ取得完了: 3件
+INFO:werkzeug:127.0.0.1 - - [26/Jul/2025 09:20:52] "GET /api/guide HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [26/Jul/2025 09:21:43] "GET / HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [26/Jul/2025 09:21:57] "GET / HTTP/1.1" 200 -
+INFO:__main__:Notion API呼び出し開始
+INFO:__main__:Notion API Request: https://api.notion.com/v1/databases/216e28003be48017a871eb7ca7817828/query
+INFO:__main__:Notion APIからガイドデータ取得完了: 3件
+INFO:werkzeug:127.0.0.1 - - [26/Jul/2025 09:22:05] "GET /api/guide HTTP/1.1" 200 -
+INFO:__main__:Notion API呼び出し開始
+INFO:__main__:Notion API Request: https://api.notion.com/v1/databases/216e28003be48017a871eb7ca7817828/query
+INFO:werkzeug:127.0.0.1 - - [26/Jul/2025 09:22:14] "GET / HTTP/1.1" 200 -
+INFO:__main__:Notion APIからガイドデータ取得完了: 3件
+INFO:werkzeug:127.0.0.1 - - [26/Jul/2025 09:22:15] "GET /api/guide HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [26/Jul/2025 09:23:54] "OPTIONS /api/check HTTP/1.1" 200 -
+INFO:__main__:認証成功: 127.0.0.1
+INFO:__main__:チェック開始 - Category: サプリメント, Type: お客様の声, Text length: 36, Special points: あり
+INFO:__main__:ルールファイル 'お客様の声.md' の変更を検知 - キャッシュを更新中...
+INFO:__main__:ルールファイル読み込み完了: お客様の声.md
+INFO:__main__:ルールキャッシュ更新完了: お客様の声.md
+INFO:__main__:Claude API呼び出し開始
+INFO:httpx:HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+INFO:__main__:Claude API応答受信: 1118 characters
+INFO:__main__:チェック完了 - Claude APIレスポンス受信
+INFO:werkzeug:127.0.0.1 - - [26/Jul/2025 09:24:07] "POST /api/check HTTP/1.1" 200 -
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+============================================================
+薬機法リスクチェッカー API サーバー (Claude API連携版)
+============================================================
+Port: 5000
+Debug: True
+Claude API: ✅ 接続済み
+NG表現データ: 18件
+Health Check: http://localhost:5000/
+API Endpoint: http://localhost:5000/api/check
+============================================================
+INFO:werkzeug: * Restarting with watchdog (inotify)
+INFO:__main__:有効なAPIキー数: 1個
+INFO:__main__:薬機法リスクチェッカー 初期化開始
+INFO:__main__:Claude API クライアント初期化完了
+INFO:__main__:Notion API 設定確認完了
+INFO:__main__:CSVファイル読み込み完了: 18件のNG表現データ
+INFO:__main__:dataディレクトリの変更を検知 - キャッシュを更新中...
+INFO:__main__:dataディレクトリ内のファイル: ['ng.md', 'NG表現言い換え.csv', 'ng_expressions.csv', 'law2.md', '美容・健康関連機器.md', 'law1.md']
+INFO:__main__:データキャッシュ更新完了: 63631文字
+INFO:__main__:全データファイル読み込み完了: 63631文字
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/data
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/rule
+INFO:__main__:リアルタイムファイル監視が開始されました
+INFO:__main__:薬機法リスクチェッカー 初期化完了
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 618-899-275
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+============================================================
+薬機法リスクチェッカー API サーバー (Claude API連携版)
+============================================================
+Port: 5000
+Debug: True
+Claude API: ✅ 接続済み
+NG表現データ: 18件
+Health Check: http://localhost:5000/
+API Endpoint: http://localhost:5000/api/check
+============================================================
+INFO:werkzeug: * Restarting with watchdog (inotify)
+INFO:__main__:有効なAPIキー数: 1個
+INFO:__main__:薬機法リスクチェッカー 初期化開始
+INFO:__main__:Claude API クライアント初期化完了
+INFO:__main__:Notion API 設定確認完了
+INFO:__main__:CSVファイル読み込み完了: 18件のNG表現データ
+INFO:__main__:dataディレクトリの変更を検知 - キャッシュを更新中...
+INFO:__main__:dataディレクトリ内のファイル: ['ng.md', 'NG表現言い換え.csv', 'ng_expressions.csv', 'law2.md', '美容・健康関連機器.md', 'law1.md']
+INFO:__main__:データキャッシュ更新完了: 63631文字
+INFO:__main__:全データファイル読み込み完了: 63631文字
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/data
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/rule
+INFO:__main__:リアルタイムファイル監視が開始されました
+INFO:__main__:薬機法リスクチェッカー 初期化完了
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 618-899-275
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+============================================================
+薬機法リスクチェッカー API サーバー (Claude API連携版)
+============================================================
+Port: 5000
+Debug: True
+Claude API: ✅ 接続済み
+NG表現データ: 18件
+Health Check: http://localhost:5000/
+API Endpoint: http://localhost:5000/api/check
+============================================================
+INFO:werkzeug: * Restarting with watchdog (inotify)
+INFO:__main__:有効なAPIキー数: 1個
+INFO:__main__:薬機法リスクチェッカー 初期化開始
+INFO:__main__:Claude API クライアント初期化完了
+INFO:__main__:Notion API 設定確認完了
+INFO:__main__:CSVファイル読み込み完了: 18件のNG表現データ
+INFO:__main__:dataディレクトリの変更を検知 - キャッシュを更新中...
+INFO:__main__:dataディレクトリ内のファイル: ['ng.md', 'NG表現言い換え.csv', 'ng_expressions.csv', 'law2.md', '美容・健康関連機器.md', 'law1.md']
+INFO:__main__:データキャッシュ更新完了: 63631文字
+INFO:__main__:全データファイル読み込み完了: 63631文字
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/data
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/rule
+INFO:__main__:リアルタイムファイル監視が開始されました
+INFO:__main__:薬機法リスクチェッカー 初期化完了
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 618-899-275
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+============================================================
+薬機法リスクチェッカー API サーバー (Claude API連携版)
+============================================================
+Port: 5000
+Debug: True
+Claude API: ✅ 接続済み
+NG表現データ: 18件
+Health Check: http://localhost:5000/
+API Endpoint: http://localhost:5000/api/check
+============================================================
+INFO:werkzeug: * Restarting with watchdog (inotify)
+INFO:__main__:有効なAPIキー数: 1個
+INFO:__main__:薬機法リスクチェッカー 初期化開始
+INFO:__main__:Claude API クライアント初期化完了
+INFO:__main__:Notion API 設定確認完了
+INFO:__main__:CSVファイル読み込み完了: 18件のNG表現データ
+INFO:__main__:dataディレクトリの変更を検知 - キャッシュを更新中...
+INFO:__main__:dataディレクトリ内のファイル: ['ng.md', 'NG表現言い換え.csv', 'ng_expressions.csv', 'law2.md', '美容・健康関連機器.md', 'law1.md']
+INFO:__main__:データキャッシュ更新完了: 63631文字
+INFO:__main__:全データファイル読み込み完了: 63631文字
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/data
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/rule
+INFO:__main__:リアルタイムファイル監視が開始されました
+INFO:__main__:薬機法リスクチェッカー 初期化完了
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 618-899-275
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+============================================================
+薬機法リスクチェッカー API サーバー (Claude API連携版)
+============================================================
+Port: 5000
+Debug: True
+Claude API: ✅ 接続済み
+NG表現データ: 18件
+Health Check: http://localhost:5000/
+API Endpoint: http://localhost:5000/api/check
+============================================================
+INFO:werkzeug: * Restarting with watchdog (inotify)
+INFO:__main__:有効なAPIキー数: 1個
+INFO:__main__:薬機法リスクチェッカー 初期化開始
+INFO:__main__:Claude API クライアント初期化完了
+INFO:__main__:Notion API 設定確認完了
+INFO:__main__:CSVファイル読み込み完了: 18件のNG表現データ
+INFO:__main__:dataディレクトリの変更を検知 - キャッシュを更新中...
+INFO:__main__:dataディレクトリ内のファイル: ['ng.md', 'NG表現言い換え.csv', 'ng_expressions.csv', 'law2.md', '美容・健康関連機器.md', 'law1.md']
+INFO:__main__:データキャッシュ更新完了: 63631文字
+INFO:__main__:全データファイル読み込み完了: 63631文字
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/data
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/rule
+INFO:__main__:リアルタイムファイル監視が開始されました
+INFO:__main__:薬機法リスクチェッカー 初期化完了
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 618-899-275
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+============================================================
+薬機法リスクチェッカー API サーバー (Claude API連携版)
+============================================================
+Port: 5000
+Debug: True
+Claude API: ✅ 接続済み
+NG表現データ: 18件
+Health Check: http://localhost:5000/
+API Endpoint: http://localhost:5000/api/check
+============================================================
+INFO:werkzeug: * Restarting with watchdog (inotify)
+INFO:__main__:有効なAPIキー数: 1個
+INFO:__main__:薬機法リスクチェッカー 初期化開始
+INFO:__main__:Claude API クライアント初期化完了
+INFO:__main__:Notion API 設定確認完了
+INFO:__main__:CSVファイル読み込み完了: 18件のNG表現データ
+INFO:__main__:dataディレクトリの変更を検知 - キャッシュを更新中...
+INFO:__main__:dataディレクトリ内のファイル: ['ng.md', 'NG表現言い換え.csv', 'ng_expressions.csv', 'law2.md', '美容・健康関連機器.md', 'law1.md']
+INFO:__main__:データキャッシュ更新完了: 63631文字
+INFO:__main__:全データファイル読み込み完了: 63631文字
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/data
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/rule
+INFO:__main__:リアルタイムファイル監視が開始されました
+INFO:__main__:薬機法リスクチェッカー 初期化完了
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 618-899-275
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+============================================================
+薬機法リスクチェッカー API サーバー (Claude API連携版)
+============================================================
+Port: 5000
+Debug: True
+Claude API: ✅ 接続済み
+NG表現データ: 18件
+Health Check: http://localhost:5000/
+API Endpoint: http://localhost:5000/api/check
+============================================================
+INFO:werkzeug: * Restarting with watchdog (inotify)
+INFO:__main__:有効なAPIキー数: 1個
+INFO:__main__:薬機法リスクチェッカー 初期化開始
+INFO:__main__:Claude API クライアント初期化完了
+INFO:__main__:Notion API 設定確認完了
+INFO:__main__:CSVファイル読み込み完了: 18件のNG表現データ
+INFO:__main__:dataディレクトリの変更を検知 - キャッシュを更新中...
+INFO:__main__:dataディレクトリ内のファイル: ['ng.md', 'NG表現言い換え.csv', 'ng_expressions.csv', 'law2.md', '美容・健康関連機器.md', 'law1.md']
+INFO:__main__:データキャッシュ更新完了: 63631文字
+INFO:__main__:全データファイル読み込み完了: 63631文字
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/data
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/rule
+INFO:__main__:リアルタイムファイル監視が開始されました
+INFO:__main__:薬機法リスクチェッカー 初期化完了
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 618-899-275
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+============================================================
+薬機法リスクチェッカー API サーバー (Claude API連携版)
+============================================================
+Port: 5000
+Debug: True
+Claude API: ✅ 接続済み
+NG表現データ: 18件
+Health Check: http://localhost:5000/
+API Endpoint: http://localhost:5000/api/check
+============================================================
+INFO:werkzeug: * Restarting with watchdog (inotify)
+INFO:__main__:有効なAPIキー数: 1個
+INFO:__main__:薬機法リスクチェッカー 初期化開始
+INFO:__main__:Claude API クライアント初期化完了
+INFO:__main__:Notion API 設定確認完了
+INFO:__main__:CSVファイル読み込み完了: 18件のNG表現データ
+INFO:__main__:dataディレクトリの変更を検知 - キャッシュを更新中...
+INFO:__main__:dataディレクトリ内のファイル: ['ng.md', 'NG表現言い換え.csv', 'ng_expressions.csv', 'law2.md', '美容・健康関連機器.md', 'law1.md']
+INFO:__main__:データキャッシュ更新完了: 63631文字
+INFO:__main__:全データファイル読み込み完了: 63631文字
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/data
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/rule
+INFO:__main__:リアルタイムファイル監視が開始されました
+INFO:__main__:薬機法リスクチェッカー 初期化完了
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 618-899-275
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+============================================================
+薬機法リスクチェッカー API サーバー (Claude API連携版)
+============================================================
+Port: 5000
+Debug: True
+Claude API: ✅ 接続済み
+NG表現データ: 18件
+Health Check: http://localhost:5000/
+API Endpoint: http://localhost:5000/api/check
+============================================================
+INFO:werkzeug: * Restarting with watchdog (inotify)
+INFO:__main__:有効なAPIキー数: 1個
+INFO:__main__:薬機法リスクチェッカー 初期化開始
+INFO:__main__:Claude API クライアント初期化完了
+INFO:__main__:Notion API 設定確認完了
+INFO:__main__:CSVファイル読み込み完了: 18件のNG表現データ
+INFO:__main__:dataディレクトリの変更を検知 - キャッシュを更新中...
+INFO:__main__:dataディレクトリ内のファイル: ['ng.md', 'NG表現言い換え.csv', 'ng_expressions.csv', 'law2.md', '美容・健康関連機器.md', 'law1.md']
+INFO:__main__:データキャッシュ更新完了: 63631文字
+INFO:__main__:全データファイル読み込み完了: 63631文字
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/data
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/rule
+INFO:__main__:リアルタイムファイル監視が開始されました
+INFO:__main__:薬機法リスクチェッカー 初期化完了
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 618-899-275
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+============================================================
+薬機法リスクチェッカー API サーバー (Claude API連携版)
+============================================================
+Port: 5000
+Debug: True
+Claude API: ✅ 接続済み
+NG表現データ: 18件
+Health Check: http://localhost:5000/
+API Endpoint: http://localhost:5000/api/check
+============================================================
+INFO:werkzeug: * Restarting with watchdog (inotify)
+INFO:__main__:有効なAPIキー数: 1個
+INFO:__main__:薬機法リスクチェッカー 初期化開始
+INFO:__main__:Claude API クライアント初期化完了
+INFO:__main__:Notion API 設定確認完了
+INFO:__main__:CSVファイル読み込み完了: 18件のNG表現データ
+INFO:__main__:dataディレクトリの変更を検知 - キャッシュを更新中...
+INFO:__main__:dataディレクトリ内のファイル: ['ng.md', 'NG表現言い換え.csv', 'ng_expressions.csv', 'law2.md', '美容・健康関連機器.md', 'law1.md']
+INFO:__main__:データキャッシュ更新完了: 63631文字
+INFO:__main__:全データファイル読み込み完了: 63631文字
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/data
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/rule
+INFO:__main__:リアルタイムファイル監視が開始されました
+INFO:__main__:薬機法リスクチェッカー 初期化完了
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 618-899-275
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+============================================================
+薬機法リスクチェッカー API サーバー (Claude API連携版)
+============================================================
+Port: 5000
+Debug: True
+Claude API: ✅ 接続済み
+NG表現データ: 18件
+Health Check: http://localhost:5000/
+API Endpoint: http://localhost:5000/api/check
+============================================================
+INFO:werkzeug: * Restarting with watchdog (inotify)
+INFO:__main__:有効なAPIキー数: 1個
+INFO:__main__:薬機法リスクチェッカー 初期化開始
+INFO:__main__:Claude API クライアント初期化完了
+INFO:__main__:Notion API 設定確認完了
+INFO:__main__:CSVファイル読み込み完了: 18件のNG表現データ
+INFO:__main__:dataディレクトリの変更を検知 - キャッシュを更新中...
+INFO:__main__:dataディレクトリ内のファイル: ['ng.md', 'NG表現言い換え.csv', 'ng_expressions.csv', 'law2.md', '美容・健康関連機器.md', 'law1.md']
+INFO:__main__:データキャッシュ更新完了: 63631文字
+INFO:__main__:全データファイル読み込み完了: 63631文字
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/data
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/rule
+INFO:__main__:リアルタイムファイル監視が開始されました
+INFO:__main__:薬機法リスクチェッカー 初期化完了
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 618-899-275
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+============================================================
+薬機法リスクチェッカー API サーバー (Claude API連携版)
+============================================================
+Port: 5000
+Debug: True
+Claude API: ✅ 接続済み
+NG表現データ: 18件
+Health Check: http://localhost:5000/
+API Endpoint: http://localhost:5000/api/check
+============================================================
+INFO:werkzeug: * Restarting with watchdog (inotify)
+INFO:__main__:有効なAPIキー数: 1個
+INFO:__main__:薬機法リスクチェッカー 初期化開始
+INFO:__main__:Claude API クライアント初期化完了
+INFO:__main__:Notion API 設定確認完了
+INFO:__main__:CSVファイル読み込み完了: 18件のNG表現データ
+INFO:__main__:dataディレクトリの変更を検知 - キャッシュを更新中...
+INFO:__main__:dataディレクトリ内のファイル: ['ng.md', 'NG表現言い換え.csv', 'ng_expressions.csv', 'law2.md', '美容・健康関連機器.md', 'law1.md']
+INFO:__main__:データキャッシュ更新完了: 63631文字
+INFO:__main__:全データファイル読み込み完了: 63631文字
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/data
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/rule
+INFO:__main__:リアルタイムファイル監視が開始されました
+INFO:__main__:薬機法リスクチェッカー 初期化完了
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 618-899-275
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+============================================================
+薬機法リスクチェッカー API サーバー (Claude API連携版)
+============================================================
+Port: 5000
+Debug: True
+Claude API: ✅ 接続済み
+NG表現データ: 18件
+Health Check: http://localhost:5000/
+API Endpoint: http://localhost:5000/api/check
+============================================================
+INFO:werkzeug: * Restarting with watchdog (inotify)
+INFO:__main__:有効なAPIキー数: 1個
+INFO:__main__:薬機法リスクチェッカー 初期化開始
+INFO:__main__:Claude API クライアント初期化完了
+INFO:__main__:Notion API 設定確認完了
+INFO:__main__:CSVファイル読み込み完了: 18件のNG表現データ
+INFO:__main__:dataディレクトリの変更を検知 - キャッシュを更新中...
+INFO:__main__:dataディレクトリ内のファイル: ['ng.md', 'NG表現言い換え.csv', 'ng_expressions.csv', 'law2.md', '美容・健康関連機器.md', 'law1.md']
+INFO:__main__:データキャッシュ更新完了: 63631文字
+INFO:__main__:全データファイル読み込み完了: 63631文字
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/data
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/rule
+INFO:__main__:リアルタイムファイル監視が開始されました
+INFO:__main__:薬機法リスクチェッカー 初期化完了
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 618-899-275
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+============================================================
+薬機法リスクチェッカー API サーバー (Claude API連携版)
+============================================================
+Port: 5000
+Debug: True
+Claude API: ✅ 接続済み
+NG表現データ: 18件
+Health Check: http://localhost:5000/
+API Endpoint: http://localhost:5000/api/check
+============================================================
+INFO:werkzeug: * Restarting with watchdog (inotify)
+INFO:__main__:有効なAPIキー数: 1個
+INFO:__main__:薬機法リスクチェッカー 初期化開始
+INFO:__main__:Claude API クライアント初期化完了
+INFO:__main__:Notion API 設定確認完了
+INFO:__main__:CSVファイル読み込み完了: 18件のNG表現データ
+INFO:__main__:dataディレクトリの変更を検知 - キャッシュを更新中...
+INFO:__main__:dataディレクトリ内のファイル: ['ng.md', 'NG表現言い換え.csv', 'ng_expressions.csv', 'law2.md', '美容・健康関連機器.md', 'law1.md']
+INFO:__main__:データキャッシュ更新完了: 63631文字
+INFO:__main__:全データファイル読み込み完了: 63631文字
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/data
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/rule
+INFO:__main__:リアルタイムファイル監視が開始されました
+INFO:__main__:薬機法リスクチェッカー 初期化完了
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 618-899-275
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+============================================================
+薬機法リスクチェッカー API サーバー (Claude API連携版)
+============================================================
+Port: 5000
+Debug: True
+Claude API: ✅ 接続済み
+NG表現データ: 18件
+Health Check: http://localhost:5000/
+API Endpoint: http://localhost:5000/api/check
+============================================================
+INFO:werkzeug: * Restarting with watchdog (inotify)
+INFO:__main__:有効なAPIキー数: 1個
+INFO:__main__:薬機法リスクチェッカー 初期化開始
+INFO:__main__:Claude API クライアント初期化完了
+INFO:__main__:Notion API 設定確認完了
+INFO:__main__:CSVファイル読み込み完了: 18件のNG表現データ
+INFO:__main__:dataディレクトリの変更を検知 - キャッシュを更新中...
+INFO:__main__:dataディレクトリ内のファイル: ['ng.md', 'NG表現言い換え.csv', 'ng_expressions.csv', 'law2.md', '美容・健康関連機器.md', 'law1.md']
+INFO:__main__:データキャッシュ更新完了: 63631文字
+INFO:__main__:全データファイル読み込み完了: 63631文字
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/data
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/rule
+INFO:__main__:リアルタイムファイル監視が開始されました
+INFO:__main__:薬機法リスクチェッカー 初期化完了
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 618-899-275
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/setting/backend/app.py', reloading
+============================================================
+薬機法リスクチェッカー API サーバー (Claude API連携版)
+============================================================
+Port: 5000
+Debug: True
+Claude API: ✅ 接続済み
+NG表現データ: 18件
+Health Check: http://localhost:5000/
+API Endpoint: http://localhost:5000/api/check
+============================================================
+INFO:werkzeug: * Restarting with watchdog (inotify)
+INFO:__main__:有効なAPIキー数: 1個
+INFO:__main__:薬機法リスクチェッカー 初期化開始
+INFO:__main__:Claude API クライアント初期化完了
+INFO:__main__:Notion API 設定確認完了
+INFO:__main__:CSVファイル読み込み完了: 18件のNG表現データ
+INFO:__main__:dataディレクトリの変更を検知 - キャッシュを更新中...
+INFO:__main__:dataディレクトリ内のファイル: ['ng.md', 'NG表現言い換え.csv', 'ng_expressions.csv', 'law2.md', '美容・健康関連機器.md', 'law1.md']
+INFO:__main__:データキャッシュ更新完了: 63631文字
+INFO:__main__:全データファイル読み込み完了: 63631文字
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/data
+INFO:__main__:ファイル監視開始: /home/seri/yakki-check/yakki-checker/setting/backend/rule
+INFO:__main__:リアルタイムファイル監視が開始されました
+INFO:__main__:薬機法リスクチェッカー 初期化完了
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 618-899-275

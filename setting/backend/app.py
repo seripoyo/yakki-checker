@@ -1142,10 +1142,15 @@ def call_claude_api(text, text_type, category, special_points=''):
         logger.error(f"エラータイプ: {type(e).__name__}")
         logger.error(f"エラー詳細: {e.__dict__ if hasattr(e, '__dict__') else 'No details'}")
         
+        # 認証エラーの場合は3.5-sonnetで再試行
+        if "authentication_error" in str(e).lower() or "invalid x-api-key" in str(e).lower() or "401" in str(e):
+            logger.warning("認証エラーが発生しました。Claude 3.5 Sonnetで再試行します。")
+            return call_claude_api_fallback(text, text_type, category, special_points)
+        
         # モデルが見つからない場合は3.5-sonnetにフォールバック
         if "model_not_found" in str(e).lower() or "does not exist" in str(e).lower():
             logger.warning("指定されたモデルが見つかりません。Claude 3.5 Sonnetにフォールバックします。")
-            return call_claude_api_fallback(text, text_type, category)
+            return call_claude_api_fallback(text, text_type, category, special_points)
         
         return create_fallback_response(text, f"Claude API呼び出しエラー: {str(e)}")
     
@@ -1156,9 +1161,9 @@ def call_claude_api(text, text_type, category, special_points=''):
         logger.error(f"スタックトレース: {traceback.format_exc()}")
         return create_fallback_response(text, f"予期しないエラー: {str(e)}")
 
-def call_claude_api_fallback(text, text_type, category):
+def call_claude_api_fallback(text, text_type, category, special_points=None):
     """
-    モデルエラー時のフォールバック処理
+    モデルエラーや認証エラー時のフォールバック処理
     Claude 3.5 Sonnetを使用して再度API呼び出しを行う
     """
     try:
@@ -1166,7 +1171,7 @@ def call_claude_api_fallback(text, text_type, category):
         
         # プロンプトの構築
         system_prompt = create_system_prompt()
-        user_prompt = create_user_prompt(text, text_type, category, csv_reference_text, markdown_reference_text)
+        user_prompt = create_user_prompt(text, text_type, category, csv_reference_text, markdown_reference_text, special_points)
         
         # Claude 3.5 Sonnetで再試行
         response = claude_client.messages.create(
@@ -1299,9 +1304,18 @@ def create_fallback_response(text, error_message):
             }
         ],
         "rewritten_texts": {
-            "conservative": text,
-            "balanced": text,
-            "appealing": text
+            "conservative": {
+                "text": text,
+                "explanation": "APIエラーのため、修正案を生成できませんでした。元のテキストを表示しています。"
+            },
+            "balanced": {
+                "text": text, 
+                "explanation": "APIエラーのため、修正案を生成できませんでした。元のテキストを表示しています。"
+            },
+            "appealing": {
+                "text": text,
+                "explanation": "APIエラーのため、修正案を生成できませんでした。元のテキストを表示しています。"
+            }
         }
     }
 
