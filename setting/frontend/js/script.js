@@ -244,7 +244,11 @@ async function handleCheckButtonClick() {
         
         // 本番環境でのサーバー起動状況表示
         if (window.location.hostname !== 'localhost') {
-            showServerStatusMessage('サーバーの起動状況を確認中...');
+            const isGitHubPages = window.location.hostname.includes('github.io');
+            const message = isGitHubPages 
+                ? 'GitHub Pages → Renderサーバー接続中...' 
+                : 'サーバーの起動状況を確認中...';
+            showServerStatusMessage(message);
         }
         
         // ストリーミングまたは通常のAPI通信
@@ -902,27 +906,41 @@ function initializeDetailedProgress() {
 }
 
 // ===== 詳細進捗の更新 =====
+let lastProgressLog = 0;
+let lastProgressValue = 0;
+
 function updateDetailedProgress(progressData) {
     const { stage, progress, message } = progressData;
     
-    console.log('📊 進捗更新:', progressData);
+    // 進捗ログの制限（5%以上変化した場合、または5秒経過した場合のみログ出力）
+    const now = Date.now();
+    const progressDiff = Math.abs(progress - lastProgressValue);
+    const timeDiff = now - lastProgressLog;
     
-    // プログレスバーの更新
+    if (progressDiff >= API_CONFIG.PROGRESS_LOG_THRESHOLD || timeDiff >= API_CONFIG.PROGRESS_UPDATE_INTERVAL || stage !== 'uploading') {
+        console.log('📊 進捗更新:', progressData);
+        lastProgressLog = now;
+        lastProgressValue = progress;
+    }
+    
+    // プログレスバーの更新（RequestAnimationFrameで最適化）
     const progressFill = document.getElementById('progress-fill');
     const progressPercentage = document.getElementById('progress-percentage');
     const progressMessage = document.getElementById('progress-message');
     
-    if (progressFill) {
-        progressFill.style.width = `${progress}%`;
-    }
-    
-    if (progressPercentage) {
-        progressPercentage.textContent = `${Math.round(progress)}%`;
-    }
-    
-    if (progressMessage) {
-        progressMessage.textContent = message;
-    }
+    requestAnimationFrame(() => {
+        if (progressFill) {
+            progressFill.style.width = `${progress}%`;
+        }
+        
+        if (progressPercentage) {
+            progressPercentage.textContent = `${Math.round(progress)}%`;
+        }
+        
+        if (progressMessage) {
+            progressMessage.textContent = message;
+        }
+    });
     
     // ステージインジケーターの更新
     const stages = ['preparing', 'validating', 'sending', 'uploading', 'receiving', 'processing', 'completed'];

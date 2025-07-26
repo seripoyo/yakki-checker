@@ -411,18 +411,39 @@ class YakkiApiClient {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort('Request timeout'), this.timeout);
 
-        // 進捗のシミュレーション（実際のアップロード進捗は難しいため）
+        // 進捗制御用の変数
+        let currentProgress = 30;
+        let progressStep = 0;
+        const maxProgress = 80;
+        // GitHub Pages環境かどうかを判定
+        const isGitHubPages = window.location.hostname.includes('github.io');
+        
+        const progressSteps = isGitHubPages ? [
+            { progress: 35, message: 'GitHub Pages → Renderサーバー接続中...' },
+            { progress: 45, message: 'Renderサーバーが起動中です...' },
+            { progress: 60, message: 'Claude APIで薬機法分析を実行中...' },
+            { progress: 75, message: '修正案を3パターン生成中...' },
+            { progress: 80, message: '分析結果をまとめています...' }
+        ] : [
+            { progress: 35, message: 'サーバーに接続中...' },
+            { progress: 45, message: 'データをアップロード中...' },
+            { progress: 60, message: 'Claude APIで分析中...' },
+            { progress: 75, message: '結果を生成中...' },
+            { progress: 80, message: 'レスポンスを準備中...' }
+        ];
+
+        // 進捗のスマートなシミュレーション（頻度制限付き）
         const progressInterval = setInterval(() => {
-            if (progressCallback) {
-                // 30%〜80%の間で段階的に進捗を更新
-                const currentProgress = Math.min(80, 30 + Math.random() * 20);
+            if (progressCallback && progressStep < progressSteps.length) {
+                const step = progressSteps[progressStep];
                 progressCallback({
                     stage: 'uploading',
-                    progress: currentProgress,
-                    message: 'サーバーで処理中...'
+                    progress: step.progress,
+                    message: step.message
                 });
+                progressStep++;
             }
-        }, 1000);
+        }, API_CONFIG.PROGRESS_UPDATE_INTERVAL); // 設定値を使用
 
         try {
             // 進捗報告: 送信開始
