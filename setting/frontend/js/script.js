@@ -161,9 +161,13 @@ function handleTextInput() {
     updateCheckButtonState();
     
     // 遅延実行で結果をクリア（入力中は結果を隠す）
+    // ただし、現在チェック処理中の場合は隠さない
     clearTimeout(window.inputTimeout);
     window.inputTimeout = setTimeout(() => {
-        if (elements.resultArea.style.display !== 'none') {
+        if (elements.resultArea.style.display !== 'none' && 
+            !elements.checkButton.disabled && // チェック中でない場合のみ
+            !elements.loadingSpinner.style.display || elements.loadingSpinner.style.display === 'none') {
+            console.log('📝 入力変更により結果エリアを非表示');
             elements.resultArea.style.display = 'none';
         }
     }, 1000);
@@ -237,6 +241,9 @@ async function handleCheckButtonClick() {
             elements.resultArea.innerHTML = quickResultsHtml;
             elements.resultArea.style.display = 'block';
         }
+        
+        // 入力変更による自動非表示タイマーをクリア
+        clearTimeout(window.inputTimeout);
         
         // UI状態の更新
         showLoading(true);
@@ -429,8 +436,15 @@ function displayCheckResult(data, originalText) {
         
         // 修正版テキストの表示（新旧形式両対応）
         console.log('📝 修正版テキスト表示開始');
+        console.log('🔍 APIレスポンス詳細:', JSON.stringify(data, null, 2));
+        
         if (data.rewritten_texts) {
             console.log('🆕 新形式（3つのバリエーション）:', data.rewritten_texts);
+            console.log('🔍 各バリエーション詳細:');
+            console.log('  - conservative:', data.rewritten_texts.conservative);
+            console.log('  - balanced:', data.rewritten_texts.balanced);
+            console.log('  - appealing:', data.rewritten_texts.appealing);
+            
             displayRewrittenTexts(data.rewritten_texts);
             console.log('✅ 新形式表示完了');
         } else if (data.rewritten_text) {
@@ -439,15 +453,32 @@ function displayCheckResult(data, originalText) {
             console.log('✅ 旧形式表示完了');
         } else {
             console.warn('⚠️ 修正版テキストがレスポンスに含まれていません');
+            console.log('🔍 利用可能なキー:', Object.keys(data));
         }
         
         // 結果エリアを表示
         console.log('👁️ 結果エリア表示設定開始');
         if (elements.resultArea) {
+            // 強制的に表示状態を設定
             elements.resultArea.style.display = 'block';
+            elements.resultArea.style.visibility = 'visible';
+            elements.resultArea.style.opacity = '1';
+            
             console.log('✅ resultArea display設定完了:', elements.resultArea.style.display);
-            elements.resultArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            console.log('✅ スクロール完了');
+            console.log('🔍 resultArea可視性確認:', {
+                display: elements.resultArea.style.display,
+                visibility: elements.resultArea.style.visibility,
+                opacity: elements.resultArea.style.opacity,
+                offsetHeight: elements.resultArea.offsetHeight,
+                scrollHeight: elements.resultArea.scrollHeight,
+                clientHeight: elements.resultArea.clientHeight
+            });
+            
+            // スクロール前に少し待つ
+            setTimeout(() => {
+                elements.resultArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                console.log('✅ スクロール完了');
+            }, 100);
         } else {
             console.error('❌ elements.resultAreaが見つかりません');
         }
@@ -456,8 +487,28 @@ function displayCheckResult(data, originalText) {
         showConsultationCTA();
         
         console.log('🎉 結果表示完了');
+        
+        // 最終確認：結果エリアの状態をチェック
+        setTimeout(() => {
+            console.log('🔍 最終確認 - 結果エリア状態:', {
+                display: elements.resultArea.style.display,
+                visibility: elements.resultArea.style.visibility,
+                offsetHeight: elements.resultArea.offsetHeight,
+                innerHTML: elements.resultArea.innerHTML ? '有' : '無',
+                children: elements.resultArea.children.length
+            });
+            
+            // 各要素の内容も確認
+            console.log('🔍 各要素の内容確認:');
+            console.log('  - 総合リスク:', elements.riskLevelText?.textContent);
+            console.log('  - ハイライトテキスト:', elements.highlightedText?.innerHTML ? '有' : '無');
+            console.log('  - 指摘事項:', elements.issuesList?.innerHTML ? '有' : '無');
+            console.log('  - 修正版テキスト:', document.getElementById('rewritten-texts-container')?.innerHTML ? '有' : '無');
+        }, 500);
+        
     } catch (error) {
         console.error('❌ 結果表示エラー:', error);
+        console.error('❌ エラースタック:', error.stack);
         throw error;
     }
 }
