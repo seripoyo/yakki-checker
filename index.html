@@ -8,6 +8,8 @@
     <meta name="description"
         content="美容系広告で必須な薬機法の適合性を手軽に自分でチェックできるツールです。代替案も提示しますが、本アプリのチェック結果は適法性を保証するものではないことをご了承ください。">
     <meta name="robots" content="noindex, nofollow">
+    <!-- XSS対策: Content Security Policy -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' http://localhost:* https://*.onrender.com;">
     <link rel="stylesheet" href="setting/frontend/css/style.css">
     <link rel="stylesheet" href="setting/frontend/css/components.css">
 </head>
