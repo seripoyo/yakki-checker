@@ -2,7 +2,8 @@
 
 /* ===== ハイライト表示 ===== */
 mark {
-    background-color: #fff3cd; /* 薄い黄色のハイライト */
+    background-color: #fff3cd;
+    /* 薄い黄色のハイライト */
     color: #856404;
     padding: 0 3px;
     border-radius: 2px;
@@ -20,19 +21,22 @@ mark:hover {
 }
 
 mark.high-risk {
-    background-color: #f8d7da; /* 薄い赤色のハイライト */
+    background-color: #f8d7da;
+    /* 薄い赤色のハイライト */
     color: #721c24;
     text-decoration-color: #ef4444;
 }
 
 mark.medium-risk {
-    background-color: #fff3cd; /* 薄いオレンジ色のハイライト */
+    background-color: #fff3cd;
+    /* 薄いオレンジ色のハイライト */
     color: #856404;
     text-decoration-color: #f59e0b;
 }
 
 mark.low-risk {
-    background-color: #d4edda; /* 薄い緑色のハイライト */
+    background-color: #d4edda;
+    /* 薄い緑色のハイライト */
     color: #155724;
     text-decoration-color: #10b981;
 }
@@ -156,6 +160,7 @@ mark:hover::after {
 .suggestions-list {
     list-style: none;
     space-y: var(--spacing-1);
+    padding-left: 0;
 }
 
 .suggestions-list li {
@@ -168,7 +173,7 @@ mark:hover::after {
     cursor: pointer;
     transition: all var(--transition-fast);
     position: relative;
-        padding-left: 2rem;
+    padding-left: 2rem;
 }
 
 .suggestions-list li::before {
@@ -195,6 +200,7 @@ mark:hover::after {
         opacity: 0;
         transform: translateY(20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -211,6 +217,7 @@ mark:hover::after {
         max-height: 0;
         transform: translateY(-10px);
     }
+
     to {
         opacity: 1;
         max-height: 200px;
@@ -290,8 +297,15 @@ mark:hover::after {
 }
 
 @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.7;
+    }
 }
 
 /* ===== モーダル・オーバーレイ ===== */
@@ -444,18 +458,46 @@ mark:hover::after {
 }
 
 /* ===== レスポンシブヘルパー ===== */
-.d-none { display: none !important; }
-.d-block { display: block !important; }
-.d-flex { display: flex !important; }
-.d-grid { display: grid !important; }
+.d-none {
+    display: none !important;
+}
 
-.text-center { text-align: center !important; }
-.text-left { text-align: left !important; }
-.text-right { text-align: right !important; }
+.d-block {
+    display: block !important;
+}
 
-.mt-auto { margin-top: auto !important; }
-.mb-auto { margin-bottom: auto !important; }
-.mx-auto { margin-left: auto !important; margin-right: auto !important; }
+.d-flex {
+    display: flex !important;
+}
+
+.d-grid {
+    display: grid !important;
+}
+
+.text-center {
+    text-align: center !important;
+}
+
+.text-left {
+    text-align: left !important;
+}
+
+.text-right {
+    text-align: right !important;
+}
+
+.mt-auto {
+    margin-top: auto !important;
+}
+
+.mb-auto {
+    margin-bottom: auto !important;
+}
+
+.mx-auto {
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
 
 /* 3つのリライト案用スタイル */
 .rewritten-texts-container {
@@ -705,21 +747,27 @@ mark:hover::after {
     box-shadow: 0 6px 12px rgba(59, 130, 246, 0.35);
 }
 
+.footer-info p a{
+color:white;
 
+}
 @media (max-width: 768px) {
+    .footer .container ,#guide-content{
+        padding: 0 16px !important;
+    }
     .consultation-cta {
         padding: var(--spacing-6);
         margin-top: var(--spacing-6);
     }
-    
+
     .cta-headline {
         font-size: var(--font-size-xl);
     }
-    
+
     .cta-subheadline {
         font-size: var(--font-size-base);
     }
-    
+
     .btn-cta-primary {
         min-width: 100%;
         font-size: var(--font-size-sm);
@@ -801,48 +849,56 @@ mark:hover::after {
 }
 
 @media (max-width: 768px) {
-    .d-md-none { display: none !important; }
-    .d-md-block { display: block !important; }
-    .d-md-flex { display: flex !important; }
-    
+    .d-md-none {
+        display: none !important;
+    }
+
+    .d-md-block {
+        display: block !important;
+    }
+
+    .d-md-flex {
+        display: flex !important;
+    }
+
     .suggestions-list li {
         font-size: var(--font-size-xs);
         padding: var(--spacing-1) var(--spacing-2);
         padding-left: var(--spacing-5);
     }
-    
+
     .issue-card {
         padding: var(--spacing-3);
     }
-    
+
     .modal {
         padding: var(--spacing-6);
         width: 95%;
     }
-    
+
     .rewritten-variant {
         padding: var(--spacing-3);
     }
-    
+
     .variant-content .rewritten-text {
         padding: var(--spacing-3);
         font-size: var(--font-size-sm);
     }
-    
+
     .quick-check-alert {
         padding: var(--spacing-3);
     }
-    
+
     .detailed-progress-container {
         padding: var(--spacing-3);
         margin: var(--spacing-3) 0;
     }
-    
+
     .progress-stages {
         flex-wrap: wrap;
         gap: var(--spacing-1);
     }
-    
+
     .progress-stages .stage {
         min-width: 60px;
         font-size: 10px;
@@ -903,12 +959,10 @@ mark:hover::after {
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(255, 255, 255, 0.3),
-        transparent
-    );
+    background: linear-gradient(90deg,
+            transparent,
+            rgba(255, 255, 255, 0.3),
+            transparent);
     animation: shimmer 1.5s infinite;
 }
 
@@ -1010,18 +1064,21 @@ mark:hover::after {
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(255, 255, 255, 0.3),
-        transparent
-    );
+    background: linear-gradient(90deg,
+            transparent,
+            rgba(255, 255, 255, 0.3),
+            transparent);
     animation: shimmer 1.5s infinite;
 }
 
 @keyframes shimmer {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(100%);
+    }
 }
 
 .progress-message {
@@ -1100,9 +1157,13 @@ mark:hover::after {
 }
 
 @keyframes bounce {
-    0%, 80%, 100% {
+
+    0%,
+    80%,
+    100% {
         transform: scale(0);
     }
+
     40% {
         transform: scale(1);
     }
