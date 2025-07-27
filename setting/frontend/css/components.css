@@ -771,6 +771,39 @@ mark:hover::after {
     }
 }
 
+/* ===== 問題なしの場合の表示スタイル ===== */
+.no-issues-container {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border: 2px solid #7dd3fc;
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-6);
+    text-align: center;
+    margin: var(--spacing-4) 0;
+}
+
+.no-issues-title {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: #0c4a6e;
+    margin-bottom: var(--spacing-2);
+}
+
+.no-issues-description {
+    font-size: var(--font-size-base);
+    color: #0369a1;
+    margin-bottom: var(--spacing-3);
+}
+
+.rewrite-suggestion {
+    font-size: var(--font-size-sm);
+    color: #075985;
+    font-style: italic;
+    margin: 0;
+    padding: var(--spacing-2);
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: var(--border-radius-sm);
+}
+
 /* ===== 簡易チェック結果 ===== */
 .quick-check-alert {
     background: #fff5f5;
