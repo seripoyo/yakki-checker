@@ -102,6 +102,10 @@ function setupEventListeners() {
     elements.textInput.addEventListener('input', handleTextInput);
     elements.textInput.addEventListener('paste', handleTextInput);
     
+    // 特に訴求したいポイント入力の監視（XSS対策）
+    elements.specialPoints.addEventListener('input', handleSpecialPointsInput);
+    elements.specialPoints.addEventListener('paste', handleSpecialPointsInput);
+    
     // 商品カテゴリ選択の監視
     elements.productCategory.addEventListener('change', updateCheckButtonState);
     
@@ -147,6 +151,32 @@ function setupInitialState() {
 
 // ===== テキスト入力処理 =====
 function handleTextInput() {
+    // XSS対策: スクリプトタグの検出と除去
+    const inputValue = elements.textInput.value;
+    const dangerousPatterns = [
+        /<script[^>]*>[\s\S]*?<\/script>/gi,
+        /<iframe[^>]*>[\s\S]*?<\/iframe>/gi,
+        /<object[^>]*>[\s\S]*?<\/object>/gi,
+        /<embed[^>]*>/gi,
+        /javascript:/gi,
+        /on\w+\s*=/gi
+    ];
+    
+    let cleanValue = inputValue;
+    let isModified = false;
+    
+    dangerousPatterns.forEach(pattern => {
+        if (pattern.test(cleanValue)) {
+            cleanValue = cleanValue.replace(pattern, '');
+            isModified = true;
+        }
+    });
+    
+    if (isModified) {
+        elements.textInput.value = cleanValue;
+        showMessage('セキュリティ上の理由により、一部の文字が削除されました。', 'warning');
+    }
+    
     // 文字数制限のチェック
     const maxLength = 500;
     if (elements.textInput.value.length > maxLength) {
@@ -171,6 +201,35 @@ function handleTextInput() {
             elements.resultArea.style.display = 'none';
         }
     }, 1000);
+}
+
+// ===== 特に訴求したいポイント入力処理 =====
+function handleSpecialPointsInput() {
+    // XSS対策: スクリプトタグの検出と除去
+    const inputValue = elements.specialPoints.value;
+    const dangerousPatterns = [
+        /<script[^>]*>[\s\S]*?<\/script>/gi,
+        /<iframe[^>]*>[\s\S]*?<\/iframe>/gi,
+        /<object[^>]*>[\s\S]*?<\/object>/gi,
+        /<embed[^>]*>/gi,
+        /javascript:/gi,
+        /on\w+\s*=/gi
+    ];
+    
+    let cleanValue = inputValue;
+    let isModified = false;
+    
+    dangerousPatterns.forEach(pattern => {
+        if (pattern.test(cleanValue)) {
+            cleanValue = cleanValue.replace(pattern, '');
+            isModified = true;
+        }
+    });
+    
+    if (isModified) {
+        elements.specialPoints.value = cleanValue;
+        showMessage('セキュリティ上の理由により、一部の文字が削除されました。', 'warning');
+    }
 }
 
 // ===== 文字数カウンターの更新 =====
@@ -582,7 +641,8 @@ function displayHighlightedText(originalText, issues) {
         return;
     }
     
-    let highlightedHtml = originalText;
+    // XSS対策: 最初にテキスト全体をエスケープ
+    let highlightedHtml = escapeHtml(originalText);
     
     // 各指摘事項についてハイライトを適用
     issues.forEach((issue, index) => {
@@ -594,8 +654,9 @@ function displayHighlightedText(originalText, issues) {
         const escapedFragment = escapeHtml(fragment);
         const markTag = `<mark class="${riskClass}" data-risk="${issue.risk_level}" data-issue-index="${index}">${escapedFragment}</mark>`;
         
+        // エスケープ済みのテキストから該当箇所を置換
         highlightedHtml = highlightedHtml.replace(
-            new RegExp(escapeRegExp(fragment), 'g'),
+            new RegExp(escapeRegExp(escapedFragment), 'g'),
             markTag
         );
     });
@@ -615,7 +676,13 @@ function displayHighlightedText(originalText, issues) {
 // ===== 指摘事項リストの表示 =====
 function displayIssuesList(issues) {
     if (!issues || issues.length === 0) {
-        elements.issuesList.innerHTML = '<p class="no-issues">指摘事項はありません。薬機法に適合していると思われます。</p>';
+        elements.issuesList.innerHTML = `
+            <div class="no-issues-container">
+                <p class="no-issues-title">✅ 薬機法チェック結果：問題なし</p>
+                <p class="no-issues-description">この表現は薬機法に適合しています。</p>
+                <p class="rewrite-suggestion">💡 下記では、より魅力的で訴求力のあるリライト案をご提案しています。ぜひご参考ください。</p>
+            </div>
+        `;
         return;
     }
     
@@ -712,13 +779,22 @@ function displayRewrittenTextsWithContainer(rewrittenContainer, legacyContainer,
         appealing: '訴求力重視版'
     };
     
-    const descriptions = {
+    // 問題がない場合とある場合で説明を変える
+    const hasIssues = currentCheckData && currentCheckData.issues && currentCheckData.issues.length > 0;
+    const descriptions = hasIssues ? {
         conservative: '最も安全で確実な表現',
         balanced: '安全性と訴求力のバランス',
         appealing: '法的リスクを最小限にしつつ訴求力を最大化'
+    } : {
+        conservative: 'より品格のある洗練された表現',
+        balanced: '感情的な魅力を加えた表現',
+        appealing: 'より刺激的で印象的な表現'
     };
     
-    let html = '<h4>💡 3つの修正版提案</h4>';
+    // 問題がない場合のタイトル変更
+    const titleText = hasIssues ? '💡 3つの修正版提案' : '✨ より魅力的な3つのリライト案';
+    
+    let html = `<h4>${titleText}</h4>`;
     
     Object.keys(texts).forEach((type, index) => {
         console.log(`🔄 処理中: ${type} = "${texts[type].text}"`);

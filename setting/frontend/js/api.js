@@ -112,8 +112,25 @@ class YakkiApiClient {
             return '';
         }
         
+        // XSS対策: 危険なパターンの除去
+        const dangerousPatterns = [
+            /<script[^>]*>[\s\S]*?<\/script>/gi,
+            /<iframe[^>]*>[\s\S]*?<\/iframe>/gi,
+            /<object[^>]*>[\s\S]*?<\/object>/gi,
+            /<embed[^>]*>/gi,
+            /javascript:/gi,
+            /on\w+\s*=/gi,
+            /<style[^>]*>[\s\S]*?<\/style>/gi,
+            /<link[^>]*>/gi
+        ];
+        
+        let cleanText = text;
+        dangerousPatterns.forEach(pattern => {
+            cleanText = cleanText.replace(pattern, '');
+        });
+        
         // HTML特殊文字のエスケープ
-        return text
+        return cleanText
             .replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;')
@@ -639,6 +656,9 @@ class YakkiApiClient {
             } else {
                 enhancedMessage = 'APIキーが無効です。正しいAPIキーを設定してください。';
             }
+        } else if (error.message && error.message.includes('authentication_error') && error.message.includes('invalid x-api-key')) {
+            // Claude API認証エラーの特別処理
+            enhancedMessage = 'Claude API認証エラー: APIキーが無効または期限切れです。管理者にAPIキーの更新を依頼してください。';
         } else if (error.message && error.message.includes('HTTP 403')) {
             enhancedMessage = 'アクセスが拒否されました。権限を確認してください。';
         } else if (error.message && error.message.includes('HTTP 429')) {
