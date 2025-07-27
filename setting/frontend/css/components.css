@@ -747,10 +747,7 @@ mark:hover::after {
     box-shadow: 0 6px 12px rgba(59, 130, 246, 0.35);
 }
 
-.footer-info p a{
-color:white;
 
-}
 @media (max-width: 768px) {
     .footer .container ,#guide-content{
         padding: 0 16px !important;
