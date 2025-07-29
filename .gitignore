@@ -93,3 +93,21 @@ yarn-error.log*
 
 # 本番用設定
 config.production.json
+
+# 薬機法データファイル（機密情報）
+# dataディレクトリのすべてのファイル（ディレクトリ自体は保持）
+setting/backend/data/*.csv
+setting/backend/data/*.md
+setting/backend/data/*.txt
+setting/backend/data/*.json
+
+# 特にNG表現言い換え.csvを明示的に除外
+setting/backend/data/NG表現言い換え.csv
+
+# ruleディレクトリのすべてのファイル（ディレクトリ自体は保持）
+setting/backend/rule/*.md
+setting/backend/rule/*.txt
+setting/backend/rule/*.json
+
+# その他のデータファイル
+setting/backend/ng.csv
