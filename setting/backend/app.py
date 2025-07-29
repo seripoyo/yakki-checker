@@ -24,6 +24,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 import csv
+import re
 import requests
 from datetime import datetime
 from flask import Flask, request, jsonify, Response, stream_with_context
@@ -1390,21 +1391,14 @@ def call_claude_api(text, text_type, category, special_points=''):
         elif response_text.startswith("```") and response_text.endswith("```"):
             response_text = response_text[3:-3].strip()
         
-        # JSONパース
-        try:
-            result = json.loads(response_text)
-            
-            # レスポンス構造の検証
-            validate_claude_response(result)
-            
-            return result
-            
-        except json.JSONDecodeError as e:
-            logger.error(f"Claude APIレスポンスのJSONパースエラー: {str(e)}")
-            logger.error(f"Raw response: {response_text}")
-            
-            # フォールバック: 構造化された応答を生成
-            return create_fallback_response(text, "JSONパースエラーのため、基本的なチェック結果を返します")
+        # 堅牢なJSONパース処理
+        result = parse_claude_response_robust(response_text, text)
+        
+        if result is None:
+            logger.error("Claude APIレスポンスの解析に完全に失敗しました")
+            return create_fallback_response(text, "Claude APIレスポンスの解析に失敗しました")
+        
+        return result
     
     except anthropic.APIError as e:
         logger.error(f"Claude API エラー: {str(e)}")
@@ -1429,6 +1423,283 @@ def call_claude_api(text, text_type, category, special_points=''):
         import traceback
         logger.error(f"スタックトレース: {traceback.format_exc()}")
         return create_fallback_response(text, f"予期しないエラー: {str(e)}")
+
+def parse_claude_response_robust(response_text, original_text):
+    """
+    Claude APIレスポンスを堅牢にJSON解析する
+    
+    Args:
+        response_text (str): Claude APIからの応答テキスト
+        original_text (str): 元のチェック対象テキスト
+    
+    Returns:
+        dict: 解析されたJSONデータまたはNone
+    """
+    logger.info(f"JSON解析開始 - レスポンス長: {len(response_text)} 文字")
+    
+    # 手法1: 標準のJSONパースを試行
+    try:
+        result = json.loads(response_text)
+        validate_claude_response(result)
+        logger.info("標準JSONパース成功")
+        return result
+    except (json.JSONDecodeError, ValueError) as e:
+        logger.warning(f"標準JSONパース失敗: {str(e)}")
+    
+    # 手法2: コードブロックを除去して再試行
+    cleaned_text = clean_json_response(response_text)
+    if cleaned_text != response_text:
+        try:
+            result = json.loads(cleaned_text)
+            validate_claude_response(result)
+            logger.info("クリーニング後JSONパース成功")
+            return result
+        except (json.JSONDecodeError, ValueError) as e:
+            logger.warning(f"クリーニング後JSONパース失敗: {str(e)}")
+    
+    # 手法3: 部分的なJSON修復を試行
+    repaired_text = repair_incomplete_json(response_text)
+    if repaired_text:
+        try:
+            result = json.loads(repaired_text)
+            validate_claude_response(result)
+            logger.info("修復後JSONパース成功")
+            return result
+        except (json.JSONDecodeError, ValueError) as e:
+            logger.warning(f"修復後JSONパース失敗: {str(e)}")
+    
+    # 手法4: 正規表現でJSON部分を抽出
+    extracted_json = extract_json_with_regex(response_text)
+    if extracted_json:
+        try:
+            result = json.loads(extracted_json)
+            validate_claude_response(result)
+            logger.info("正規表現抽出後JSONパース成功")
+            return result
+        except (json.JSONDecodeError, ValueError) as e:
+            logger.warning(f"正規表現抽出後JSONパース失敗: {str(e)}")
+    
+    # 手法5: 部分的なデータでフォールバック応答を生成
+    partial_data = extract_partial_data(response_text)
+    if partial_data:
+        logger.info("部分データからフォールバック応答を生成")
+        return create_partial_fallback_response(original_text, partial_data)
+    
+    # すべて失敗した場合
+    logger.error("すべてのJSON解析手法が失敗しました")
+    logger.error(f"Raw response: {response_text[:500]}...")  # 最初の500文字のみログ出力
+    return None
+
+def clean_json_response(response_text):
+    """
+    レスポンステキストからJSON以外の不要な部分を除去
+    """
+    # ```json```ブロックを除去
+    if response_text.startswith("```json") and response_text.endswith("```"):
+        return response_text[7:-3].strip()
+    elif response_text.startswith("```") and response_text.endswith("```"):
+        return response_text[3:-3].strip()
+    
+    # 前後の空白文字を除去
+    cleaned = response_text.strip()
+    
+    # JSON以外のテキストが前後にある場合は除去を試行
+    if cleaned.startswith('{') and cleaned.endswith('}'):
+        return cleaned
+    
+    # JSON部分を探して抽出
+    start = cleaned.find('{')
+    end = cleaned.rfind('}') + 1
+    
+    if start != -1 and end > start:
+        return cleaned[start:end]
+    
+    return cleaned
+
+def repair_incomplete_json(response_text):
+    """
+    不完全なJSONを修復する試み
+    """
+    try:
+        # 末尾のカンマやブレースが不足している場合を修復
+        text = response_text.strip()
+        
+        # 末尾にカンマがある場合は除去
+        if text.endswith(','):
+            text = text[:-1]
+        
+        # 開きブレースの数を数えて、閉じブレースが不足している場合は追加
+        open_braces = text.count('{')
+        close_braces = text.count('}')
+        
+        if open_braces > close_braces:
+            text += '}' * (open_braces - close_braces)
+        
+        # 開き括弧の数を数えて、閉じ括弧が不足している場合は追加
+        open_brackets = text.count('[')
+        close_brackets = text.count(']')
+        
+        if open_brackets > close_brackets:
+            text += ']' * (open_brackets - close_brackets)
+        
+        # ダブルクォートが開いたままの文字列を修復
+        text = fix_unclosed_strings(text)
+        
+        return text
+        
+    except Exception as e:
+        logger.warning(f"JSON修復中にエラー: {str(e)}")
+        return None
+
+def fix_unclosed_strings(text):
+    """
+    開いたままの文字列を修復
+    """
+    try:
+        # 簡単な修復: 最後のダブルクォートが閉じられていない場合
+        quote_count = text.count('"')
+        if quote_count % 2 == 1:  # 奇数の場合は最後に追加
+            # 最後のダブルクォートの後に適切な位置で閉じる
+            last_quote_pos = text.rfind('"')
+            if last_quote_pos != -1:
+                # 最後のクォートの後に適切な位置で終了
+                remaining = text[last_quote_pos + 1:]
+                # 次の区切り文字までを探してクォートで閉じる
+                next_delimiter = -1
+                for char in [',', '}', ']', '\n']:
+                    pos = remaining.find(char)
+                    if pos != -1 and (next_delimiter == -1 or pos < next_delimiter):
+                        next_delimiter = pos
+                
+                if next_delimiter != -1:
+                    text = text[:last_quote_pos + 1 + next_delimiter] + '"' + text[last_quote_pos + 1 + next_delimiter:]
+                else:
+                    text += '"'
+        
+        return text
+        
+    except Exception as e:
+        logger.warning(f"文字列修復中にエラー: {str(e)}")
+        return text
+
+def extract_json_with_regex(response_text):
+    """
+    正規表現でJSON部分を抽出
+    """
+    try:
+        # JSON構造を探す正規表現パターン
+        # 開始の { から対応する } までを抽出
+        pattern = r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}'
+        matches = re.findall(pattern, response_text, re.DOTALL)
+        
+        if matches:
+            # 最も長いマッチ（最も完全な可能性が高い）を選択
+            longest_match = max(matches, key=len)
+            return longest_match
+        
+        # より簡単なパターンで再試行
+        start = response_text.find('{')
+        if start != -1:
+            brace_count = 0
+            for i, char in enumerate(response_text[start:], start):
+                if char == '{':
+                    brace_count += 1
+                elif char == '}':
+                    brace_count -= 1
+                    if brace_count == 0:
+                        return response_text[start:i+1]
+        
+        return None
+        
+    except Exception as e:
+        logger.warning(f"正規表現抽出中にエラー: {str(e)}")
+        return None
+
+def extract_partial_data(response_text):
+    """
+    レスポンスから部分的なデータを抽出
+    """
+    partial_data = {}
+    
+    try:
+        # overall_riskを抽出
+        risk_match = re.search(r'"overall_risk"\s*:\s*"(高|中|低)"', response_text)
+        if risk_match:
+            partial_data['overall_risk'] = risk_match.group(1)
+        
+        # issuesを抽出（簡単なパターン）
+        issues_pattern = r'"fragment"\s*:\s*"([^"]+)"'
+        fragment_matches = re.findall(issues_pattern, response_text)
+        if fragment_matches:
+            partial_data['fragments'] = fragment_matches
+        
+        # rewritten_textsを抽出
+        rewrite_patterns = {
+            'conservative': r'"conservative"\s*:\s*\{[^}]*"text"\s*:\s*"([^"]+)"',
+            'balanced': r'"balanced"\s*:\s*\{[^}]*"text"\s*:\s*"([^"]+)"',
+            'appealing': r'"appealing"\s*:\s*\{[^}]*"text"\s*:\s*"([^"]+)"'
+        }
+        
+        for key, pattern in rewrite_patterns.items():
+            match = re.search(pattern, response_text, re.DOTALL)
+            if match:
+                if 'rewrites' not in partial_data:
+                    partial_data['rewrites'] = {}
+                partial_data['rewrites'][key] = match.group(1)
+        
+        return partial_data if partial_data else None
+        
+    except Exception as e:
+        logger.warning(f"部分データ抽出中にエラー: {str(e)}")
+        return None
+
+def create_partial_fallback_response(original_text, partial_data):
+    """
+    部分データからフォールバック応答を作成
+    """
+    # デフォルト値で基本構造を作成
+    result = {
+        "overall_risk": partial_data.get('overall_risk', '中'),
+        "risk_counts": {
+            "total": len(partial_data.get('fragments', [])) or 1,
+            "high": 0,
+            "medium": 1,
+            "low": 0
+        },
+        "issues": [],
+        "rewritten_texts": {
+            "conservative": {
+                "text": original_text,
+                "explanation": "APIレスポンスが不完全なため、部分的な情報から生成しました。"
+            },
+            "balanced": {
+                "text": original_text,
+                "explanation": "APIレスポンスが不完全なため、部分的な情報から生成しました。"
+            },
+            "appealing": {
+                "text": original_text,
+                "explanation": "APIレスポンスが不完全なため、部分的な情報から生成しました。"
+            }
+        }
+    }
+    
+    # 部分データがある場合は上書き
+    if 'fragments' in partial_data:
+        for fragment in partial_data['fragments']:
+            result['issues'].append({
+                "fragment": fragment,
+                "reason": "レスポンスが不完全なため、詳細な分析結果を表示できません。手動で確認してください。",
+                "risk_level": "中",
+                "suggestions": ["専門家に相談してください", "手動で確認してください"]
+            })
+    
+    if 'rewrites' in partial_data:
+        for key, text in partial_data['rewrites'].items():
+            if key in result['rewritten_texts']:
+                result['rewritten_texts'][key]['text'] = text
+                result['rewritten_texts'][key]['explanation'] = "部分的なAPIレスポンスから抽出されたリライト案です。完全な解析結果ではないため、専門家による確認をお勧めします。"
+    
+    return result
 
 def call_claude_api_fallback(text, text_type, category, special_points=None):
     """
@@ -1466,9 +1737,12 @@ def call_claude_api_fallback(text, text_type, category, special_points=None):
         elif response_text.startswith("```") and response_text.endswith("```"):
             response_text = response_text[3:-3].strip()
         
-        # JSONパース
-        result = json.loads(response_text)
-        validate_claude_response(result)
+        # JSONパース - 堅牢処理版を使用
+        result = parse_claude_response_robust(response_text, text)
+        
+        if result is None:
+            logger.error("フォールバックモデルでもJSON解析に失敗しました")
+            return create_fallback_response(text, "JSON解析エラー")
         
         return result
         
