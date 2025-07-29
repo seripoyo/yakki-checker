@@ -1276,11 +1276,12 @@ function showMessage(message, type = 'info') {
 }
 
 // ===== 専門家相談ボタンクリック処理 =====
-function handleConsultButtonClick() {
+function handleConsultButtonClick(event) {
+    event.preventDefault(); // デフォルトのリンク動作を防ぐ
     console.log('専門家相談ボタンがクリックされました');
     
     // 実際のリンク先が決まったら更新
-    const consultUrl = 'https://example.com/contact';
+    const consultUrl = 'https://forms.gle/cv8G73yqwK7e7cdX8';
     
     // 新しいウィンドウで開く
     window.open(consultUrl, '_blank', 'noopener,noreferrer');
