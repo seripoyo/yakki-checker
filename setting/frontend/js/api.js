@@ -90,7 +90,7 @@ class YakkiApiClient {
 
         // APIキーがある場合は追加
         if (this.apiKey) {
-            headers['X-API-Key'] = this.apiKey;
+            headers['X-API-KEY'] = this.apiKey;
             // デバッグ用（本番環境での問題調査）
             if (window.location.hostname.includes('github.io')) {
                 console.log('🔑 本番環境APIキー設定:', this.apiKey ? 'キーあり（' + this.apiKey.substring(0, 8) + '...）' : 'キーなし');
@@ -338,6 +338,15 @@ class YakkiApiClient {
             if (sanitizedSpecialPoints && sanitizedSpecialPoints.trim()) {
                 requestBody.special_points = sanitizedSpecialPoints;
             }
+
+            // 美容機器カテゴリの場合、医薬品・医療機器承認の情報を追加
+            if (sanitizedCategory === '美容機器・健康器具・その他') {
+                const medicalApprovalRadio = document.querySelector('input[name="medical-approval"]:checked');
+                if (medicalApprovalRadio) {
+                    requestBody.medical_approval = medicalApprovalRadio.value === 'yes';
+                }
+            }
+            
             console.log('📦 リクエストボディ:', requestBody);
 
             // バリデーション

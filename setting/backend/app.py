@@ -297,9 +297,9 @@ class CheckCache:
         self.misses = 0
         self.lock = threading.Lock()
     
-    def get_cache_key(self, text, category, text_type, special_points=None):
+    def get_cache_key(self, text, category, text_type, special_points=None, medical_approval=False):
         """キャッシュキーの生成"""
-        content = f"{text}|{category}|{text_type}|{special_points or ''}"
+        content = f"{text}|{category}|{text_type}|{special_points or ''}|{medical_approval}"
         return hashlib.sha256(content.encode()).hexdigest()
     
     def get(self, key):
@@ -764,7 +764,8 @@ def create_system_prompt():
    - **重要**: 各リライト案には、なぜそのリライトが薬機法的に適切かつ訴求力向上につながるかの解説を必ず含めること
 4. **リスク件数集計**: 高・中・低リスクの件数をそれぞれカウント
 
-必ず以下のJSON形式で、キーの名前も厳密に守って出力してください。他の説明文は一切含めないでください：
+必ず以下のJSON形式で、キーの名前も厳密に守って出力してください。他の説明文は一切含めないでください。
+レスポンスは完全で有効なJSONとして生成し、文字数制限内（5000文字以内）に収めてください：
 
 {
   "overall_risk": "高" | "中" | "低",
@@ -777,7 +778,7 @@ def create_system_prompt():
   "issues": [
     {
       "fragment": "問題のある表現",
-      "reason": "抵触する理由の詳細説明...",
+      "reason": "抵触する理由（150文字以内）...",
       "risk_level": "高" | "中" | "低",
       "suggestions": ["代替案1", "代替案2", "代替案3"]
     }
@@ -785,15 +786,15 @@ def create_system_prompt():
   "rewritten_texts": {
     "conservative": {
       "text": "保守的バージョンのリライト文...",
-      "explanation": "このリライトが薬機法的に適切な理由の詳細解説..."
+      "explanation": "このリライトが薬機法的に適切な理由（100文字以内）..."
     },
     "balanced": {
       "text": "バランス版のリライト文...",
-      "explanation": "このリライトが薬機法的に適切な理由の詳細解説..."
+      "explanation": "このリライトが薬機法的に適切な理由（100文字以内）..."
     },
     "appealing": {
       "text": "訴求力重視版のリライト文...",
-      "explanation": "このリライトが薬機法的に適切な理由の詳細解説..."
+      "explanation": "このリライトが薬機法的に適切な理由（100文字以内）..."
     }
   }
 }"""
@@ -845,7 +846,7 @@ def get_text_type_guidance(text_type):
     
     return guidance_map.get(text_type, "")
 
-def create_user_prompt(text, text_type, category, all_data_content, rule_content, special_points=''):
+def create_user_prompt(text, text_type, category, all_data_content, rule_content, special_points='', medical_approval=False):
     """
     Claude API用のユーザープロンプトを生成（全データファイル・ルールファイル対応）
     """
@@ -865,6 +866,18 @@ def create_user_prompt(text, text_type, category, all_data_content, rule_content
     # 特に訴求したいポイントが指定されている場合は追加
     if special_points and special_points.strip():
         prompt += f"""特に訴求したいポイント: {special_points}
+
+"""
+    
+    # 医薬品・医療機器承認の情報を追加（美容機器カテゴリの場合）
+    if category == '美容機器・健康器具・その他':
+        if medical_approval:
+            prompt += f"""医薬品・医療機器承認: あり（承認された医療機器として扱う）
+※ この製品は医薬品・医療機器として承認されているため、医療機器.mdの規則を優先的に適用してください。
+
+"""
+        else:
+            prompt += f"""医薬品・医療機器承認: なし（一般の美容機器・健康器具として扱う）
 
 """
     
@@ -1101,6 +1114,7 @@ def check_text():
         text_type = data['type']
         category = data.get('category', '化粧品')  # デフォルトは化粧品
         special_points = data.get('special_points', '').strip()  # 特に訴求したいポイント（オプション）
+        medical_approval = data.get('medical_approval', False)  # 医薬品・医療機器承認（デフォルト: False）
         
         # テキストの空文字チェック
         if not text:
@@ -1125,10 +1139,10 @@ def check_text():
             }), 400
         
         # ログ出力
-        logger.info(f"チェック開始 - Category: {category}, Type: {text_type}, Text length: {len(text)}, Special points: {'あり' if special_points else 'なし'}")
+        logger.info(f"チェック開始 - Category: {category}, Type: {text_type}, Text length: {len(text)}, Special points: {'あり' if special_points else 'なし'}, Medical approval: {medical_approval}")
         
-        # キャッシュチェック
-        cache_key = check_cache.get_cache_key(text, category, text_type, special_points)
+        # キャッシュチェック（medical_approvalも考慮）
+        cache_key = check_cache.get_cache_key(text, category, text_type, special_points, medical_approval)
         cached_result = check_cache.get(cache_key)
         
         if cached_result:
@@ -1141,8 +1155,49 @@ def check_text():
         # 応答時間の計測開始
         start_time = time.time()
         
+        # 前処理: NG表現の部分一致検出
+        preprocessing_issues = check_ng_expressions_in_text(text)
+        
         # Claude API呼び出し
-        result = call_claude_api(text, text_type, category, special_points)
+        result = call_claude_api(text, text_type, category, special_points, medical_approval)
+        
+        # 前処理で検出された問題を結果にマージ
+        if preprocessing_issues:
+            # 既存のissuesリストに前処理結果を追加
+            existing_issues = result.get('issues', [])
+            
+            # 重複チェック（同じfragmentがないか確認）
+            existing_fragments = [issue.get('fragment', '') for issue in existing_issues]
+            
+            for preprocessing_issue in preprocessing_issues:
+                # 重複していない場合のみ追加
+                if preprocessing_issue['fragment'] not in existing_fragments:
+                    existing_issues.append(preprocessing_issue)
+            
+            result['issues'] = existing_issues
+            
+            # リスクカウントを再計算
+            risk_counts = {'total': 0, 'high': 0, 'medium': 0, 'low': 0}
+            overall_risk = '低'
+            
+            for issue in existing_issues:
+                risk_level = issue.get('risk_level', '低')
+                risk_counts['total'] += 1
+                
+                if risk_level == '高':
+                    risk_counts['high'] += 1
+                    overall_risk = '高'
+                elif risk_level == '中':
+                    risk_counts['medium'] += 1
+                    if overall_risk != '高':
+                        overall_risk = '中'
+                else:
+                    risk_counts['low'] += 1
+            
+            result['risk_counts'] = risk_counts
+            result['overall_risk'] = overall_risk
+            
+            logger.info(f"前処理とClaude APIの結果をマージ - 総問題数: {risk_counts['total']}件")
         
         # 応答時間の計測終了
         response_time = round(time.time() - start_time, 2)
@@ -1335,7 +1390,93 @@ def get_guide():
             "timestamp": datetime.now().isoformat()
         })
 
-def call_claude_api(text, text_type, category, special_points=''):
+def create_preprocessing_fallback_response(text, preprocessing_issues):
+    """
+    前処理結果のみを使用したフォールバックレスポンスを生成
+    """
+    # リスクレベルの計算
+    high_count = sum(1 for issue in preprocessing_issues if issue.get('risk_level') == '高')
+    medium_count = sum(1 for issue in preprocessing_issues if issue.get('risk_level') == '中')
+    low_count = sum(1 for issue in preprocessing_issues if issue.get('risk_level') == '低')
+    
+    overall_risk = '高' if high_count > 0 else ('中' if medium_count > 0 else '低')
+    
+    return {
+        "overall_risk": overall_risk,
+        "risk_counts": {
+            "total": len(preprocessing_issues),
+            "high": high_count,
+            "medium": medium_count,
+            "low": low_count
+        },
+        "issues": preprocessing_issues,
+        "rewritten_texts": {
+            "conservative": {
+                "text": "薬機法に配慮した安全な表現に修正することを推奨します。",
+                "explanation": "前処理で検出された問題表現を取り除いた安全な代替表現をご検討ください。"
+            },
+            "balanced": {
+                "text": "薬機法に配慮しつつ、適切な表現に修正することを推奨します。",
+                "explanation": "検出された問題を修正し、バランスの取れた表現をご検討ください。"
+            },
+            "appealing": {
+                "text": "薬機法に配慮した魅力的な表現に修正することを推奨します。",
+                "explanation": "問題表現を修正し、より訴求力のある代替表現をご検討ください。"
+            }
+        }
+    }
+
+def check_ng_expressions_in_text(text):
+    """
+    テキスト内のNG表現を部分一致で検出
+    
+    Args:
+        text (str): チェック対象のテキスト
+    
+    Returns:
+        list: 検出されたNG表現のリスト [{'fragment': str, 'risk_level': str, 'category': str}]
+    """
+    detected_issues = []
+    csv_file_path = os.path.join(os.path.dirname(__file__), 'data', 'ng_expressions.csv')
+    
+    if not os.path.exists(csv_file_path):
+        logger.warning(f"NG表現CSVファイルが見つかりません: {csv_file_path}")
+        return detected_issues
+    
+    try:
+        with open(csv_file_path, 'r', encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                ng_expression = row.get('NG表現', '').strip()
+                if ng_expression and ng_expression in text:
+                    # テキスト内で該当部分を見つける
+                    start_pos = text.find(ng_expression)
+                    if start_pos != -1:
+                        # 前後の文脈を含めてフラグメントを抽出（最大30文字）
+                        context_start = max(0, start_pos - 10)
+                        context_end = min(len(text), start_pos + len(ng_expression) + 10)
+                        fragment = text[context_start:context_end]
+                        
+                        detected_issues.append({
+                            'fragment': fragment,
+                            'reason': f'「{ng_expression}」は薬機法上問題となる可能性があります。',
+                            'risk_level': row.get('リスクレベル', '中'),
+                            'category': row.get('カテゴリ', '一般'),
+                            'suggestions': [
+                                row.get('代替表現1', '適切な表現に修正してください'),
+                                row.get('代替表現2', ''),
+                                row.get('代替表現3', '')
+                            ]
+                        })
+        
+        logger.info(f"前処理でNG表現を{len(detected_issues)}件検出")
+        return detected_issues
+        
+    except Exception as e:
+        logger.error(f"NG表現チェックでエラー: {str(e)}")
+        return detected_issues
+
+def call_claude_api(text, text_type, category, special_points='', medical_approval=False):
     """
     Claude APIを呼び出して薬機法チェックを実行
     
@@ -1344,6 +1485,7 @@ def call_claude_api(text, text_type, category, special_points=''):
         text_type (str): テキストの種類
         category (str): 商品カテゴリ
         special_points (str): 特に訴求したいポイント（オプション）
+        medical_approval (bool): 医薬品・医療機器承認（美容機器カテゴリでのみ使用）
     
     Returns:
         dict: Claude APIからの応答（JSON形式）
@@ -1358,7 +1500,7 @@ def call_claude_api(text, text_type, category, special_points=''):
         
         # プロンプトの構築
         system_prompt = create_system_prompt()
-        user_prompt = create_user_prompt(text, text_type, category, all_data_content, rule_content, special_points)
+        user_prompt = create_user_prompt(text, text_type, category, all_data_content, rule_content, special_points, medical_approval)
         
         logger.info("Claude API呼び出し開始")
         
@@ -1370,7 +1512,7 @@ def call_claude_api(text, text_type, category, special_points=''):
         # Claude APIリクエスト (高速化最適化)
         response = claude_client.messages.create(
             model="claude-sonnet-4-20250514",  # Claude Sonnet 4
-            max_tokens=4000,  # 3つのリライト案に対応
+            max_tokens=6000,  # 長文対応でトークン数を増加
             temperature=0,  # 決定論的出力で最高速度
             system=system_prompt,
             messages=[
@@ -1395,8 +1537,12 @@ def call_claude_api(text, text_type, category, special_points=''):
         result = parse_claude_response_robust(response_text, text)
         
         if result is None:
-            logger.error("Claude APIレスポンスの解析に完全に失敗しました")
-            return create_fallback_response(text, "Claude APIレスポンスの解析に失敗しました")
+            logger.error("Claude APIレスポンスの解析に完全に失敗しました - 前処理結果を使用")
+            # 前処理で検出された問題があるかチェック
+            if preprocessing_issues:
+                return create_preprocessing_fallback_response(text, preprocessing_issues)
+            else:
+                return create_fallback_response(text, "Claude APIレスポンスの解析に失敗しました")
         
         return result
     
