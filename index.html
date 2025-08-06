@@ -56,6 +56,23 @@
                             </select>
                         </div>
 
+                        <!-- 医薬品・医療機器承認の質問（美容機器カテゴリ選択時のみ表示） -->
+                        <div class="form-group" id="medical-approval-section" style="display: none;">
+                            <label class="form-label">医薬品・医療機器として承認されていますか？</label>
+                            <div class="radio-group">
+                                <label class="radio-label">
+                                    <input type="radio" name="medical-approval" value="no" checked>
+                                    <span class="radio-custom"></span>
+                                    いいえ
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="medical-approval" value="yes">
+                                    <span class="radio-custom"></span>
+                                    はい
+                                </label>
+                            </div>
+                        </div>
+
                         <div class="form-group">
                             <label for="text-type" class="form-label">文章の種類を選択してください</label>
                             <select id="text-type" class="form-select">
