@@ -48,7 +48,10 @@ const elements = {
     guideContent: document.getElementById('guide-content'),
     
     // その他
-    consultButton: document.getElementById('consult-button')
+    consultButton: document.getElementById('consult-button'),
+    
+    // 医薬品・医療機器承認関連
+    medicalApprovalSection: document.getElementById('medical-approval-section')
 };
 
 // ===== 初期化処理 =====
@@ -107,7 +110,10 @@ function setupEventListeners() {
     elements.specialPoints.addEventListener('paste', handleSpecialPointsInput);
     
     // 商品カテゴリ選択の監視
-    elements.productCategory.addEventListener('change', updateCheckButtonState);
+    elements.productCategory.addEventListener('change', function() {
+        updateCheckButtonState();
+        handleCategoryChange();
+    });
     
     // 文章種類選択の監視
     elements.textType.addEventListener('change', updateCheckButtonState);
@@ -1273,6 +1279,23 @@ function showMessage(message, type = 'info') {
             messageElement.remove();
         }
     }, 3000);
+}
+
+// ===== カテゴリ変更処理 =====
+function handleCategoryChange() {
+    const selectedCategory = elements.productCategory.value;
+    
+    // 美容機器・健康器具・その他が選択された場合のみ医薬品・医療機器承認質問を表示
+    if (selectedCategory === '美容機器・健康器具・その他') {
+        elements.medicalApprovalSection.style.display = 'block';
+    } else {
+        elements.medicalApprovalSection.style.display = 'none';
+        // 他のカテゴリが選択された場合はラジオボタンをリセット
+        const noRadio = document.querySelector('input[name="medical-approval"][value="no"]');
+        if (noRadio) {
+            noRadio.checked = true;
+        }
+    }
 }
 
 // ===== 専門家相談ボタンクリック処理 =====
