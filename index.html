@@ -44,8 +44,12 @@
                 <!-- リスクチェッカータブ -->
                 <section id="checker-content" class="tab-panel active">
                     <div class="checker-form">
-                        <div class="form-group">
-                            <label for="product-category" class="form-label">商品カテゴリを選択してください</label>
+                        <!-- STEP 1: 商品カテゴリ選択 -->
+                        <div class="form-step">
+                            <div class="step-header">
+                                <span class="step-number">STEP 1</span>
+                                <span class="step-title">商品カテゴリを選択してください</span>
+                            </div>
                             <select id="product-category" class="form-select">
                                 <option value="">-- 選択してください --</option>
                                 <option value="化粧品">化粧品（一般化粧品）</option>
@@ -54,12 +58,11 @@
                                 <option value="サプリメント">サプリメント・健康食品</option>
                                 <option value="美容機器・健康器具・その他">美容機器・健康器具・その他</option>
                             </select>
-                        </div>
-
-                        <!-- 医薬品・医療機器承認の質問（美容機器カテゴリ選択時のみ表示） -->
-                        <div class="form-group" id="medical-approval-section" style="display: none;">
-                            <label class="form-label">医薬品・医療機器として承認されていますか？</label>
-                            <div class="radio-group">
+                            
+                            <!-- 医薬品・医療機器承認の質問（美容機器カテゴリ選択時のみ表示） -->
+                            <div class="sub-option" id="medical-approval-section" style="display: none;">
+                                <label class="sub-option-label">医薬品・医療機器として承認されていますか？</label>
+                                <div class="radio-group">
                                 <label class="radio-label">
                                     <input type="radio" name="medical-approval" value="no" checked>
                                     <span class="radio-custom"></span>
@@ -72,9 +75,14 @@
                                 </label>
                             </div>
                         </div>
+                        </div>
 
-                        <div class="form-group">
-                            <label for="text-type" class="form-label">文章の種類を選択してください</label>
+                        <!-- STEP 2: 文章の種類選択 -->
+                        <div class="form-step">
+                            <div class="step-header">
+                                <span class="step-number">STEP 2</span>
+                                <span class="step-title">文章の種類を選択してください</span>
+                            </div>
                             <select id="text-type" class="form-select">
                                 <option value="">-- 選択してください --</option>
                                 <option value="キャッチコピー">キャッチコピー</option>
@@ -84,8 +92,12 @@
                             </select>
                         </div>
 
-                        <div class="form-group">
-                            <label for="text-input" class="form-label">チェックしたい文章を入力してください</label>
+                        <!-- STEP 3: チェック文章入力 -->
+                        <div class="form-step">
+                            <div class="step-header">
+                                <span class="step-number">STEP 3</span>
+                                <span class="step-title">チェックしたい文章を入力してください</span>
+                            </div>
                             <textarea id="text-input" class="form-textarea"
                                 placeholder="例：このクリームでシミが完全に消えます！アンチエイジング効果で若々しいお肌に..." rows="6"></textarea>
                             <div class="character-count">
@@ -93,8 +105,11 @@
                             </div>
                         </div>
 
-                        <div class="form-group">
-                            <label for="special-points" class="form-label">特に訴求したいポイント（任意）</label>
+                        <!-- 特に訴求したいポイント（任意） -->
+                        <div class="optional-section">
+                            <div class="optional-header">
+                                <span class="optional-label">特に訴求したいポイント（任意）</span>
+                            </div>
                             <textarea id="special-points" class="form-textarea"
                                 placeholder="例：自然由来成分であることを強調したい、即効性よりも安全性をアピールしたい、他社との差別化ポイントなど" rows="3"></textarea>
                             <div class="form-note">
