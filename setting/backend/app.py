@@ -1251,18 +1251,41 @@ def check_text_stream():
             # イベント2: CSVチェック開始
             yield f"data: {json.dumps({'type': 'csv_check', 'message': 'NG表現データベースをチェック中...'}, ensure_ascii=False)}\n\n"
             
-            # CSVからNG表現をチェック（簡易版）
+            # CSVからNG表現をチェック（語幹・活用形対応版）
             csv_ng_words = []
             csv_file_path = os.path.join(os.path.dirname(__file__), 'data', 'ng_expressions.csv')
             if os.path.exists(csv_file_path):
+                # 語幹と活用形パターンを取得
+                ng_patterns = generate_ng_patterns()
+                detected_words = set()  # 重複検出を防ぐ
+                
                 with open(csv_file_path, 'r', encoding='utf-8') as f:
                     reader = csv.DictReader(f)
-                    for row in reader:
-                        if row['NG表現'] in text:
-                            csv_ng_words.append({
-                                'word': row['NG表現'],
-                                'risk': row.get('リスクレベル', '中')
-                            })
+                    ng_data = list(reader)
+                
+                # パターンベースの検出
+                for base_word, patterns in ng_patterns.items():
+                    for pattern in patterns:
+                        if pattern in text and pattern not in detected_words:
+                            for row in ng_data:
+                                ng_expression = row.get('NG表現', '').strip()
+                                if base_word in ng_expression or ng_expression == pattern:
+                                    detected_words.add(pattern)
+                                    csv_ng_words.append({
+                                        'word': pattern,
+                                        'risk': row.get('リスクレベル', '中')
+                                    })
+                                    break
+                
+                # 通常の完全一致検出
+                for row in ng_data:
+                    ng_expression = row.get('NG表現', '').strip()
+                    if ng_expression and ng_expression in text and ng_expression not in detected_words:
+                        detected_words.add(ng_expression)
+                        csv_ng_words.append({
+                            'word': ng_expression,
+                            'risk': row.get('リスクレベル', '中')
+                        })
             
             if csv_ng_words:
                 yield f"data: {json.dumps({'type': 'ng_words_found', 'words': csv_ng_words}, ensure_ascii=False)}\n\n"
@@ -1426,9 +1449,59 @@ def create_preprocessing_fallback_response(text, preprocessing_issues):
         }
     }
 
+def generate_ng_patterns():
+    """
+    NG表現の語幹と活用形パターンを生成する
+    
+    Returns:
+        dict: キーワードをキーとし、パターンリストを値とする辞書
+    """
+    patterns = {
+        # むくみ関連
+        'むくみ': [
+            'むくみ', 'むくむ', 'むくん', 'ムクミ', 'ムクむ', 'ムクん',
+            '浮腫み', '浮腫む', '浮腫ん', '浮腫', 
+            'パンパン', 'ぱんぱん', '腫れ', 'はれ'
+        ],
+        # たるみ関連
+        'たるみ': [
+            'たるみ', 'たるむ', 'たるん', 'タルミ', 'タルむ', 'タルん',
+            '弛み', '弛む', '弛ん', 'ゆるみ', 'ゆるむ', 'ゆるん'
+        ],
+        # シミ関連
+        'シミ': [
+            'シミ', 'しみ', 'シミが', 'しみが', 'シミを', 'しみを',
+            'シミの', 'しみの', 'シミに', 'しみに'
+        ],
+        # シワ関連
+        'シワ': [
+            'シワ', 'しわ', 'シワが', 'しわが', 'シワを', 'しわを',
+            'シワの', 'しわの', 'シワに', 'しわに', '皺'
+        ],
+        # アンチエイジング関連
+        'アンチエイジング': [
+            'アンチエイジング', 'アンチ・エイジング', 'アンチ　エイジング',
+            'anti-aging', 'antiaging', 'ANTI-AGING', 'Anti-Aging'
+        ],
+        # 美白関連
+        '美白': [
+            '美白', 'びはく', 'ビハク', '美白効果', '美白成分', '美白作用'
+        ],
+        # 治る・改善関連
+        '治る': [
+            '治る', '治す', '治し', '治せ', '治った', '治って',
+            '直る', '直す', '直し', '直せ', '直った', '直って'
+        ],
+        '改善': [
+            '改善', 'かいぜん', '改善する', '改善し', '改善され',
+            '改善できる', '改善効果'
+        ]
+    }
+    return patterns
+
 def check_ng_expressions_in_text(text):
     """
-    テキスト内のNG表現を部分一致で検出
+    テキスト内のNG表現を語幹・活用形を含めて検出
     
     Args:
         text (str): チェック対象のテキスト
@@ -1443,33 +1516,71 @@ def check_ng_expressions_in_text(text):
         logger.warning(f"NG表現CSVファイルが見つかりません: {csv_file_path}")
         return detected_issues
     
+    # 語幹と活用形パターンを取得
+    ng_patterns = generate_ng_patterns()
+    detected_ng_words = set()  # 重複検出を防ぐためのセット
+    
     try:
         with open(csv_file_path, 'r', encoding='utf-8') as f:
             reader = csv.DictReader(f)
-            for row in reader:
-                ng_expression = row.get('NG表現', '').strip()
-                if ng_expression and ng_expression in text:
-                    # テキスト内で該当部分を見つける
-                    start_pos = text.find(ng_expression)
-                    if start_pos != -1:
-                        # 前後の文脈を含めてフラグメントを抽出（最大30文字）
-                        context_start = max(0, start_pos - 10)
-                        context_end = min(len(text), start_pos + len(ng_expression) + 10)
-                        fragment = text[context_start:context_end]
-                        
-                        detected_issues.append({
-                            'fragment': fragment,
-                            'reason': f'「{ng_expression}」は薬機法上問題となる可能性があります。',
-                            'risk_level': row.get('リスクレベル', '中'),
-                            'category': row.get('カテゴリ', '一般'),
-                            'suggestions': [
-                                row.get('代替表現1', '適切な表現に修正してください'),
-                                row.get('代替表現2', ''),
-                                row.get('代替表現3', '')
-                            ]
-                        })
+            ng_data = list(reader)  # 全データを一度読み込む
         
-        logger.info(f"前処理でNG表現を{len(detected_issues)}件検出")
+        # パターンベースの検出
+        for base_word, patterns in ng_patterns.items():
+            for pattern in patterns:
+                if pattern in text and pattern not in detected_ng_words:
+                    # CSVから該当するベースワードのデータを探す
+                    for row in ng_data:
+                        ng_expression = row.get('NG表現', '').strip()
+                        # ベースワードまたは完全一致を探す
+                        if base_word in ng_expression or ng_expression == pattern:
+                            start_pos = text.find(pattern)
+                            if start_pos != -1:
+                                # 前後の文脈を含めてフラグメントを抽出（最大30文字）
+                                context_start = max(0, start_pos - 10)
+                                context_end = min(len(text), start_pos + len(pattern) + 10)
+                                fragment = text[context_start:context_end]
+                                
+                                detected_ng_words.add(pattern)
+                                detected_issues.append({
+                                    'fragment': fragment,
+                                    'reason': f'「{pattern}」は薬機法上問題となる可能性があります。',
+                                    'risk_level': row.get('リスクレベル', '中'),
+                                    'category': row.get('カテゴリ', '一般'),
+                                    'suggestions': [
+                                        row.get('代替表現1', '適切な表現に修正してください'),
+                                        row.get('代替表現2', ''),
+                                        row.get('代替表現3', '')
+                                    ]
+                                })
+                            break  # 一つ見つかったら次のパターンへ
+        
+        # 通常の完全一致検出（パターンに含まれないもの）
+        for row in ng_data:
+            ng_expression = row.get('NG表現', '').strip()
+            if ng_expression and ng_expression in text and ng_expression not in detected_ng_words:
+                # テキスト内で該当部分を見つける
+                start_pos = text.find(ng_expression)
+                if start_pos != -1:
+                    # 前後の文脈を含めてフラグメントを抽出（最大30文字）
+                    context_start = max(0, start_pos - 10)
+                    context_end = min(len(text), start_pos + len(ng_expression) + 10)
+                    fragment = text[context_start:context_end]
+                    
+                    detected_ng_words.add(ng_expression)
+                    detected_issues.append({
+                        'fragment': fragment,
+                        'reason': f'「{ng_expression}」は薬機法上問題となる可能性があります。',
+                        'risk_level': row.get('リスクレベル', '中'),
+                        'category': row.get('カテゴリ', '一般'),
+                        'suggestions': [
+                            row.get('代替表現1', '適切な表現に修正してください'),
+                            row.get('代替表現2', ''),
+                            row.get('代替表現3', '')
+                        ]
+                    })
+        
+        logger.info(f"前処理でNG表現を{len(detected_issues)}件検出（語幹・活用形含む）")
         return detected_issues
         
     except Exception as e:
