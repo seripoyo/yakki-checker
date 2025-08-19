@@ -27,6 +27,11 @@ def require_api_key(f):
     """APIキー認証デコレータ"""
     @wraps(f)
     def decorated_function(*args, **kwargs):
+        # 開発環境かつAPIキーが設定されていない場合は認証をスキップ
+        if Config.DEBUG and not Config.VALID_API_KEYS:
+            logger.info(f"開発環境: 認証スキップ - {request.remote_addr}")
+            return f(*args, **kwargs)
+        
         # 認証が無効化されている場合はスキップ
         if not Config.VALID_API_KEYS:
             return f(*args, **kwargs)

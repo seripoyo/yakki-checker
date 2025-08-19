@@ -58,8 +58,9 @@ class Config:
         if not cls.CLAUDE_API_KEY:
             errors.append("CLAUDE_API_KEY is required")
         
-        if not cls.VALID_API_KEYS:
-            errors.append("VALID_API_KEYS is required")
+        # 開発環境ではAPIキー認証をオプショナルにする
+        if not cls.DEBUG and not cls.VALID_API_KEYS:
+            errors.append("VALID_API_KEYS is required in production")
         
         if errors:
             raise ValueError(f"設定エラー: {', '.join(errors)}")

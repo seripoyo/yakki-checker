@@ -1146,14 +1146,18 @@ function updateDetailedProgress(progressData) {
     
     requestAnimationFrame(() => {
         if (progressFill) {
+            // アニメーション付きでバーを更新
+            progressFill.style.transition = 'width 0.3s ease';
             progressFill.style.width = `${progress}%`;
         }
         
         if (progressPercentage) {
+            // 数値を同時に更新
             progressPercentage.textContent = `${Math.round(progress)}%`;
         }
         
         if (progressMessage) {
+            // メッセージを更新
             progressMessage.textContent = message;
         }
     });
@@ -1173,7 +1177,7 @@ function updateDetailedProgress(progressData) {
         }
     });
     
-    // ステージに応じてタイトルを更新
+    // ステージに応じてタイトルを更新（進捗率と同期）
     const progressTitle = document.getElementById('progress-title');
     if (progressTitle) {
         const stageTitles = {
@@ -1185,7 +1189,9 @@ function updateDetailedProgress(progressData) {
             processing: '分析処理中...',
             completed: 'チェック完了！'
         };
-        progressTitle.textContent = stageTitles[stage] || '処理中...';
+        requestAnimationFrame(() => {
+            progressTitle.textContent = stageTitles[stage] || '処理中...';
+        });
     }
 }
 

@@ -177,23 +177,45 @@ class StreamingClient {
             container.className = 'streaming-progress';
             container.innerHTML = `
                 <div class="progress-header">
-                    <h4>分析中...</h4>
-                    <span class="progress-percentage">${progress.progress}%</span>
+                    <h4 id="stream-progress-title">分析中...</h4>
+                    <span class="progress-percentage" id="stream-progress-percent">${progress.progress}%</span>
                 </div>
                 <div class="progress-bar">
-                    <div class="progress-fill" style="width: ${progress.progress}%"></div>
+                    <div class="progress-fill" id="stream-progress-fill" style="width: ${progress.progress}%"></div>
                 </div>
-                <p class="progress-message">${progress.message}</p>
+                <p class="progress-message" id="stream-progress-message">${progress.message}</p>
                 <div class="progress-steps"></div>
             `;
             
             const resultArea = document.getElementById('result-area');
             resultArea.insertBefore(container, resultArea.firstChild);
         } else {
-            // 既存のコンテナを更新
-            progressContainer.querySelector('.progress-percentage').textContent = `${progress.progress}%`;
-            progressContainer.querySelector('.progress-fill').style.width = `${progress.progress}%`;
-            progressContainer.querySelector('.progress-message').textContent = progress.message;
+            // 既存のコンテナを更新（アニメーション付き）
+            const progressPercent = progressContainer.querySelector('#stream-progress-percent');
+            const progressFill = progressContainer.querySelector('#stream-progress-fill');
+            const progressMessage = progressContainer.querySelector('#stream-progress-message');
+            const progressTitle = progressContainer.querySelector('#stream-progress-title');
+            
+            // 数値とバーを同時に更新
+            requestAnimationFrame(() => {
+                if (progressPercent) progressPercent.textContent = `${progress.progress}%`;
+                if (progressFill) {
+                    progressFill.style.transition = 'width 0.3s ease';
+                    progressFill.style.width = `${progress.progress}%`;
+                }
+                if (progressMessage) progressMessage.textContent = progress.message;
+                
+                // ステップに応じてタイトルも更新
+                if (progressTitle && progress.step) {
+                    const titles = {
+                        'start': 'チェックを開始しています...',
+                        'csv': 'NG表現データベースをチェック中...',
+                        'ai': 'AIによる詳細分析を実行中...',
+                        'complete': '分析が完了しました'
+                    };
+                    progressTitle.textContent = titles[progress.step] || '分析中...';
+                }
+            });
             
             // ステップ表示を更新
             if (progress.data && progress.step === 'ng_words') {
@@ -202,6 +224,27 @@ class StreamingClient {
                     `<span class="detected-word">${word.word}</span>`
                 ).join('');
                 stepsContainer.innerHTML = `<div class="ng-words-preview">検出: ${ngWordsHtml}</div>`;
+            } else if (progress.step) {
+                const stepsContainer = progressContainer.querySelector('.progress-steps');
+                if (stepsContainer) {
+                    // ステップインジケーターを表示
+                    const steps = [
+                        { id: 'start', label: '開始', value: 10 },
+                        { id: 'csv', label: 'DB確認', value: 30 },
+                        { id: 'ai', label: 'AI分析', value: 60 },
+                        { id: 'complete', label: '完了', value: 100 }
+                    ];
+                    
+                    const currentStepIndex = steps.findIndex(s => s.id === progress.step);
+                    const stepsHtml = steps.map((step, index) => {
+                        let className = 'progress-step';
+                        if (index < currentStepIndex) className += ' completed';
+                        else if (index === currentStepIndex) className += ' active';
+                        return `<span class="${className}">${step.label}</span>`;
+                    }).join('');
+                    
+                    stepsContainer.innerHTML = `<div class="progress-indicators">${stepsHtml}</div>`;
+                }
             }
         }
         

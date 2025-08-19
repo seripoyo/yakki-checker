@@ -30,12 +30,17 @@ const API_CONFIG = {
 };
 
 // 環境に応じてAPIのURLを自動選択
+// 開発環境でも本番APIを使用（一時的な対応）
 const getApiUrl = () => {
-    if (window.location.hostname === 'localhost' || 
-        window.location.hostname === '127.0.0.1') {
-        return API_CONFIG.DEV_BACKEND_URL;
-    }
+    // 常に本番環境のAPIを使用
     return API_CONFIG.BACKEND_URL;
+    
+    // 以下は元のコード（必要に応じて復元可能）
+    // if (window.location.hostname === 'localhost' || 
+    //     window.location.hostname === '127.0.0.1') {
+    //     return API_CONFIG.DEV_BACKEND_URL;
+    // }
+    // return API_CONFIG.BACKEND_URL;
 };
 
 // APIキーの取得（セキュア版）
@@ -52,12 +57,11 @@ const getApiKey = () => {
         return sessionKey;
     }
     
-    // 開発環境の場合は警告を表示
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        console.warn('⚠️ APIキーが設定されていません。管理者に確認してください。');
-        // 開発用の一時的なキーを返す（本番では使用しない）
-        return 'dev_temp_key_' + Date.now();
-    }
+    // 開発環境でも本番環境と同じAPIキーを使用
+    // 本番環境のAPIキー（統一使用）
+    const apiKey = 'Mfe43kjAWKxa8sDSAn64450dKAX261UJg2XV3bCer-8';
+    console.log('🔑 APIキー設定済み');
+    return apiKey;
     
     return null;
 };

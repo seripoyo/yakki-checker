@@ -78,9 +78,9 @@ class YakkiApiClient {
             'Content-Type': 'application/json',
         };
 
-        // APIキーがある場合は追加
+        // APIキーがある場合は追加（正しいヘッダー名を使用）
         if (this.apiKey) {
-            headers['X-API-KEY'] = this.apiKey;
+            headers['X-API-Key'] = this.apiKey;  // X-API-KEY -> X-API-Key に修正
             // デバッグ情報は最小限に
             console.log('🔑 APIキー: 設定済み');
         } else {
