@@ -20,29 +20,19 @@ class YakkiApiClient {
      * @returns {string|null} APIキー
      */
     getApiKeyFromStorage() {
-        // 開発環境（localhost）の場合
-        if (window.location.hostname === 'localhost') {
-            // 古いキーをクリア
-            const storedKey = localStorage.getItem('yakki_api_key');
-            if (storedKey === 'demo_key_for_development_only') {
-                localStorage.removeItem('yakki_api_key');
-            }
-            
-            // 新しいAPIキーを設定・返却
-            const newApiKey = 'Mfe43kjAWKxa8sDSAn64450dKAX261UJg2XV3bCer-8';
-            localStorage.setItem('yakki_api_key', newApiKey);
-            return newApiKey;
+        // config.jsのセキュアなAPIキー取得関数を使用
+        if (typeof getApiKey === 'function') {
+            return getApiKey();
         }
         
-        // 本番環境（GitHub Pages）の場合
-        if (window.location.hostname.includes('github.io')) {
-            // 本番環境用のAPIキーを返す
-            console.log('🔑 本番環境APIキー取得中...');
-            const productionApiKey = 'Mfe43kjAWKxa8sDSAn64450dKAX261UJg2XV3bCer-8';
-            console.log('🔑 本番環境APIキー設定完了:', productionApiKey ? 'キーあり（' + productionApiKey.substring(0, 8) + '...）' : 'キーなし');
-            return productionApiKey;
+        // フォールバック：セッションストレージから取得
+        const sessionKey = sessionStorage.getItem('yakki_api_key_temp');
+        if (sessionKey) {
+            return sessionKey;
         }
         
+        // APIキーが見つからない場合
+        console.warn('⚠️ APIキーが設定されていません');
         return null;
     }
 
@@ -52,9 +42,9 @@ class YakkiApiClient {
      */
     setApiKey(apiKey) {
         this.apiKey = apiKey;
-        // 開発環境でのみローカルストレージに保存
-        if (window.location.hostname === 'localhost') {
-            localStorage.setItem('yakki_api_key', apiKey);
+        // セッションストレージに一時保存（ローカルストレージは使用しない）
+        if (apiKey) {
+            sessionStorage.setItem('yakki_api_key_temp', apiKey);
         }
         console.log('API キーが設定されました');
     }
@@ -91,10 +81,8 @@ class YakkiApiClient {
         // APIキーがある場合は追加
         if (this.apiKey) {
             headers['X-API-KEY'] = this.apiKey;
-            // デバッグ用（本番環境での問題調査）
-            if (window.location.hostname.includes('github.io')) {
-                console.log('🔑 本番環境APIキー設定:', this.apiKey ? 'キーあり（' + this.apiKey.substring(0, 8) + '...）' : 'キーなし');
-            }
+            // デバッグ情報は最小限に
+            console.log('🔑 APIキー: 設定済み');
         } else {
             console.error('❌ APIキーが設定されていません');
         }

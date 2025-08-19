@@ -1,71 +1,26 @@
-# 薬機法リスクチェッカー - Xserver用セキュリティ設定
-
-# 環境変数ファイルの保護
-<Files ".env">
+# .envファイルへの直接アクセスを完全にブロック
+<Files ~ "^\.env">
     Order allow,deny
     Deny from all
 </Files>
 
-<Files ".env.*">
+# 環境変数ファイルのパターンをブロック
+<FilesMatch "\.(env|env\..*|.*\.env)$">
     Order allow,deny
     Deny from all
-</Files>
+</FilesMatch>
 
-# 設定ファイルの保護
-<Files "*.config">
+# セキュリティ関連ファイルへのアクセスを拒否
+<FilesMatch "(^#.*#|\.(bak|config|dist|fla|inc|ini|log|psd|sh|sql|sw[op])|~)$">
     Order allow,deny
     Deny from all
-</Files>
+</FilesMatch>
 
-# ログファイルの保護
-<Files "*.log">
-    Order allow,deny
-    Deny from all
-</Files>
-
-# PIDファイルの保護
-<Files "*.pid">
-    Order allow,deny
-    Deny from all
-</Files>
-
-# Pythonファイルへの直接アクセス禁止（必要に応じて）
-<Files "*.py">
-    Order allow,deny
-    Deny from all
-</Files>
-
-# バックアップファイルの保護
-<Files "*~">
-    Order allow,deny
-    Deny from all
-</Files>
-
-<Files "*.bak">
-    Order allow,deny
-    Deny from all
-</Files>
-
-# セキュリティヘッダーの追加
-<IfModule mod_headers.c>
-    # XSS対策
-    Header always set X-Content-Type-Options nosniff
-    Header always set X-Frame-Options DENY
-    Header always set X-XSS-Protection "1; mode=block"
-    
-    # HTTPS強制（SSL設定時のみ有効化）
-    # Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
-    
-    # リファラーポリシー
-    Header always set Referrer-Policy "strict-origin-when-cross-origin"
-    
-    # Content Security Policy
-    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://api.anthropic.com https://api.notion.com"
-</IfModule>
-
-# ディレクトリリストの無効化
+# ディレクトリリスティングを無効化
 Options -Indexes
 
-# サーバー情報の隠蔽
-ServerTokens Prod
-ServerSignature Off
+# HTTPメソッドの制限
+<LimitExcept GET POST>
+    Order deny,allow
+    Deny from all
+</LimitExcept>

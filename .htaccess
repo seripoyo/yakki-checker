@@ -1,0 +1,25 @@
+# ルートディレクトリの.htaccess - .envファイルへのアクセスを完全ブロック
+
+# .envファイルへの直接アクセスを禁止
+<Files ~ "^\.env">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# 環境変数ファイルのパターンをブロック
+<FilesMatch "\.(env|env\..*|.*\.env)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# backendディレクトリへの直接アクセスを制限
+<Directory "setting/backend">
+    # .envファイルへのアクセスを拒否
+    <Files ".env">
+        Order allow,deny
+        Deny from all
+    </Files>
+</Directory>
+
+# ディレクトリリスティングを無効化
+Options -Indexes

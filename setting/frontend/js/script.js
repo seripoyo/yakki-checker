@@ -157,30 +157,51 @@ function setupInitialState() {
 
 // ===== テキスト入力処理 =====
 function handleTextInput() {
-    // XSS対策: スクリプトタグの検出と除去
+    // セキュリティ強化: SecurityUtilsを使用した入力検証
     const inputValue = elements.textInput.value;
-    const dangerousPatterns = [
-        /<script[^>]*>[\s\S]*?<\/script>/gi,
-        /<iframe[^>]*>[\s\S]*?<\/iframe>/gi,
-        /<object[^>]*>[\s\S]*?<\/object>/gi,
-        /<embed[^>]*>/gi,
-        /javascript:/gi,
-        /on\w+\s*=/gi
-    ];
     
-    let cleanValue = inputValue;
-    let isModified = false;
-    
-    dangerousPatterns.forEach(pattern => {
-        if (pattern.test(cleanValue)) {
-            cleanValue = cleanValue.replace(pattern, '');
-            isModified = true;
+    // SecurityUtilsが利用可能か確認
+    if (typeof SecurityUtils !== 'undefined') {
+        const validation = SecurityUtils.validateYakkiInput(inputValue, {
+            maxLength: 500,
+            allowHtml: false,
+            strict: false // 警告は出すが処理は続行
+        });
+        
+        if (!validation.isValid) {
+            showMessage(validation.errors.join('\n'), 'error');
+            return;
         }
-    });
-    
-    if (isModified) {
-        elements.textInput.value = cleanValue;
-        showMessage('セキュリティ上の理由により、一部の文字が削除されました。', 'warning');
+        
+        if (validation.warnings.length > 0) {
+            showMessage(validation.warnings.join('\n'), 'warning');
+        }
+        
+        // クリーンな値を使用
+        elements.textInput.value = validation.cleanedValue;
+    } else {
+        // フォールバック: 基本的な検証
+        const dangerousPatterns = [
+            /<script[^>]*>[\s\S]*?<\/script>/gi,
+            /<iframe[^>]*>[\s\S]*?<\/iframe>/gi,
+            /javascript:/gi,
+            /on\w+\s*=/gi
+        ];
+        
+        let cleanValue = inputValue;
+        let isModified = false;
+        
+        dangerousPatterns.forEach(pattern => {
+            if (pattern.test(cleanValue)) {
+                cleanValue = cleanValue.replace(pattern, '');
+                isModified = true;
+            }
+        });
+        
+        if (isModified) {
+            elements.textInput.value = cleanValue;
+            showMessage('セキュリティ上の理由により、一部の文字が削除されました。', 'warning');
+        }
     }
     
     // 文字数制限のチェック
