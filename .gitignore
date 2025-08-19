@@ -1,0 +1,8 @@
+# MCP configuration
+.mcp.json
+
+
+# AI Team Directory (Keep private)
+my-ai-team/
+.my-ai-team/
+my-ai-team/*
