@@ -1,0 +1,140 @@
+INFO:__main__:薬機法リスクチェッカー 初期化開始
+INFO:__main__:Claude API クライアント初期化完了
+INFO:__main__:Notion API 設定確認完了
+INFO:__main__:CSVファイル読み込み完了: 18件のNG表現データ
+INFO:__main__:マークダウンファイル読み込み完了: 33240文字
+INFO:__main__:薬機法リスクチェッカー 初期化完了
+============================================================
+薬機法リスクチェッカー API サーバー (Claude API連携版)
+============================================================
+Port: 5000
+Debug: True
+Claude API: ✅ 接続済み
+NG表現データ: 18件
+Health Check: http://localhost:5000/
+API Endpoint: http://localhost:5000/api/check
+============================================================
+ * Serving Flask app 'app'
+ * Debug mode: on
+INFO:werkzeug:[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://172.30.238.44:5000
+INFO:werkzeug:[33mPress CTRL+C to quit[0m
+INFO:werkzeug: * Restarting with stat
+INFO:__main__:薬機法リスクチェッカー 初期化開始
+INFO:__main__:Claude API クライアント初期化完了
+INFO:__main__:Notion API 設定確認完了
+INFO:__main__:CSVファイル読み込み完了: 18件のNG表現データ
+INFO:__main__:マークダウンファイル読み込み完了: 33240文字
+INFO:__main__:薬機法リスクチェッカー 初期化完了
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 618-899-275
+INFO:__main__:チェック開始 - Category: 化粧品, Type: キャッチコピー, Text length: 11
+INFO:__main__:Claude API呼び出し開始
+INFO:httpx:HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+INFO:__main__:Claude API応答受信: 762 characters
+ERROR:__main__:Claude APIレスポンスのJSONパースエラー: Expecting value: line 1 column 1 (char 0)
+ERROR:__main__:Raw response: ```json
+{
+  "overall_risk": "高",
+  "risk_counts": {
+    "total": 2,
+    "high": 2,
+    "medium": 0,
+    "low": 0
+  },
+  "issues": [
+    {
+      "fragment": "美白効果",
+      "reason": "化粧品において「美白」単体および「美白効果」は薬機法違反。医薬部外品専用の表現であり、化粧品では使用不可。化粧品の効能効果56項目に含まれない医薬部外品的効果を暗示している。",
+      "risk_level": "高",
+      "suggestions": ["透明感を与える", "明るい印象の肌へ導く", "キメを整えツヤを与える"]
+    },
+    {
+      "fragment": "シミが消える",
+      "reason": "化粧品において「シミが消える」は治療的効果を明確に謳っており、薬機法違反。化粧品の効能効果56項目を大幅に逸脱し、医薬品的効果を暗示している。消費者に誤解を与える危険性が極めて高い。",
+      "risk_level": "高",
+      "suggestions": ["キメを整え明るい印象の肌へ導く", "透明感のある肌へ導く", "うるおいを与えツヤのある肌に整える"]
+    }
+  ],
+  "rewritten_texts": {
+    "conservative": "透明感を与えキメを整える",
+    "balanced": "明るい印象の肌へ導くスキンケア",
+    "appealing": "透明感あふれる明るい印象の肌へ導く"
+  }
+}
+```
+WARNING:__main__:フォールバック応答を生成: JSONパースエラーのため、基本的なチェック結果を返します
+INFO:__main__:チェック完了 - Claude APIレスポンス受信
+INFO:werkzeug:127.0.0.1 - - [19/Jul/2025 14:35:21] "POST /api/check HTTP/1.1" 200 -
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/backend/app.py', reloading
+============================================================
+薬機法リスクチェッカー API サーバー (Claude API連携版)
+============================================================
+Port: 5000
+Debug: True
+Claude API: ✅ 接続済み
+NG表現データ: 18件
+Health Check: http://localhost:5000/
+API Endpoint: http://localhost:5000/api/check
+============================================================
+INFO:werkzeug: * Restarting with stat
+INFO:__main__:薬機法リスクチェッカー 初期化開始
+INFO:__main__:Claude API クライアント初期化完了
+INFO:__main__:Notion API 設定確認完了
+INFO:__main__:CSVファイル読み込み完了: 18件のNG表現データ
+INFO:__main__:マークダウンファイル読み込み完了: 33240文字
+INFO:__main__:薬機法リスクチェッカー 初期化完了
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 618-899-275
+INFO:werkzeug: * Detected change in '/home/seri/yakki-check/yakki-checker/backend/app.py', reloading
+============================================================
+薬機法リスクチェッカー API サーバー (Claude API連携版)
+============================================================
+Port: 5000
+Debug: True
+Claude API: ✅ 接続済み
+NG表現データ: 18件
+Health Check: http://localhost:5000/
+API Endpoint: http://localhost:5000/api/check
+============================================================
+INFO:werkzeug: * Restarting with stat
+INFO:__main__:薬機法リスクチェッカー 初期化開始
+INFO:__main__:Claude API クライアント初期化完了
+INFO:__main__:Notion API 設定確認完了
+INFO:__main__:CSVファイル読み込み完了: 18件のNG表現データ
+INFO:__main__:マークダウンファイル読み込み完了: 33240文字
+INFO:__main__:薬機法リスクチェッカー 初期化完了
+WARNING:werkzeug: * Debugger is active!
+INFO:werkzeug: * Debugger PIN: 618-899-275
+INFO:__main__:チェック開始 - Category: 化粧品, Type: キャッチコピー, Text length: 11
+INFO:__main__:Claude API呼び出し開始
+INFO:httpx:HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+INFO:__main__:Claude API応答受信: 762 characters
+INFO:__main__:チェック完了 - Claude APIレスポンス受信
+INFO:werkzeug:127.0.0.1 - - [19/Jul/2025 14:36:27] "POST /api/check HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [19/Jul/2025 14:38:40] "GET / HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [19/Jul/2025 14:38:53] "OPTIONS /api/check HTTP/1.1" 200 -
+INFO:__main__:チェック開始 - Category: 化粧品, Type: お客様の声, Text length: 16
+INFO:__main__:Claude API呼び出し開始
+INFO:httpx:HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+INFO:__main__:Claude API応答受信: 995 characters
+INFO:__main__:チェック完了 - Claude APIレスポンス受信
+INFO:werkzeug:127.0.0.1 - - [19/Jul/2025 14:39:05] "POST /api/check HTTP/1.1" 200 -
+INFO:__main__:Notion API呼び出し開始
+INFO:__main__:Notion API Request: https://api.notion.com/v1/databases/216e28003be48017a871eb7ca7817828/query
+INFO:__main__:Notion APIからガイドデータ取得完了: 3件
+INFO:werkzeug:127.0.0.1 - - [21/Jul/2025 08:44:23] "GET /api/guide HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [23/Jul/2025 20:19:51] "GET / HTTP/1.1" 200 -
+INFO:__main__:Notion API呼び出し開始
+INFO:__main__:Notion API Request: https://api.notion.com/v1/databases/216e28003be48017a871eb7ca7817828/query
+INFO:__main__:Notion APIからガイドデータ取得完了: 3件
+INFO:werkzeug:127.0.0.1 - - [23/Jul/2025 20:19:58] "GET /api/guide HTTP/1.1" 200 -
+INFO:werkzeug:127.0.0.1 - - [23/Jul/2025 20:49:41] "OPTIONS /api/check HTTP/1.1" 200 -
+INFO:__main__:チェック開始 - Category: 薬用化粧品, Type: 商品説明文・広告文・通常テキスト, Text length: 21
+INFO:__main__:Claude API呼び出し開始
+INFO:httpx:HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+INFO:__main__:Claude API応答受信: 900 characters
+INFO:__main__:チェック完了 - Claude APIレスポンス受信
+INFO:werkzeug:127.0.0.1 - - [23/Jul/2025 20:49:55] "POST /api/check HTTP/1.1" 200 -

@@ -19,12 +19,10 @@
 - Git（開発時のみ）
 
 ### 重要：プロジェクト構造
-プロジェクトは `/home/seri/yakki-check/` にクローンされています。
-実際のアプリケーションファイルは `yakki-checker/` サブディレクトリ内にあります。
+プロジェクトは `/home/seri/yakki-check/` ディレクトリに配置されています。
 
 ### 1. プロジェクトディレクトリへの移動
 ```bash
-# すでにクローン済みの場合
 cd /home/seri/yakki-check
 ```
 
@@ -32,7 +30,7 @@ cd /home/seri/yakki-check
 
 #### 2.1 ターミナル1でバックエンドディレクトリへ移動
 ```bash
-cd yakki-checker/setting/backend
+cd setting/backend
 ```
 
 #### 2.2 環境変数の設定（.envファイルが存在しない場合）
@@ -81,7 +79,7 @@ API Endpoint: http://localhost:5000/api/check
 
 #### 3.2 プロジェクトルートへ移動
 ```bash
-cd /home/seri/yakki-check/yakki-checker
+cd /home/seri/yakki-check
 ```
 
 #### 3.3 ポート8000が使用中でないか確認
@@ -92,8 +90,7 @@ lsof -ti:8000 | xargs kill -9 2>/dev/null || true
 
 #### 3.4 フロントエンドサーバーの起動
 ```bash
-# 正しいディレクトリでPython3のhttp.serverを使用
-cd /home/seri/yakki-check/yakki-checker
+# Python3のhttp.serverを使用
 python3 -m http.server 8000
 ```
 
@@ -141,7 +138,7 @@ http://localhost:8000
 
 ## プロジェクト構成（最新）
 ```
-yakki-checker/
+yakki-check/
 ├── setting/
 │   ├── backend/                    # バックエンドAPI
 │   │   ├── app.py                 # Flask APIサーバー
@@ -310,7 +307,7 @@ yakki-checker/
 #### ステップ1: バックエンド起動（ターミナル1）
 ```bash
 # プロジェクトディレクトリへ移動
-cd /home/seri/yakki-check/yakki-checker/setting/backend
+cd /home/seri/yakki-check/setting/backend
 
 # Python3でバックエンドを起動
 python3 app.py
@@ -319,8 +316,8 @@ python3 app.py
 #### ステップ2: フロントエンド起動（ターミナル2）
 ```bash
 # 新しいターミナルを開く
-# 正しいプロジェクトディレクトリへ移動（重要）
-cd /home/seri/yakki-check/yakki-checker
+# プロジェクトディレクトリへ移動
+cd /home/seri/yakki-check
 
 # ポート8000が空いているか確認
 lsof -ti:8000 | xargs kill -9 2>/dev/null || true
@@ -329,7 +326,7 @@ lsof -ti:8000 | xargs kill -9 2>/dev/null || true
 python3 -m http.server 8000
 ```
 
-**重要**: フロントエンドは必ず `/home/seri/yakki-check/yakki-checker` ディレクトリから起動する必要があります。このディレクトリに `index.html` が存在し、CSSやJSファイルへの相対パスが正しく設定されています。
+**重要**: フロントエンドは必ず `/home/seri/yakki-check` ディレクトリから起動する必要があります。このディレクトリに `index.html` が存在し、CSSやJSファイルへの相対パスが正しく設定されています。
 
 ### サーバー管理
 ```bash
@@ -359,7 +356,7 @@ python3 -m http.server 8000
 #### 3. No such file or directory
 ```bash
 # 正しいディレクトリパスを使用
-cd /home/seri/yakki-check/yakki-checker/setting/backend
+cd /home/seri/yakki-check/setting/backend
 ```
 
 ## トラブルシューティング
@@ -375,14 +372,14 @@ lsof -ti:8000 | xargs kill -9 2>/dev/null || true
 
 #### 手順、2: バックエンドの起動（ターミナル1）
 ```bash
-cd /home/seri/yakki-check/yakki-checker/setting/backend
+cd /home/seri/yakki-check/setting/backend
 python3 app.py
 ```
 
 #### 手順、3: フロントエンドの起動（ターミナル2）
 ```bash
 # 新しいターミナルを開いて実行
-cd /home/seri/yakki-check/yakki-checker
+cd /home/seri/yakki-check
 python3 -m http.server 8000
 ```
 
@@ -397,7 +394,7 @@ python3 -m http.server 8000
 ### Claude API認証エラー
 1. `.env`ファイルのCLAUDE_API_KEYが正しく設定されているか確認
 ```bash
-cd /home/seri/yakki-check/yakki-checker/setting/backend
+cd /home/seri/yakki-check/setting/backend
 cat .env
 ```
 2. Render.com環境変数でCLAUDE_API_KEYを手動設定
@@ -409,7 +406,7 @@ cat .env
 lsof -ti:5000 | xargs kill -9
 
 # Python3コマンドを使用
-cd /home/seri/yakki-check/yakki-checker/setting/backend
+cd /home/seri/yakki-check/setting/backend
 python3 app.py
 
 # 依存関係の再インストールが必要な場合
@@ -421,7 +418,7 @@ pip3 install -r requirements.txt --force-reinstall
 # キャッシュクリア: Ctrl+Shift+R（Windows）またはCmd+Shift+R（Mac）
 # ポート確認
 lsof -ti:8000 | xargs kill -9
-cd /home/seri/yakki-check/yakki-checker
+cd /home/seri/yakki-check
 python3 -m http.server 8000
 ```
 

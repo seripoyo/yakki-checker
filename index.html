@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>薬機法リスクチェッカー</title>
+    <meta name="title" content="薬機法リスクチェッカー" />
+    <meta name="description"
+        content="化粧品やサプリなどの広告で対応が必要な薬機法における抵触リスクの一次チェックを自分で行えるツールです。リライト案も提示しますが、本アプリの結果は適法性を保証するものではございません。" />
+    <meta name="robots" content="noindex, nofollow">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://yakki-check.seripoyo.com/" />
+    <meta property="og:title" content="薬機法リスクチェッカー" />
+    <meta property="og:description"
+        content="化粧品やサプリなどの広告で対応が必要な薬機法における抵触リスクの一次チェックを自分で行えるツールです。リライト案も提示しますが、本アプリの結果は適法性を保証するものではございません。" />
+    <meta property="og:image" content="assetes/yakki-checker-ogp.png" />
+    <meta property="og:image:alt" content="化粧品やサプリなどの広告で対応が必要な薬機法における抵触リスクの一次チェックを自分で行えるツールです。リライト案も提示しますが、本アプリの結果は適法性を保証するものではございません。" />
+
+    <!-- X (Twitter) -->
+     <meta name="twitter:widgets:csp" content="on">
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://yakki-check.seripoyo.com/" />
+    <meta property="twitter:title" content="薬機法リスクチェッカー" />
+    <meta property="twitter:description"
+        content="化粧品やサプリなどの広告で対応が必要な薬機法における抵触リスクの一次チェックを自分で行えるツールです。リライト案も提示しますが、本アプリの結果は適法性を保証するものではございません。" />
+    <meta property="twitter:image" content="assetes/yakki-checker-ogp.png" />
+    <meta name="twitter:image:alt" content="化粧品やサプリなどの広告で対応が必要な薬機法における抵触リスクの一次チェックを自分で行えるツールです。リライト案も提示しますが、本アプリの結果は適法性を保証するものではございません。" />
+    <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
+    <!-- XSS対策: Content Security Policy (強化版) -->
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' http://localhost:* https://*.onrender.com; frame-ancestors 'none'; form-action 'self'; base-uri 'self'; upgrade-insecure-requests;">
+    <link rel="stylesheet" href="setting/frontend/css/style.css">
+    <link rel="stylesheet" href="setting/frontend/css/components.css">
+    <link rel="stylesheet" href="setting/frontend/css/progress.css">
+</head>
+
+<body>
+    <!-- ヘッダー -->
+    <header class="header">
+        <div class="container">
+            <h1 class="header-title">
+                <span class="icon">⚖️</span>
+                薬機法リスクチェッカー
+            </h1>
+            <p class="header-subtitle">化粧品・コスメ広告の薬機法適合性チェックツール</p>
+        </div>
+    </header>
+
+    <!-- メインコンテンツ -->
+    <main class="main">
+        <div class="container">
+            <!-- タブナビゲーション -->
+            <nav class="tab-navigation">
+                <button id="tab-checker" class="tab-button active" data-tab="checker">
+                    📝 リスクチェッカー
+                </button>
+                <button id="tab-guide" class="tab-button" data-tab="guide">
+                    📖 薬機法簡単ガイド
+                </button>
+            </nav>
+
+            <!-- タブコンテンツ -->
+            <div class="tab-content">
+                <!-- リスクチェッカータブ -->
+                <section id="checker-content" class="tab-panel active">
+                    <div class="checker-form">
+                        <!-- STEP 1: 商品カテゴリ選択 -->
+                        <div class="form-step">
+                            <div class="step-header">
+                                <span class="step-number">STEP 1</span>
+                                <span class="step-title">商品カテゴリを選択してください</span>
+                            </div>
+                            <select id="product-category" class="form-select">
+                                <option value="">-- 選択してください --</option>
+                                <option value="化粧品">化粧品（一般化粧品）</option>
+                                <option value="薬用化粧品">薬用化粧品（医薬部外品）</option>
+                                <option value="医薬部外品">医薬部外品（化粧品以外）</option>
+                                <option value="サプリメント">サプリメント・健康食品</option>
+                                <option value="美容機器・健康器具・その他">美容機器・健康器具・その他</option>
+                            </select>
+
+                            <!-- 医薬品・医療機器承認の質問（美容機器カテゴリ選択時のみ表示） -->
+                            <div class="sub-option" id="medical-approval-section" style="display: none;">
+                                <label class="sub-option-label">医薬品・医療機器として承認されていますか？</label>
+                                <div class="radio-group">
+                                    <label class="radio-label">
+                                        <input type="radio" name="medical-approval" value="no" checked>
+                                        <span class="radio-custom"></span>
+                                        いいえ
+                                    </label>
+                                    <label class="radio-label">
+                                        <input type="radio" name="medical-approval" value="yes">
+                                        <span class="radio-custom"></span>
+                                        はい
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- STEP 2: 文章の種類選択 -->
+                        <div class="form-step">
+                            <div class="step-header">
+                                <span class="step-number">STEP 2</span>
+                                <span class="step-title">文章の種類を選択してください</span>
+                            </div>
+                            <select id="text-type" class="form-select">
+                                <option value="">-- 選択してください --</option>
+                                <option value="キャッチコピー">キャッチコピー</option>
+                                <option value="LP見出し・タイトル">LP見出し・タイトル</option>
+                                <option value="商品説明文・広告文・通常テキスト">商品説明文・広告文・通常テキスト</option>
+                                <option value="お客様の声">お客様の声</option>
+                            </select>
+                        </div>
+
+                        <!-- STEP 3: チェック文章入力 -->
+                        <div class="form-step">
+                            <div class="step-header">
+                                <span class="step-number">STEP 3</span>
+                                <span class="step-title">チェックしたい文章を入力してください</span>
+                            </div>
+                            <textarea id="text-input" class="form-textarea"
+                                placeholder="例：このクリームでシミが完全に消えます！アンチエイジング効果で若々しいお肌に..." rows="6"></textarea>
+                            <div class="character-count">
+                                <span id="char-count">0</span> / 500文字
+                            </div>
+                        </div>
+
+                        <!-- 特に訴求したいポイント（任意） -->
+                        <div class="optional-section">
+                            <div class="optional-header">
+                                <span class="optional-label">特に訴求したいポイント（任意）</span>
+                            </div>
+                            <textarea id="special-points" class="form-textarea"
+                                placeholder="例：自然由来成分であることを強調したい、即効性よりも安全性をアピールしたい、他社との差別化ポイントなど" rows="3"></textarea>
+                            <div class="form-note">
+                                ※ 入力いただいた場合、この内容に配慮したリライト案を提示します
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button id="check-button" class="btn btn-primary" disabled>
+                                <span class="btn-icon">🔍</span>
+                                チェック開始
+                            </button>
+                            <button id="clear-button" class="btn btn-secondary">
+                                <span class="btn-icon">🗑️</span>
+                                クリア
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- ローディングスピナー -->
+                    <div id="loading-spinner" class="loading-spinner" style="display: none;">
+                        <div class="spinner"></div>
+                        <p>薬機法チェック中...</p>
+                    </div>
+
+                    <!-- 結果表示エリア -->
+                    <div id="result-area" class="result-area" style="display: none;">
+                        <!-- 総合リスクレベル -->
+                        <div id="overall-risk" class="risk-summary">
+                            <h3 class="risk-title">総合リスクレベル</h3>
+                            <div id="risk-badge" class="risk-badge">
+                                <span id="risk-level-text">低</span>
+                            </div>
+                        </div>
+
+                        <!-- リスク件数サマリー -->
+                        <div id="risk-counts" class="risk-counts">
+                            <h3 class="section-title">検出結果サマリー</h3>
+                            <div class="counts-grid">
+                                <div class="count-item">
+                                    <span class="count-label">総検出数</span>
+                                    <span id="total-count" class="count-value">0</span>
+                                </div>
+                                <div class="count-item high">
+                                    <span class="count-label">高リスク</span>
+                                    <span id="high-count" class="count-value">0</span>
+                                </div>
+                                <div class="count-item medium">
+                                    <span class="count-label">中リスク</span>
+                                    <span id="medium-count" class="count-value">0</span>
+                                </div>
+                                <div class="count-item low">
+                                    <span class="count-label">低リスク</span>
+                                    <span id="low-count" class="count-value">0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 詳細結果（2カラム表示） -->
+                        <div class="result-details">
+                            <h3 class="section-title">詳細結果</h3>
+                            <div class="details-grid">
+                                <!-- 左カラム：入力文表示エリア -->
+                                <div class="left-column">
+                                    <h4 class="column-title">入力文（問題箇所をハイライト）</h4>
+                                    <div id="highlighted-text" class="highlighted-text">
+                                        <!-- JavaScriptで動的に生成 -->
+                                    </div>
+                                </div>
+
+                                <!-- 右カラム：解説エリア -->
+                                <div class="right-column">
+                                    <h4 class="column-title">指摘事項</h4>
+                                    <div id="issues-list" class="issues-list">
+                                        <!-- JavaScriptで動的に生成 -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 全文リライト案（3つのバリエーション） -->
+                        <div id="rewritten-section" class="rewritten-section">
+                            <h3 class="section-title">🎯 修正版テキスト</h3>
+                            <div id="rewritten-texts-container" class="rewritten-texts-container">
+                                <!-- JavaScriptで動的に生成 -->
+                            </div>
+
+                            <!-- 従来版（後方互換性） -->
+                            <div id="legacy-rewritten" style="display: none;">
+                                <div id="rewritten-text" class="rewritten-text">
+                                    <!-- JavaScriptで動的に生成 -->
+                                </div>
+                                <button id="copy-rewritten" class="btn btn-outline copy-btn">
+                                    <span class="btn-icon">📋</span>
+                                    修正版をコピー
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 相談促進CTA -->
+                        <div id="consultation-cta" class="consultation-cta" style="display: none;">
+                            <div class="cta-content">
+                                <div class="cta-header">
+                                    <h3 class="cta-headline">「その広告表現…大丈夫？」</h3>
+                                    <p class="cta-subheadline">薬機法・景表法に配慮した<br>広告作りをサポート！</p>
+                                </div>
+
+                                <div class="cta-body">
+                                    <p>薬機法や景表法に引っかかると、<br>行政指導や掲載停止のリスクも⚡</p>
+                                    <p>「この表現ってNGなの？」と<br>不安を感じるなら、</p>
+
+                                    <p>過去の行政事例やガイドラインに基づいた <br></p>
+
+                                    <p>広告表現を整えるための具体的な提案や<br>言い換えをサポートします。</p>
+                                </div>
+
+                                <div class="cta-buttons">
+                                    <a href="https://forms.gle/cv8G73yqwK7e7cdX8" target="_blank"
+                                        rel="noopener noreferrer" class="btn btn-cta-primary"
+                                        id="cta-consultation-button">
+                                        <span class="btn-icon"></span>
+                                        今すぐ「薬機法管理者」に相談してみる！
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 薬機法簡単ガイドタブ -->
+                <section id="guide-content" class="tab-panel">
+                    <style>
+                        * {
+                            margin: 0;
+                            padding: 0;
+                            box-sizing: border-box;
+                        }
+
+                        body {
+                            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", "Hiragino Sans", Arial, sans-serif;
+                            line-height: 1.7;
+                            color: #2d3748;
+                            background-color: #f8fafc;
+                            font-size: 16px;
+                        }
+
+                        .container {
+                            max-width: 1100px;
+                            margin: 0 auto;
+                            padding: 0 20px;
+                        }
+
+                        header {
+                            background: #fff;
+                            border-bottom: 1px solid #e2e8f0;
+                            padding: 32px 0;
+                        }
+
+                        h1 {
+                            font-size: 2.25rem;
+                            font-weight: 700;
+                            color: #1a202c;
+                            margin-bottom: 8px;
+                            letter-spacing: -0.025em;
+                        }
+
+                        .subtitle {
+                            font-size: 1.125rem;
+                            color: #64748b;
+                            font-weight: 400;
+                        }
+
+                        .warning-banner {
+                            background-color: #fef2f2;
+                            border: 1px solid #fecaca;
+                            color: #991b1b;
+                            padding: 16px 24px;
+                            margin: 32px 0;
+                            border-radius: 8px;
+                            font-weight: 500;
+                            display: flex;
+                            align-items: center;
+                            gap: 12px;
+                        }
+
+                        .warning-banner::before {
+                            content: "⚠️";
+                            font-size: 1.25rem;
+                        }
+
+                        .section {
+                            background: white;
+                            border-radius: 12px;
+                            padding: 40px;
+                            margin-bottom: 24px;
+                            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                        }
+
+                        h2 {
+                            font-size: 1.875rem;
+                            font-weight: 700;
+                            color: #1a202c;
+                            margin-bottom: 24px;
+                            display: flex;
+                            align-items: center;
+                            gap: 12px;
+                        }
+
+                        h2::before {
+                            content: attr(data-emoji);
+                            font-size: 1.5rem;
+                            display: inline-block;
+                        }
+
+                        h3 {
+                            font-size: 1.25rem;
+                            font-weight: 600;
+                            color: #2d3748;
+                            margin: 32px 0 16px 0;
+                        }
+
+                        h4 {
+                            font-size: 1.125rem;
+                            font-weight: 600;
+                            color: #2d3748;
+                            margin-bottom: 8px;
+                        }
+
+                        p {
+                            margin-bottom: 16px;
+                            color: #4a5568;
+                        }
+
+                        .lead {
+                            font-size: 1.125rem;
+                            line-height: 1.75;
+                            color: #4a5568;
+                            margin-bottom: 32px;
+                        }
+
+                        .category-grid {
+                            display: grid;
+                            grid-template-columns: repeat(2, 1fr);
+                            gap: 20px;
+                            margin: 32px 0;
+                        }
+
+                        .category-card {
+                            background: #f8fafc;
+                            border: 1px solid #e2e8f0;
+                            border-radius: 8px;
+                            padding: 24px;
+                            transition: all 0.2s ease;
+                        }
+
+                        .category-card:hover {
+                            border-color: #cbd5e1;
+                            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+                        }
+
+                        .category-card h4 {
+                            font-size: 1.125rem;
+                            color: #1a202c;
+                            margin-bottom: 12px;
+                            display: flex;
+                            align-items: center;
+                            gap: 8px;
+                        }
+
+                        .category-card p {
+                            font-size: 0.875rem;
+                            color: #64748b;
+                            margin-bottom: 8px;
+                        }
+
+                        .category-card .status {
+                            font-size: 0.875rem;
+                            font-weight: 600;
+                            margin-top: 12px;
+                        }
+
+                        .status-ok {
+                            color: #059669;
+                        }
+
+                        .status-ng {
+                            color: #dc2626;
+                        }
+
+                        .example-box {
+                            padding: 16px 20px;
+                            margin: 12px 0;
+                            border-radius: 6px;
+                            font-size: 0.9375rem;
+                        }
+
+                        .ng-example {
+                            background-color: #fef2f2;
+                            border: 1px solid #fecaca;
+                            color: #7f1d1d;
+                        }
+
+                        .ok-example {
+                            background-color: #f0fdf4;
+                            border: 1px solid #bbf7d0;
+                            color: #14532d;
+                        }
+
+                        .example-box strong {
+                            font-weight: 600;
+                            display: inline-block;
+                            margin-bottom: 4px;
+                        }
+
+                        ul,
+                        ol {
+                            margin: 16px 0;
+                            padding-left: 24px;
+                        }
+
+                        li {
+                            margin-bottom: 12px;
+                            color: #4a5568;
+                            line-height: 1.6;
+                        }
+
+                        .table-wrapper {
+                            overflow-x: auto;
+                            margin: 32px 0;
+                            border-radius: 8px;
+                            border: 1px solid #e2e8f0;
+                        }
+
+                        table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            background: white;
+                            font-size: 0.9375rem;
+                        }
+
+                        th {
+                            background-color: #f8fafc;
+                            padding: 16px;
+                            text-align: left;
+                            font-weight: 600;
+                            color: #1a202c;
+                            border-bottom: 1px solid #e2e8f0;
+                        }
+
+                        td {
+                            padding: 16px;
+                            border-bottom: 1px solid #f1f5f9;
+                        }
+
+                        tr:last-child td {
+                            border-bottom: none;
+                        }
+
+                        tr:hover {
+                            background-color: #f8fafc;
+                        }
+
+                        .penalty-section {
+                            background-color: #fef3c7;
+                            border: 1px solid #fde68a;
+                            border-radius: 8px;
+                            padding: 24px;
+                            margin: 24px 0;
+                        }
+
+                        .penalty-section h3 {
+                            color: #92400e;
+                            margin-top: 0;
+                            margin-bottom: 16px;
+                        }
+
+                        .penalty-section h4 {
+                            color: #78350f;
+                            margin-top: 20px;
+                            margin-bottom: 12px;
+                        }
+
+                        .penalty-section ul {
+                            margin: 8px 0;
+                        }
+
+                        .penalty-section li {
+                            color: #92400e;
+                        }
+
+                        .checklist {
+                            background-color: #eff6ff;
+                            border: 1px solid #dbeafe;
+                            border-radius: 8px;
+                            padding: 24px;
+                            margin: 24px 0;
+                        }
+
+                        .checklist h3 {
+                            color: #1e3a8a;
+                            margin-top: 0;
+                            margin-bottom: 20px;
+                        }
+
+                        .check-item {
+                            display: flex;
+                            align-items: flex-start;
+                            margin-bottom: 16px;
+                            gap: 12px;
+                        }
+
+                        .check-item input[type="checkbox"] {
+                            width: 20px;
+                            height: 20px;
+                            margin-top: 2px;
+                            cursor: pointer;
+                            flex-shrink: 0;
+                        }
+
+                        .check-item label {
+                            cursor: pointer;
+                            color: #1e40af;
+                            line-height: 1.5;
+                        }
+
+                        .point-card {
+                            background-color: #f0f4ff;
+                            border-left: 4px solid #4f46e5;
+                            padding: 20px 24px;
+                            margin: 16px 0;
+                            border-radius: 0 6px 6px 0;
+                        }
+
+                        .point-card p {
+                            margin: 0;
+                            color: #312e81;
+                        }
+
+                        .cta-section {
+                            text-align: center;
+                            padding: 48px 32px;
+                            background-color: #fef3c7;
+                            border-radius: 12px;
+                            margin: 40px 0;
+                        }
+
+                        .cta-section h2 {
+                            justify-content: center;
+                            color: #92400e;
+                            margin-bottom: 16px;
+                        }
+
+                        .cta-section p {
+                            color: #78350f;
+                            margin-bottom: 32px;
+                            max-width: 600px;
+                            margin-left: auto;
+                            margin-right: auto;
+                        }
+
+                        .cta-button {
+                            display: inline-block;
+                            background-color: #f97316;
+                            color: white;
+                            padding: 14px 32px;
+                            font-size: 1.0625rem;
+                            font-weight: 600;
+                            text-decoration: none;
+                            border-radius: 8px;
+                            border: 3px solid #353535;
+                            transition: .3s;
+
+                        }
+
+                        .cta-button:hover {
+                            box-shadow: 0px 5px #353535;
+                        }
+
+                        .cta-button:active {
+                            box-shadow: 0 0;
+                            transform: translate(0px, 5px);
+                        }
+
+                        .footer {
+                            background-color: #1a202c;
+                            color: #cbd5e1;
+                            text-align: center;
+                            padding: 32px 0;
+                            margin-top: 64px;
+                        }
+
+                        .footer p {
+                            color: #cbd5e1;
+                            margin: 0;
+                            line-height: 1.6;
+                        }
+
+                        .highlight {
+                            background-color: #fef3c7;
+                            padding: 2px 6px;
+                            border-radius: 3px;
+                            font-weight: 500;
+                        }
+
+                        @media (max-width: 768px) {
+                            .container {
+                                padding: 0 16px;
+                            }
+
+                            h1 {
+                                font-size: 1.875rem;
+                            }
+
+                            h2 {
+                                font-size: 1.5rem;
+                            }
+
+                            .section {
+                                padding: 24px 8px;
+                            }
+
+                            .category-grid {
+                                grid-template-columns: 1fr;
+                            }
+
+                            table {
+                                font-size: 0.875rem;
+                            }
+
+                            th,
+                            td {
+                                padding: 12px;
+                            }
+                        }
+
+                        @media screen and (max-width: 768px) {
+                            @media screen and (max-width: 768px) {
+                                table {
+                                    width: 100%;
+                                }
+
+                                table .thead {
+                                    display: none;
+                                }
+
+                                table tr {
+                                    width: 100%;
+                                }
+
+                                table td {
+                                    display: block;
+                                    text-align: right;
+                                    width: 100%;
+                                }
+
+                                table td:first-child {
+                                    background: #e9727e;
+                                    color: #fff;
+                                    font-weight: bold;
+                                    text-align: center;
+                                }
+
+                                table td:before {
+                                    content: attr(data-label);
+                                    float: left;
+                                    font-weight: bold;
+                                    margin-right: 10px;
+                                }
+                            }
+
+                        }
+                    </style>
+                    </head>
+
+                    <body>
+                        <header>
+                            <div class="container">
+                                <h1>簡単薬機法ガイド</h1>
+                                <p class="subtitle">初心者でもわかる！広告表現の基本ルール</p>
+                            </div>
+                        </header>
+
+                        <div class="container">
+                            <div class="warning-banner">
+                                薬機法違反は最大3年の懲役または300万円以下の罰金！正しい知識を身につけましょう
+                            </div>
+
+                            <section class="section">
+                                <h2 data-emoji="📖">薬機法とは？</h2>
+                                <p class="lead">
+                                    薬機法（医薬品、医療機器等の品質、有効性及び安全性の確保等に関する法律）は、
+                                    <span class="highlight">医薬品・化粧品・健康食品などの広告表現を規制する法律</span>です。
+                                    消費者を誤解から守り、適切な商品選択ができるようにすることが目的です。
+                                </p>
+                            </section>
+
+                            <section class="section">
+                                <h2 data-emoji="📦">製品カテゴリー別ルール</h2>
+                                <div class="category-grid">
+                                    <div class="category-card">
+                                        <h4>💊 医薬品</h4>
+                                        <p>病気の治療・予防を目的とする製品</p>
+                                        <p class="status status-ok">✓「治る」「改善」などの表現が可能</p>
+                                    </div>
+                                    <div class="category-card">
+                                        <h4>💄 化粧品</h4>
+                                        <p>美化・清潔・健やかに保つことが目的</p>
+                                        <p class="status status-ng">✗ 治療効果は標榜できません</p>
+                                    </div>
+                                    <div class="category-card">
+                                        <h4>🥗 健康食品</h4>
+                                        <p>栄養補給・健康維持を目的とする製品</p>
+                                        <p class="status status-ng">✗ 病気への効果は標榜できません</p>
+                                    </div>
+                                    <div class="category-card">
+                                        <h4>🔧 雑品（美容機器等）</h4>
+                                        <p>物理的な効果のみを目的とする製品</p>
+                                        <p class="status status-ng">✗ 身体への作用は標榜できません</p>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <section class="section">
+                                <h2 data-emoji="⚠️">絶対に使ってはいけない表現</h2>
+
+                                <h3>1. 病気の治療・予防</h3>
+                                <div class="ng-example example-box">
+                                    <strong>❌ NG例：</strong>アトピーが治る / がん予防 / 糖尿病改善 / 便秘解消 / 花粉症対策 / 冷え性改善
+                                </div>
+                                <div class="ok-example example-box">
+                                    <strong>✅ OK例：</strong>健康維持のために / スッキリした毎日を / 健やかな生活をサポート
+                                </div>
+
+                                <h3>2. 最大級・保証表現</h3>
+                                <div class="ng-example example-box">
+                                    <strong>❌ NG例：</strong>最高の効果 / 世界一 / 絶対安全 / 必ず効く / No.1 / 究極 / 万能
+                                </div>
+                                <div class="ok-example example-box">
+                                    <strong>✅ OK例：</strong>多くの方に選ばれています / 満足度93%（※調査概要明記）
+                                </div>
+
+                                <h3>3. 医師・専門家の推薦</h3>
+                                <div class="ng-example example-box">
+                                    <strong>❌ NG例：</strong>医師推奨 / 〇〇病院採用 / 薬剤師が選ぶ / 皮膚科医おすすめ / 厚生労働省認可
+                                </div>
+                                <div class="ok-example example-box">
+                                    <strong>✅ OK例：</strong>専門家と共同開発 / 品質にこだわって製造
+                                </div>
+
+                                <h3>4. 即効性・持続性</h3>
+                                <div class="ng-example example-box">
+                                    <strong>❌ NG例：</strong>すぐ効く / 3日で効果実感 / 効果が永続 / 一度使えば二度と / 瞬時に / たちまち
+                                </div>
+                                <div class="ok-example example-box">
+                                    <strong>✅ OK例：</strong>じっくりケア / 継続することが大切 / 毎日のお手入れに
+                                </div>
+
+                                <h3>5. 身体の変化・機能への影響</h3>
+                                <div class="ng-example example-box">
+                                    <strong>❌ NG例：</strong>細胞活性化 / 血液サラサラ / 脂肪燃焼 / デトックス / ホルモンバランス調整 / 免疫力向上
+                                </div>
+                                <div class="ok-example example-box">
+                                    <strong>✅ OK例：</strong>健康的な毎日を / 内側からキレイに / バランスを整える
+                                </div>
+
+                                <h3>6. 症状・部位への作用</h3>
+                                <div class="ng-example example-box">
+                                    <strong>❌ NG例：</strong>シミが消える / シワ除去 / たるみ解消 / ニキビ完治 / 白髪が黒髪に / 視力回復
+                                </div>
+                                <div class="ok-example example-box">
+                                    <strong>✅ OK例：</strong>肌を整える / ハリのある印象に / 清潔に保つ
+                                </div>
+
+                                <h3>7. 不安を煽る表現</h3>
+                                <div class="ng-example example-box">
+                                    <strong>❌ NG例：</strong>放置すると危険 / 手遅れになる前に / 〇〇は病気のサイン
+                                </div>
+                                <div class="ok-example example-box">
+                                    <strong>✅ OK例：</strong>早めのケアを / 健康が気になる方に
+                                </div>
+
+                                <h3>8. 用法・用量の指定（健康食品）</h3>
+                                <div class="ng-example example-box">
+                                    <strong>❌ NG例：</strong>1日3回食後に服用 / 就寝前に2粒 / 症状に応じて増減
+                                </div>
+                                <div class="ok-example example-box">
+                                    <strong>✅ OK例：</strong>目安として1日2粒 / お召し上がり方：水などと一緒に
+                                </div>
+                            </section>
+
+                            <section class="section">
+                                <h2 data-emoji="📊">カテゴリー別NG表現例</h2>
+                                <div class="table-wrapper">
+                                    <table>
+                                        <tr class="thead">
+                                            <th></th>
+                                            <th>NG表現</th>
+                                            <th>理由</th>
+                                            <th>OK表現</th>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>化粧品</strong></td>
+                                            <td data-label="不適切な表現">シミが消える</td>
+                                            <td data-label="理由">治療効果は医薬品のみ</td>
+                                            <td data-label="適切な表現例">日やけによるシミ・ソバカスを防ぐ</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>化粧品</strong></td>
+                                            <td data-label="不適切な表現">アンチエイジング</td>
+                                            <td data-label="理由">老化防止は医薬品的効能</td>
+                                            <td data-label="適切な表現例">エイジングケア（年齢に応じたケア）</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>化粧品</strong></td>
+                                            <td data-label="不適切な表現">細胞活性化</td>
+                                            <td data-label="理由">細胞への作用は不可</td>
+                                            <td data-label="適切な表現例">肌がいきいき</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>健康食品</strong></td>
+                                            <td data-label="不適切な表現">血糖値を下げる</td>
+                                            <td data-label="理由">疾病指標の改善は医薬品</td>
+                                            <td data-label="適切な表現例">甘いものが気になる方に</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>健康食品</strong></td>
+                                            <td data-label="不適切な表現">脂肪燃焼</td>
+                                            <td data-label="理由">身体機能への作用</td>
+                                            <td data-label="適切な表現例">ダイエッターをサポート</td>
+                                        </tr>
+                                        <tr class="last">
+                                            <td><strong>健康食品</strong></td>
+                                            <td data-label="不適切な表現">デトックス</td>
+                                            <td data-label="理由">解毒作用は医薬品的</td>
+                                            <td data-label="適切な表現例">スッキリした毎日を</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </section>
+
+                            <section class="section">
+                                <h2 data-emoji="⚖️">違反した場合の処分</h2>
+                                <div class="penalty-section">
+                                    <h3>薬機法違反のペナルティ</h3>
+
+                                    <h4>行政処分</h4>
+                                    <ul>
+                                        <li>措置命令（広告の中止・訂正）</li>
+                                        <li>業務停止命令</li>
+                                        <li>許可・承認の取り消し</li>
+                                    </ul>
+
+                                    <h4>刑事罰</h4>
+                                    <ul>
+                                        <li>最大3年の懲役または300万円以下の罰金</li>
+                                        <li>法人の場合は両罰規定あり</li>
+                                    </ul>
+
+                                    <h4>その他のリスク</h4>
+                                    <ul>
+                                        <li>企業イメージの低下</li>
+                                        <li>消費者からの信頼喪失</li>
+                                        <li>売上への影響</li>
+                                    </ul>
+                                </div>
+                            </section>
+
+                            <section class="section">
+                                <h2 data-emoji="✓">広告作成前のチェックリスト</h2>
+                                <div class="checklist">
+                                    <h3>必ず確認しましょう</h3>
+                                    <div class="check-item">
+                                        <input type="checkbox" id="check1">
+                                        <label for="check1">製品カテゴリーを正しく把握していますか？</label>
+                                    </div>
+                                    <div class="check-item">
+                                        <input type="checkbox" id="check2">
+                                        <label for="check2">病気の治療・予防を謳っていませんか？</label>
+                                    </div>
+                                    <div class="check-item">
+                                        <input type="checkbox" id="check3">
+                                        <label for="check3">最大級表現（最高・No.1等）を使っていませんか？</label>
+                                    </div>
+                                    <div class="check-item">
+                                        <input type="checkbox" id="check4">
+                                        <label for="check4">医師・専門家の推薦を示していませんか？</label>
+                                    </div>
+                                    <div class="check-item">
+                                        <input type="checkbox" id="check5">
+                                        <label for="check5">効果の保証（必ず・確実に等）をしていませんか？</label>
+                                    </div>
+                                    <div class="check-item">
+                                        <input type="checkbox" id="check6">
+                                        <label for="check6">承認された効能効果の範囲内ですか？</label>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <section class="section">
+                                <h2 data-emoji="💡">覚えておきたい基本ルール</h2>
+                                <div class="point-card">
+                                    <p><strong>化粧品</strong>は「美しく見せる」「清潔にする」が基本。治療はできません。</p>
+                                </div>
+                                <div class="point-card">
+                                    <p><strong>健康食品</strong>は「栄養補給」「健康維持」まで。病気への効果は謳えません。</p>
+                                </div>
+                                <div class="point-card">
+                                    <p><strong>体験談</strong>も規制対象。「個人の感想です」と書いても違反は違反。</p>
+                                </div>
+                                <div class="point-card">
+                                    <p><strong>ビフォーアフター写真</strong>は要注意。効果を保証する表現になりがち。</p>
+                                </div>
+                                <div class="point-card">
+                                    <p><strong>成分の効能</strong>も慎重に。「〇〇成分が細胞に働きかける」はNG。</p>
+                                </div>
+                                <div class="point-card">
+                                    <p>迷ったら<strong>専門家に相談</strong>。後から違反が発覚すると大変です。</p>
+                                </div>
+                            </section>
+
+                            <section class="section">
+                                <h2 data-emoji="📌">まとめ</h2>
+                                <p style="font-size: 1.125rem; line-height: 1.8;">
+                                    薬機法は<span class="highlight">消費者を守るための大切な法律</span>です。
+                                    正しい知識を持って、誠実な広告表現を心がけましょう。
+                                </p>
+                                <p style="font-size: 1.125rem; line-height: 1.8; margin-top: 24px;">
+                                    <strong>「グレーゾーンは避ける」「迷ったら専門家に相談」</strong><br>
+                                    これが薬機法対策の鉄則です。
+                                </p>
+                            </section>
+
+                            <section class="cta-section">
+                                <h2 data-emoji="">広告表現、これで安心？</h2>
+                                <p>
+                                    チェック結果に不安が残るなら、<br class="sp-only">ぜひお気軽にご相談ください。<br>
+                                    行政指導事例に基づいた表現の整え、<br class="sp-only">ご提案＆サポートします🌱
+                                </p>
+                                <a href="https://forms.gle/cv8G73yqwK7e7cdX8" target="_blank" rel="noopener noreferrer"
+                                    class="cta-button">薬機法管理者に相談する</a>
+                            </section>
+                        </div>
+
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- フッター -->
+    <footer class="footer">
+        <div class="container">
+            <div class="disclaimer">
+                <h4>⚠️ 免責事項</h4>
+                <div class="disclaimer-content">
+                    <p>「薬機法リスクチェッカー」（以下「本サービス」）は、過去の行政指導事例、各種ガイドライン、公的機関が公開する資料等を参考に、広告・販促表現における注意点を可視化する目的で提供されています。
+                    </p>
+
+                    <h5>■ 法律判断を提供するものではありません</h5>
+                    <p>本サービスは、弁護士または弁護士法人による法的助言・法律判断を提供するものではありません。薬機法・景品表示法その他の関連法令の違反の有無を断定する目的ではなく、参考情報の提供を目的としています。
+                    </p>
+
+                    <h5>■ 表現修正の提案は法的責任を負うものではありません</h5>
+                    <p>本サービスで表示されるコメントや表現例・表現修正案は、過去の行政指導や公的ガイドラインに基づく一般的な参考情報であり、法令適合性を保証するものではありません。最終的な表現内容の採否は、ご利用者自身の責任においてご判断ください。
+                    </p>
+
+                    <h5>■ 必要に応じて弁護士等の専門家にご相談ください</h5>
+                    <p>本サービスは広告表現の法的リスクを簡易的に可視化することを目的としています。実際の広告物・販促資料の法令適合性を正確に判断するには、審査を行う担当者ごとに解釈が異なる可能性があるため、必要に応じて弁護士等の専門家にご相談ください。
+                    </p>
+
+                    <h5>■ 免責事項の改訂について</h5>
+                    <p>本サービスは予告なく内容を変更・改訂することがあります。最新の免責事項は本ページにてご確認ください。</p>
+                </div>
+            </div>
+
+            <div class="business-link">
+                <p>景表法や薬機法に配慮した<br class="sp-only">ライティングのご相談はこちら</p>
+                <a href="#" class="btn btn-business" id="consult-button">
+                    <span class="btn-icon"></span>
+                    薬機法管理者に相談してみる
+                </a>
+            </div>
+
+            <div class="footer-info">
+                <p>&copy; 2025 薬機法リスクチェッカー. All rights reserved.</p>
+                <p>バージョン 1.0.0</p>
+                <p><a href="https://forms.gle/t6XexCByLfgpRM5t6">お問い合わせ</a></p>
+
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript読み込み -->
+    <script src="setting/frontend/js/config.js"></script>
+    <script src="setting/frontend/js/security.js"></script>
+    <script src="setting/frontend/js/api.js"></script>
+    <script src="setting/frontend/js/quickCheck.js"></script>
+    <script src="setting/frontend/js/streaming.js"></script>
+    <script src="setting/frontend/js/ui.js"></script>
+    <script src="setting/frontend/js/script.js"></script>
+</body>
+
+</html>

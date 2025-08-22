@@ -1,0 +1,26 @@
+# .envファイルへの直接アクセスを完全にブロック
+<Files ~ "^\.env">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# 環境変数ファイルのパターンをブロック
+<FilesMatch "\.(env|env\..*|.*\.env)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# セキュリティ関連ファイルへのアクセスを拒否
+<FilesMatch "(^#.*#|\.(bak|config|dist|fla|inc|ini|log|psd|sh|sql|sw[op])|~)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# ディレクトリリスティングを無効化
+Options -Indexes
+
+# HTTPメソッドの制限
+<LimitExcept GET POST>
+    Order deny,allow
+    Deny from all
+</LimitExcept>

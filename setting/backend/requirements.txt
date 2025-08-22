@@ -1,0 +1,31 @@
+# 薬機法リスクチェッカー バックエンド依存関係
+# Python Flask API サーバー用ライブラリ（Claude API連携版）
+
+# ウェブフレームワーク
+Flask==2.3.3
+Werkzeug==2.3.7
+
+# CORS（クロスオリジンリソース共有）対応
+Flask-CORS==4.0.0
+
+# Claude API クライアント（メイン）
+anthropic==0.40.0
+
+# 環境変数管理
+python-dotenv==1.0.0
+
+# 日付・時刻処理
+python-dateutil==2.8.2
+
+# JSON処理強化
+jsonschema==4.17.3
+
+# HTTP通信ライブラリ（その他API呼び出し用）
+requests==2.31.0
+
+# 開発・デバッグ用（任意）
+pytest==7.4.0
+pytest-flask==1.2.0
+
+# 本番環境用WSGIサーバー
+gunicorn==21.2.0
