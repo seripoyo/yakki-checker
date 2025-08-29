@@ -70,8 +70,8 @@ class StreamingClient {
             console.error('ストリーミング接続エラー:', error);
             onError(error);
             
-            // フォールバック: 通常のAPIを使用
-            this.fallbackToNormalAPI(checkData, onComplete, onError);
+            // フォールバックはscript.js側で処理するのでここでは実行しない
+            // this.fallbackToNormalAPI(checkData, onComplete, onError);
         }
     }
     

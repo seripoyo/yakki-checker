@@ -810,8 +810,13 @@ class YakkiApiClient {
             }
         }
 
-        // overall_riskの確認
+        // overall_riskの確認と補正
         const validRiskLevels = ['高', '中', '低'];
+        // "不明"の場合は"中"に変換（バックエンドの互換性のため）
+        if (data.overall_risk === '不明') {
+            console.warn('⚠️ リスクレベル"不明"を"中"に変換します');
+            data.overall_risk = '中';
+        }
         if (!validRiskLevels.includes(data.overall_risk)) {
             throw new Error('総合リスクレベルが不正です');
         }

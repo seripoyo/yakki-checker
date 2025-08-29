@@ -303,8 +303,19 @@ function updateCheckButtonState() {
     elements.checkButton.disabled = !(hasText && hasCategory && hasType);
 }
 
+// 処理中フラグ（重複実行防止用）
+let isProcessing = false;
+
 // ===== チェック開始ボタンクリック処理 =====
 async function handleCheckButtonClick() {
+    // 重複実行防止
+    if (isProcessing) {
+        if (typeof debugLog === 'function') {
+            debugLog('⚠️ 既に処理中です。重複実行を防止しました。');
+        }
+        return;
+    }
+    
     if (typeof debugLog === 'function') {
         debugLog('🚀 チェック開始ボタンがクリックされました');
         debugLog('📝 ボタン状態:', {
@@ -315,6 +326,8 @@ async function handleCheckButtonClick() {
     }
     
     try {
+        // 処理開始フラグを設定
+        isProcessing = true;
         // バリデーション
         const text = elements.textInput.value.trim();
         const category = elements.productCategory.value;
@@ -487,6 +500,8 @@ async function handleCheckButtonClick() {
         // エラー時に結果エリアを非表示
         elements.resultArea.style.display = 'none';
     } finally {
+        // 処理終了フラグをリセット
+        isProcessing = false;
         showLoading(false);
     }
 }
