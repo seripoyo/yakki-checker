@@ -264,6 +264,7 @@ mark:hover::after {
         opacity: 0;
         transform: translateX(20px);
     }
+
     to {
         opacity: 1;
         transform: translateX(0);
@@ -355,8 +356,13 @@ mark:hover::after {
 }
 
 @keyframes shimmer {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(100%);
+    }
 }
 
 @keyframes pulse {
@@ -596,6 +602,7 @@ mark:hover::after {
     transition: all var(--transition-normal);
     position: relative;
     overflow: hidden;
+    margin-bottom: 3rem;
 }
 
 .rewritten-variant::after {
@@ -849,9 +856,12 @@ mark:hover::after {
 
 
 @media (max-width: 768px) {
-    .footer .container ,#guide-content{
+
+    .footer .container,
+    #guide-content {
         padding: 0 16px !important;
     }
+
     .consultation-cta {
         padding: var(--spacing-6);
         margin-top: var(--spacing-6);
@@ -1357,8 +1367,15 @@ mark:hover::after {
 }
 
 @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-5px); }
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-5px);
+    }
 }
 
 .step-title {
@@ -1420,12 +1437,12 @@ mark:hover::after {
     flex-shrink: 0;
 }
 
-.radio-label input[type="radio"]:checked + .radio-custom {
+.radio-label input[type="radio"]:checked+.radio-custom {
     border-color: var(--color-primary);
     background-color: var(--color-primary);
 }
 
-.radio-label input[type="radio"]:checked + .radio-custom::after {
+.radio-label input[type="radio"]:checked+.radio-custom::after {
     content: '';
     position: absolute;
     top: 50%;
@@ -1487,27 +1504,27 @@ mark:hover::after {
         padding: var(--spacing-5);
         margin-bottom: var(--spacing-4);
     }
-    
+
     .step-header {
         gap: var(--spacing-2);
         margin-bottom: var(--spacing-3);
     }
-    
+
     .step-number {
         width: 32px;
         height: 32px;
         font-size: var(--font-size-xs);
     }
-    
+
     .step-title {
         font-size: var(--font-size-base);
     }
-    
+
     .radio-group {
         flex-direction: column;
         gap: var(--spacing-2);
     }
-    
+
     .optional-section {
         padding: var(--spacing-4);
         margin-bottom: var(--spacing-4);
