@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>デバッグテスト</title>
+    <script>
+        // エラーを捕捉
+        window.addEventListener('error', function(e) {
+            console.error('エラー捕捉:', e.message, e.filename, e.lineno, e.colno);
+            document.getElementById('errors').innerHTML += `<div style="color:red">${e.message} at ${e.filename}:${e.lineno}:${e.colno}</div>`;
+            e.preventDefault();
+        });
+
+        // 未処理のPromiseエラーを捕捉
+        window.addEventListener('unhandledrejection', function(e) {
+            console.error('未処理のPromiseエラー:', e.reason);
+            document.getElementById('errors').innerHTML += `<div style="color:orange">Promise Error: ${e.reason}</div>`;
+            e.preventDefault();
+        });
+
+        // コンソールログをキャプチャ
+        const originalLog = console.log;
+        const originalError = console.error;
+        let logCount = 0;
+        let errorCount = 0;
+
+        console.log = function(...args) {
+            logCount++;
+            document.getElementById('logs').innerHTML += `<div>[LOG ${logCount}]: ${args.join(' ')}</div>`;
+            originalLog.apply(console, args);
+        };
+
+        console.error = function(...args) {
+            errorCount++;
+            document.getElementById('errors').innerHTML += `<div style="color:red">[ERROR ${errorCount}]: ${args.join(' ')}</div>`;
+            originalError.apply(console, args);
+        };
+    </script>
+</head>
+<body>
+    <h1>デバッグテスト</h1>
+    <h2>エラー:</h2>
+    <div id="errors" style="background: #fee; padding: 10px; min-height: 50px;"></div>
+    
+    <h2>ログ:</h2>
+    <div id="logs" style="background: #eff; padding: 10px; min-height: 50px; max-height: 300px; overflow-y: auto;"></div>
+    
+    <h2>スクリプト読み込み順序:</h2>
+    <div id="load-order"></div>
+    
+    <script>
+        document.getElementById('load-order').innerHTML += '<div>1. config.js を読み込み開始</div>';
+    </script>
+    <script src="setting/frontend/js/config.js"></script>
+    <script>
+        document.getElementById('load-order').innerHTML += '<div>2. config.js 読み込み完了</div>';
+        document.getElementById('load-order').innerHTML += '<div>3. security.js を読み込み開始</div>';
+    </script>
+    <script src="setting/frontend/js/security.js"></script>
+    <script>
+        document.getElementById('load-order').innerHTML += '<div>4. security.js 読み込み完了</div>';
+        document.getElementById('load-order').innerHTML += '<div>5. api.js を読み込み開始</div>';
+    </script>
+    <script src="setting/frontend/js/api.js"></script>
+    <script>
+        document.getElementById('load-order').innerHTML += '<div>6. api.js 読み込み完了</div>';
+        document.getElementById('load-order').innerHTML += '<div>7. script.js を読み込み開始</div>';
+    </script>
+    <script src="setting/frontend/js/script.js"></script>
+    <script>
+        document.getElementById('load-order').innerHTML += '<div>8. script.js 読み込み完了</div>';
+        document.getElementById('load-order').innerHTML += '<div style="color:green">✅ すべてのスクリプト読み込み完了</div>';
+    </script>
+</body>
+</html>

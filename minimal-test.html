@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>最小限テスト</title>
+</head>
+<body>
+    <h1>最小限のテストページ</h1>
+    <p>このページが正常に表示されれば、HTTPサーバーは正常に動作しています。</p>
+    
+    <h2>JavaScript基本テスト:</h2>
+    <div id="test-result"></div>
+    
+    <script>
+        document.getElementById('test-result').innerHTML = '✅ JavaScript実行成功';
+        console.log('基本テスト: JavaScriptが正常に動作しています');
+    </script>
+    
+    <h2>config.jsのみ読み込みテスト:</h2>
+    <div id="config-test"></div>
+    <script src="setting/frontend/js/config.js"></script>
+    <script>
+        if (typeof isDebugMode === 'function') {
+            document.getElementById('config-test').innerHTML = '✅ config.js読み込み成功、デバッグモード: ' + isDebugMode();
+        } else {
+            document.getElementById('config-test').innerHTML = '❌ config.js読み込み失敗';
+        }
+    </script>
+</body>
+</html>

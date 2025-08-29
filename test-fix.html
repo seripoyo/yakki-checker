@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>動作確認テスト</title>
+    <style>
+        body { padding: 20px; font-family: sans-serif; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; }
+        .success { color: green; }
+        .error { color: red; }
+        .tab { padding: 10px 20px; margin: 5px; cursor: pointer; background: #f0f0f0; }
+        .tab.active { background: #007bff; color: white; }
+        .content { padding: 20px; border: 1px solid #ddd; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <h1>修正後の動作確認</h1>
+    
+    <div class="test-section">
+        <h2>1. JavaScript読み込み状態</h2>
+        <div id="js-status"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. タブ切り替えテスト</h2>
+        <div>
+            <button class="tab active" id="tab1">タブ1</button>
+            <button class="tab" id="tab2">タブ2</button>
+        </div>
+        <div id="content1" class="content">タブ1のコンテンツ</div>
+        <div id="content2" class="content hidden">タブ2のコンテンツ</div>
+        <div id="tab-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. チェック開始ボタンテスト</h2>
+        <button id="test-check-button">チェック開始（テスト）</button>
+        <div id="button-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>4. エラーログ</h2>
+        <div id="error-log" style="background: #f8f8f8; padding: 10px; font-family: monospace; white-space: pre-wrap; min-height: 50px;">エラーなし</div>
+    </div>
+    
+    <!-- JavaScriptファイルを読み込み -->
+    <script src="setting/frontend/js/config.js"></script>
+    <script src="setting/frontend/js/security.js"></script>
+    <script src="setting/frontend/js/api.js"></script>
+    <script src="setting/frontend/js/quickCheck.js"></script>
+    <script src="setting/frontend/js/streaming.js"></script>
+    <script src="setting/frontend/js/ui.js"></script>
+    <script src="setting/frontend/js/script.js"></script>
+    
+    <script>
+        // エラーキャプチャ
+        const errorLog = document.getElementById('error-log');
+        let errors = [];
+        
+        window.addEventListener('error', function(e) {
+            const errorMsg = `ERROR: ${e.message} (${e.filename}:${e.lineno})`;
+            errors.push(errorMsg);
+            errorLog.textContent = errors.join('\n');
+            errorLog.className = 'error';
+        });
+        
+        // JavaScript読み込み状態の確認
+        window.addEventListener('load', function() {
+            const statusDiv = document.getElementById('js-status');
+            const functions = [
+                'debugLog',
+                'sanitizeInput',
+                'checkTextWithBackend',
+                'showQuickCheck',
+                'handleStreamingResponse',
+                'showLoading'
+            ];
+            
+            let allLoaded = true;
+            let statusHtml = '<ul>';
+            
+            functions.forEach(func => {
+                const exists = typeof window[func] === 'function';
+                allLoaded = allLoaded && exists;
+                statusHtml += `<li class="${exists ? 'success' : 'error'}">
+                    ${func}: ${exists ? '✅ 読み込み成功' : '❌ 読み込み失敗'}
+                </li>`;
+            });
+            
+            statusHtml += '</ul>';
+            statusHtml += `<p class="${allLoaded ? 'success' : 'error'}">
+                ${allLoaded ? '✅ すべてのJavaScriptが正常に読み込まれました' : '❌ 一部のJavaScriptが読み込まれていません'}
+            </p>`;
+            
+            if (errors.length === 0) {
+                statusHtml += '<p class="success">✅ JavaScriptエラーなし</p>';
+            } else {
+                statusHtml += `<p class="error">❌ ${errors.length}個のエラーが発生</p>`;
+            }
+            
+            statusDiv.innerHTML = statusHtml;
+            
+            // タブ切り替えテスト
+            const tab1 = document.getElementById('tab1');
+            const tab2 = document.getElementById('tab2');
+            const content1 = document.getElementById('content1');
+            const content2 = document.getElementById('content2');
+            const tabResult = document.getElementById('tab-result');
+            
+            tab1.addEventListener('click', function() {
+                tab1.classList.add('active');
+                tab2.classList.remove('active');
+                content1.classList.remove('hidden');
+                content2.classList.add('hidden');
+                tabResult.innerHTML = '<span class="success">✅ タブ1に切り替え成功</span>';
+            });
+            
+            tab2.addEventListener('click', function() {
+                tab2.classList.add('active');
+                tab1.classList.remove('active');
+                content2.classList.remove('hidden');
+                content1.classList.add('hidden');
+                tabResult.innerHTML = '<span class="success">✅ タブ2に切り替え成功</span>';
+            });
+            
+            // ボタンクリックテスト
+            const testButton = document.getElementById('test-check-button');
+            const buttonResult = document.getElementById('button-result');
+            
+            testButton.addEventListener('click', function() {
+                buttonResult.innerHTML = '<span class="success">✅ ボタンクリックイベント正常動作</span>';
+                
+                // メインアプリの初期化関数が存在するか確認
+                if (typeof init === 'function') {
+                    buttonResult.innerHTML += '<br><span class="success">✅ init関数が存在</span>';
+                } else {
+                    buttonResult.innerHTML += '<br><span class="error">❌ init関数が見つかりません</span>';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

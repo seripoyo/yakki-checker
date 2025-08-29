@@ -56,47 +56,63 @@ const elements = {
 
 // ===== 初期化処理 =====
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 薬機法リスクチェッカー 初期化開始');
-    
-    // DOM要素の存在確認
-    console.log('🔍 DOM要素確認:');
-    Object.keys(elements).forEach(key => {
-        const element = elements[key];
-        if (element) {
-            console.log(`✅ ${key}:`, element);
-        } else {
-            console.error(`❌ ${key}: 要素が見つかりません`);
-        }
-    });
+    // デバッグモードでのみ詳細ログを出力
+    if (typeof debugLog === 'function') {
+        debugLog('🚀 薬機法リスクチェッカー 初期化開始');
+        
+        // DOM要素の存在確認（デバッグモードのみ）
+        debugLog('🔍 DOM要素確認:');
+        Object.keys(elements).forEach(key => {
+            const element = elements[key];
+            if (element) {
+                debugLog(`✅ ${key}: 存在確認`);
+            } else {
+                debugError(`❌ ${key}: 要素が見つかりません`);
+            }
+        });
+        
+        debugLog('🔧 イベントリスナー設定開始');
+    }
     
     // イベントリスナーの設定
-    console.log('🔧 イベントリスナー設定開始');
     setupEventListeners();
     
     // 初期状態の設定
-    console.log('⚙️ 初期状態設定開始');
     setupInitialState();
     
-    // API クライアント確認
-    console.log('🌐 APIクライアント確認:', window.yakkiApi ? '✅ 利用可能' : '❌ 未初期化');
+    // API クライアント確認（エラーの場合のみ表示）
+    if (!window.yakkiApi && typeof debugError === 'function') {
+        debugError('❌ APIクライアント未初期化');
+    }
     
-    console.log('🎉 薬機法リスクチェッカー 初期化完了');
+    // 初期化完了（本番環境では非表示）
+    if (typeof debugLog === 'function') {
+        debugLog('🎉 薬機法リスクチェッカー 初期化完了');
+    }
 });
 
 // ===== イベントリスナーの設定 =====
 function setupEventListeners() {
-    console.log('🔧 イベントリスナー設定開始');
+    if (typeof debugLog === 'function') {
+        debugLog('🔧 イベントリスナー設定開始');
+    }
     
     // DOM要素の存在確認
     if (!elements.checkButton) {
-        console.error('❌ checkButton要素が見つかりません');
+        if (typeof debugError === 'function') {
+            debugError('❌ checkButton要素が見つかりません');
+        }
         return;
     }
     
     // チェック開始ボタン
-    console.log('✅ checkButton要素確認:', elements.checkButton);
+    if (typeof debugLog === 'function') {
+        debugLog('✅ checkButton要素確認');
+    }
     elements.checkButton.addEventListener('click', handleCheckButtonClick);
-    console.log('✅ checkButtonクリックイベントリスナー追加完了');
+    if (typeof debugLog === 'function') {
+        debugLog('✅ checkButtonクリックイベントリスナー追加完了');
+    }
     
     // クリアボタン
     elements.clearButton.addEventListener('click', handleClearButtonClick);
@@ -200,7 +216,7 @@ function handleTextInput() {
         
         if (isModified) {
             elements.textInput.value = cleanValue;
-            showMessage('セキュリティ上の理由により、一部の文字が削除されました。', 'warning');
+            showMessage('🔐 安全のため、一部の文字を調整させていただきました。ご心配なくお使いください✨', 'warning');
         }
     }
     
@@ -224,7 +240,9 @@ function handleTextInput() {
         if (elements.resultArea.style.display !== 'none' && 
             !elements.checkButton.disabled && // チェック中でない場合のみ
             !elements.loadingSpinner.style.display || elements.loadingSpinner.style.display === 'none') {
-            console.log('📝 入力変更により結果エリアを非表示');
+            if (typeof debugLog === 'function') {
+                debugLog('📝 入力変更により結果エリアを非表示');
+            }
             elements.resultArea.style.display = 'none';
         }
     }, 1000);
@@ -255,7 +273,7 @@ function handleSpecialPointsInput() {
     
     if (isModified) {
         elements.specialPoints.value = cleanValue;
-        showMessage('セキュリティ上の理由により、一部の文字が削除されました。', 'warning');
+        showMessage('🔐 安全のため、一部の文字を調整させていただきました。ご心配なくお使いください✨', 'warning');
     }
 }
 
@@ -287,12 +305,14 @@ function updateCheckButtonState() {
 
 // ===== チェック開始ボタンクリック処理 =====
 async function handleCheckButtonClick() {
-    console.log('🚀 チェック開始ボタンがクリックされました');
-    console.log('📝 ボタン状態:', {
-        disabled: elements.checkButton.disabled,
-        textValue: elements.textInput.value,
-        typeValue: elements.textType.value
-    });
+    if (typeof debugLog === 'function') {
+        debugLog('🚀 チェック開始ボタンがクリックされました');
+        debugLog('📝 ボタン状態:', {
+            disabled: elements.checkButton.disabled,
+            textValue: elements.textInput.value,
+            typeValue: elements.textType.value
+        });
+    }
     
     try {
         // バリデーション
@@ -317,7 +337,9 @@ async function handleCheckButtonClick() {
         }
         
         // 簡易チェック機能を無効化（API結果との競合を回避）
-        console.log('⚡ 簡易チェック機能は無効化されています');
+        if (typeof debugLog === 'function') {
+            debugLog('⚡ 簡易チェック機能は無効化されています');
+        }
         
         // 入力変更による自動非表示タイマーをクリア
         clearTimeout(window.inputTimeout);
@@ -336,8 +358,10 @@ async function handleCheckButtonClick() {
         }
         
         // ストリーミングまたは通常のAPI通信
-        console.log('🌐 API通信開始:', { text, category, type, specialPoints });
-        console.log('🔌 APIクライアント確認:', window.yakkiApi ? '✅ 利用可能' : '❌ 未初期化');
+        if (typeof debugLog === 'function') {
+            debugLog('🌐 API通信開始:', { text, category, type, specialPoints });
+            debugLog('🔌 APIクライアント確認:', window.yakkiApi ? '✅ 利用可能' : '❌ 未初期化');
+        }
         
         if (!window.yakkiApi) {
             throw new Error('APIクライアントが初期化されていません');
@@ -348,7 +372,9 @@ async function handleCheckButtonClick() {
         const useStreaming = window.streamingClient && window.location.hostname === 'localhost';
         
         if (useStreaming) {
-            console.log('📡 ストリーミングチェック開始...');
+            if (typeof debugLog === 'function') {
+                debugLog('📡 ストリーミングチェック開始...');
+            }
             data = await new Promise((resolve, reject) => {
                 window.streamingClient.startStreamingCheck(
                     {
@@ -359,7 +385,9 @@ async function handleCheckButtonClick() {
                     },
                     // 進捗コールバック
                     (progress) => {
-                        console.log('進捗:', progress);
+                        if (typeof debugLog === 'function') {
+                            debugLog('進捗:', progress);
+                        }
                         window.streamingClient.updateProgressUI(progress);
                     },
                     // 完了コールバック
@@ -368,8 +396,12 @@ async function handleCheckButtonClick() {
                     },
                     // エラーコールバック
                     (error) => {
-                        console.log('ストリーミングエラー、通常APIにフォールバック');
-                        console.error('ストリーミングエラー詳細:', error);
+                        if (typeof debugLog === 'function') {
+                            debugLog('ストリーミングエラー、通常APIにフォールバック');
+                        }
+                        if (typeof debugError === 'function') {
+                            debugError('ストリーミングエラー詳細:', error);
+                        }
                         
                         // 通常のAPIにフォールバック
                         updateDetailedProgress({
@@ -383,7 +415,9 @@ async function handleCheckButtonClick() {
                         })
                             .then(resolve)
                             .catch((fallbackError) => {
-                                console.error('フォールバック処理も失敗:', fallbackError);
+                                if (typeof debugError === 'function') {
+                                    debugError('フォールバック処理も失敗:', fallbackError);
+                                }
                                 // 最後の手段として、エラー表示を行う
                                 showUserFriendlyError(fallbackError);
                                 reject(fallbackError);
@@ -392,14 +426,18 @@ async function handleCheckButtonClick() {
                 );
             });
         } else {
-            console.log('📡 通常API呼び出し中...');
+            if (typeof debugLog === 'function') {
+                debugLog('📡 通常API呼び出し中...');
+            }
             // プログレスバー付きでAPI呼び出し
             data = await window.yakkiApi.checkText(text, category, type, specialPoints, (progress) => {
                 updateDetailedProgress(progress);
             });
         }
         
-        console.log('📨 API応答受信:', data);
+        if (typeof debugLog === 'function') {
+            debugLog('📨 API応答受信:', data);
+        }
         
         // レスポンス構造の検証
         if (!validateApiResponse(data)) {
@@ -413,7 +451,15 @@ async function handleCheckButtonClick() {
         showMessage('薬機法チェックが完了しました！', 'success');
         
     } catch (error) {
-        console.error('チェック処理エラー:', error);
+        // エラーは常に表示（重要）
+        console.error('❌ チェック処理エラー:', error);
+        if (typeof debugError === 'function') {
+            debugError('🔍 エラー詳細:', {
+                name: error.name,
+                message: error.message,
+                stack: error.stack
+            });
+        }
         
         // エラー種別に応じたメッセージ
         let message = 'チェック処理中にエラーが発生しました。';
@@ -948,7 +994,7 @@ function copyVariantText(type) {
     
     const text = textElement.textContent;
     if (!text) {
-        showMessage('コピーするテキストがありません', 'warning');
+        showMessage('😊 コピーできるテキストがまだありません', 'info');
         return;
     }
     
@@ -969,7 +1015,7 @@ function copyVariantText(type) {
             }, 2000);
         }
     }).catch(() => {
-        showMessage('コピーに失敗しました', 'error');
+        showMessage('😔 コピーがうまくいきませんでした。もう一度お試しください', 'error');
     });
 }
 
@@ -990,7 +1036,7 @@ function applySuggestion(suggestion) {
     navigator.clipboard.writeText(suggestion).then(() => {
         showMessage(`"${suggestion}" をクリップボードにコピーしました`, 'success');
     }).catch(() => {
-        showMessage('コピーに失敗しました', 'error');
+        showMessage('😔 コピーがうまくいきませんでした。もう一度お試しください', 'error');
     });
 }
 
@@ -998,7 +1044,7 @@ function applySuggestion(suggestion) {
 function handleCopyRewrittenText() {
     const rewrittenText = elements.rewrittenText.textContent;
     if (!rewrittenText) {
-        showMessage('コピーするテキストがありません', 'warning');
+        showMessage('😊 コピーできるテキストがまだありません', 'info');
         return;
     }
     
@@ -1009,7 +1055,7 @@ function handleCopyRewrittenText() {
             elements.copyRewrittenButton.innerHTML = '<span class="btn-icon">📋</span>修正版をコピー';
         }, 2000);
     }).catch(() => {
-        showMessage('コピーに失敗しました', 'error');
+        showMessage('😔 コピーがうまくいきませんでした。もう一度お試しください', 'error');
     });
 }
 
@@ -1109,6 +1155,8 @@ function initializeDetailedProgress() {
                 <div class="stage" id="stage-preparing">準備</div>
                 <div class="stage" id="stage-validating">検証</div>
                 <div class="stage" id="stage-sending">送信</div>
+                <div class="stage" id="stage-uploading">アップロード</div>
+                <div class="stage" id="stage-receiving">受信</div>
                 <div class="stage" id="stage-processing">処理</div>
                 <div class="stage" id="stage-completed">完了</div>
             </div>
@@ -1134,7 +1182,10 @@ function updateDetailedProgress(progressData) {
     const timeDiff = now - lastProgressLog;
     
     if (progressDiff >= API_CONFIG.PROGRESS_LOG_THRESHOLD || timeDiff >= API_CONFIG.PROGRESS_UPDATE_INTERVAL || stage !== 'uploading') {
-        console.log('📊 進捗更新:', progressData);
+        // デバッグモードの場合のみログ出力
+        if (typeof debugLog === 'function') {
+            debugLog('📊 進捗更新:', progressData);
+        }
         lastProgressLog = now;
         lastProgressValue = progress;
     }
@@ -1353,12 +1404,7 @@ function escapeRegExp(string) {
     return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-// デバッグ用関数
-function debugLog(message, data = null) {
-    if (window.location.hostname === 'localhost') {
-        console.log(`[DEBUG] ${message}`, data);
-    }
-}
+// デバッグ用関数は config.js で定義済み
 
 // ===== ユーザーフレンドリーなエラー表示 =====
 function showUserFriendlyError(error) {

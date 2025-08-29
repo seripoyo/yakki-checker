@@ -29,7 +29,9 @@ class ClaudeService:
         """Claude APIクライアントを初期化"""
         try:
             if Config.CLAUDE_API_KEY:
-                self.client = anthropic.Anthropic(api_key=Config.CLAUDE_API_KEY)
+                self.client = anthropic.Anthropic(
+                    api_key=Config.CLAUDE_API_KEY
+                )
                 logger.info("Claude APIクライアント初期化完了")
             else:
                 logger.warning("Claude APIキーが設定されていません")

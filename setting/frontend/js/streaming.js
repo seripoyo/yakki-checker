@@ -169,6 +169,11 @@ class StreamingClient {
      * @param {Object} progress - 進捗情報
      */
     updateProgressUI(progress) {
+        // メインの進捗更新関数を呼び出す（script.jsで定義）
+        if (typeof updateDetailedProgress === 'function') {
+            updateDetailedProgress(progress);
+        }
+        
         const progressContainer = document.getElementById('streaming-progress');
         if (!progressContainer) {
             // 進捗表示コンテナを作成

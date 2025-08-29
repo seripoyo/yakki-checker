@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>静的テスト</title>
+</head>
+<body>
+    <h1>完全に静的なテストページ</h1>
+    <p>JavaScriptを一切使用しないシンプルなHTMLページです。</p>
+    <p>このページが表示されれば、HTTPサーバーは正常に動作しています。</p>
+    <p>現在時刻: <span id="time">JavaScriptなし</span></p>
+    
+    <h2>HTTPサーバー再起動の手順:</h2>
+    <ol>
+        <li>古いプロセスを終了: <code>kill -9 [PID]</code></li>
+        <li>新しいサーバーを起動: <code>python3 -m http.server 8000</code></li>
+        <li>ブラウザのキャッシュをクリア: Ctrl+Shift+R (Windows) または Cmd+Shift+R (Mac)</li>
+    </ol>
+    
+    <h2>無限リロード問題の解決状況:</h2>
+    <p>✅ HTTPサーバーのハング問題を解決</p>
+    <p>✅ サーバーを再起動済み</p>
+    <p>✅ ファイルアクセスは正常</p>
+    
+    <p><a href="index.html">メインページへ戻る</a></p>
+</body>
+</html>

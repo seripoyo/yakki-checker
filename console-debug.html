@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>コンソールデバッグ</title>
+</head>
+<body>
+    <h1>JavaScriptエラー確認ページ</h1>
+    <div id="error-log" style="background: #f0f0f0; padding: 20px; font-family: monospace; white-space: pre-wrap;"></div>
+    
+    <h2>テスト項目:</h2>
+    <button id="test-button">テストボタン</button>
+    <div id="test-result"></div>
+    
+    <script>
+        const errorLog = document.getElementById('error-log');
+        let errors = [];
+        
+        // エラーをキャプチャ
+        window.addEventListener('error', function(e) {
+            const error = `ERROR: ${e.message}
+File: ${e.filename}
+Line: ${e.lineno}:${e.colno}
+Stack: ${e.error?.stack || 'N/A'}
+---`;
+            errors.push(error);
+            errorLog.textContent = errors.join('\n');
+            console.error('Captured error:', e);
+        });
+        
+        window.addEventListener('unhandledrejection', function(e) {
+            const error = `PROMISE REJECTION: ${e.reason}
+---`;
+            errors.push(error);
+            errorLog.textContent = errors.join('\n');
+            console.error('Unhandled promise rejection:', e);
+        });
+        
+        // 基本的なテスト
+        document.getElementById('test-button').addEventListener('click', function() {
+            document.getElementById('test-result').textContent = '✅ ボタンクリック成功';
+        });
+        
+        errorLog.textContent = 'エラー監視中...\n';
+    </script>
+    
+    <!-- メインアプリのJavaScriptを読み込み -->
+    <script src="setting/frontend/js/config.js"></script>
+    <script src="setting/frontend/js/security.js"></script>
+    <script src="setting/frontend/js/api.js"></script>
+    <script src="setting/frontend/js/quickCheck.js"></script>
+    <script src="setting/frontend/js/streaming.js"></script>
+    <script src="setting/frontend/js/ui.js"></script>
+    <script src="setting/frontend/js/script.js"></script>
+    
+    <script>
+        // ロード完了後の状態確認
+        window.addEventListener('load', function() {
+            const status = `
+ロード完了
+---
+定義された関数:
+- isDebugMode: ${typeof isDebugMode}
+- sanitizeInput: ${typeof sanitizeInput}
+- checkTextWithBackend: ${typeof checkTextWithBackend}
+- showQuickCheck: ${typeof showQuickCheck}
+- handleStreamingResponse: ${typeof handleStreamingResponse}
+- showLoading: ${typeof showLoading}
+- init 関数: ${typeof init}
+---
+エラー数: ${errors.length}
+`;
+            errorLog.textContent += status;
+        });
+    </script>
+</body>
+</html>

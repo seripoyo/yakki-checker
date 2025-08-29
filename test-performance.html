@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>パフォーマンステスト</title>
+    <script>
+        // ページローディング時間を測定
+        const startTime = performance.now();
+        
+        window.addEventListener('load', function() {
+            const loadTime = performance.now() - startTime;
+            document.getElementById('load-time').textContent = loadTime.toFixed(2) + 'ms';
+            
+            // コンソールログ数をカウント
+            const originalLog = console.log;
+            let logCount = 0;
+            console.log = function(...args) {
+                logCount++;
+                originalLog.apply(console, args);
+            };
+            
+            // メインページをiframeで読み込み
+            const iframe = document.createElement('iframe');
+            iframe.src = 'index.html';
+            iframe.style.width = '100%';
+            iframe.style.height = '600px';
+            iframe.onload = function() {
+                setTimeout(() => {
+                    document.getElementById('log-count').textContent = logCount;
+                }, 1000);
+            };
+            document.getElementById('iframe-container').appendChild(iframe);
+        });
+    </script>
+</head>
+<body>
+    <h1>パフォーマンステスト結果</h1>
+    <p>ページ読み込み時間: <span id="load-time">計測中...</span></p>
+    <p>コンソールログ数: <span id="log-count">計測中...</span></p>
+    <hr>
+    <div id="iframe-container"></div>
+</body>
+</html>

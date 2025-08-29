@@ -514,4 +514,8 @@ window.addEventListener('resize', () => {
     window.yakkiUI.optimizeForDevice();
 });
 
-console.log('薬機法リスクチェッカー ui.js 読み込み完了');
+// 初回のみログ出力
+if (!window._uiJsLoaded) {
+    console.log('薬機法リスクチェッカー ui.js 読み込み完了');
+    window._uiJsLoaded = true;
+}

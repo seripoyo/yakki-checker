@@ -13,6 +13,17 @@ class YakkiApiClient {
         this.lastRequestTime = 0;
         this.minRequestInterval = 1000; // 最小リクエスト間隔（ミリ秒）- 開発環境用に緩和
         this.serverStatus = 'unknown'; // 'online', 'sleeping', 'unknown'
+        
+        // 初期化ログ（デバッグモードまたは初回のみ）
+        if ((typeof isDebugMode === 'function' && isDebugMode()) || !window._apiClientInitLogged) {
+            console.log('🚀 [YakkiApiClient] 初期化完了:', {
+                baseUrl: this.baseUrl,
+                timeout: this.timeout + 'ms (' + Math.floor(this.timeout / 1000) + '秒)',
+                hasApiKey: !!this.apiKey,
+                environment: window.location.hostname === 'localhost' ? '開発環境' : '本番環境'
+            });
+            window._apiClientInitLogged = true;
+        }
     }
 
     /**
@@ -32,7 +43,9 @@ class YakkiApiClient {
         }
         
         // APIキーが見つからない場合
-        console.warn('⚠️ APIキーが設定されていません');
+        if (typeof debugWarn === 'function') {
+            debugWarn('⚠️ APIキーが設定されていません');
+        }
         return null;
     }
 
@@ -46,7 +59,9 @@ class YakkiApiClient {
         if (apiKey) {
             sessionStorage.setItem('yakki_api_key_temp', apiKey);
         }
-        console.log('API キーが設定されました');
+        if (typeof debugLog === 'function') {
+            debugLog('API キーが設定されました');
+        }
     }
 
     /**
@@ -81,8 +96,11 @@ class YakkiApiClient {
         // APIキーがある場合は追加（正しいヘッダー名を使用）
         if (this.apiKey) {
             headers['X-API-Key'] = this.apiKey;  // X-API-KEY -> X-API-Key に修正
-            // デバッグ情報は最小限に
-            console.log('🔑 APIキー: 設定済み');
+            // デバッグ情報は最小限に（初回のみ）
+            if (!window._apiKeyStatusLogged) {
+                console.log('🔑 APIキー: 設定済み');
+                window._apiKeyStatusLogged = true;
+            }
         } else {
             console.error('❌ APIキーが設定されていません');
         }
@@ -133,7 +151,9 @@ class YakkiApiClient {
      * @returns {Promise<boolean>} サーバーがオンラインかどうか
      */
     async wakeUpServer() {
-        console.log('🌟 サーバー起動チェック開始...');
+        if (typeof debugLog === 'function') {
+            debugLog('🌟 サーバー起動チェック開始...');
+        }
         
         // 本番環境でない場合はスキップ
         if (window.location.hostname === 'localhost') {
@@ -156,20 +176,27 @@ class YakkiApiClient {
             clearTimeout(timeoutId);
             
             if (response.ok) {
-                console.log('✅ サーバーはオンラインです');
+                if (typeof debugLog === 'function') {
+                    debugLog('✅ サーバーはオンラインです');
+                }
                 this.serverStatus = 'online';
                 return true;
             } else {
-                console.log('⚠️ サーバーレスポンスが異常:', response.status);
+                if (typeof debugWarn === 'function') {
+                    debugWarn('⚠️ サーバーレスポンスが異常:', response.status);
+                }
                 this.serverStatus = 'unknown';
                 return false;
             }
         } catch (error) {
             if (error.name === 'AbortError') {
+                // サーバー起動中のメッセージはユーザーに表示
                 console.log('⏰ サーバー起動中... 少し時間がかかります');
                 this.serverStatus = 'sleeping';
             } else {
-                console.log('❌ サーバー接続エラー:', error.message);
+                if (typeof debugError === 'function') {
+                    debugError('❌ サーバー接続エラー:', error.message);
+                }
                 this.serverStatus = 'unknown';
             }
             return false;
@@ -185,22 +212,41 @@ class YakkiApiClient {
      */
     async callWithRetry(apiCall, operationName = 'API呼び出し', progressCallback = null) {
         let lastError;
+        const retryStartTime = Date.now();
+        
+        const debug = typeof isDebugMode === 'function' && isDebugMode();
+        if (debug) {
+            console.log(`🔄 [リトライ] ${operationName} 開始 (最大${API_CONFIG.MAX_RETRIES}回試行)`);
+        }
         
         for (let attempt = 1; attempt <= API_CONFIG.MAX_RETRIES; attempt++) {
             try {
-                console.log(`🔄 ${operationName} - 試行 ${attempt}/${API_CONFIG.MAX_RETRIES}`);
+                const attemptStartTime = Date.now();
+                if (debug) {
+                    console.log(`🔄 [リトライ] 試行 ${attempt}/${API_CONFIG.MAX_RETRIES} - ${new Date().toISOString()}`);
+                }
                 
                 // 最初の試行前にサーバー起動チェック
                 if (attempt === 1 && this.serverStatus !== 'online') {
+                    if (debug) {
+                        console.log('🔍 [サーバーチェック] ステータス確認開始');
+                    }
                     if (progressCallback) progressCallback({
                         stage: 'preparing',
                         progress: 2,
                         message: 'サーバーの状態を確認中...'
                     });
                     
+                    const wakeStartTime = Date.now();
                     const isOnline = await this.wakeUpServer();
+                    const wakeTime = Date.now() - wakeStartTime;
+                    if (debug) {
+                        console.log(`🔍 [サーバーチェック] 完了 - ${wakeTime}ms, オンライン: ${isOnline}`);
+                    }
+                    
                     if (!isOnline && this.serverStatus === 'sleeping') {
                         // サーバーがスリープ中の場合、起動を待つ
+                        // サーバー起動中はユーザーに表示
                         console.log('😴 サーバーが起動中です。しばらくお待ちください...');
                         
                         if (progressCallback) progressCallback({
@@ -213,19 +259,30 @@ class YakkiApiClient {
                     }
                 }
                 
+                const apiCallStartTime = Date.now();
                 const result = await apiCall();
-                console.log(`✅ ${operationName} 成功 (試行 ${attempt})`);
+                const apiCallTime = Date.now() - apiCallStartTime;
+                const attemptTime = Date.now() - attemptStartTime;
+                
+                if (debug) {
+                    console.log(`✅ [リトライ] ${operationName} 成功 (試行 ${attempt})`);
+                    console.log(`⏱️ [リトライ] API呼び出し時間: ${apiCallTime}ms, 試行全体時間: ${attemptTime}ms`);
+                }
                 this.serverStatus = 'online';
                 return result;
                 
             } catch (error) {
                 lastError = error;
-                console.log(`❌ ${operationName} 失敗 (試行 ${attempt}):`, error.message);
+                if (debug) {
+                    console.log(`❌ ${operationName} 失敗 (試行 ${attempt}):`, error.message);
+                }
                 
                 // 最後の試行でない場合は待機
                 if (attempt < API_CONFIG.MAX_RETRIES) {
                     const delay = API_CONFIG.RETRY_DELAY * attempt; // 指数バックオフ
-                    console.log(`⏳ ${delay}ms 待機してリトライします...`);
+                    if (debug) {
+                        console.log(`⏳ ${delay}ms 待機してリトライします...`);
+                    }
                     
                     if (progressCallback) progressCallback({
                         stage: 'preparing',
@@ -239,6 +296,7 @@ class YakkiApiClient {
         }
         
         // 全ての試行が失敗した場合
+        // エラーは常に表示（重要）
         console.error(`💥 ${operationName} 最終的に失敗:`, lastError);
         throw lastError;
     }
@@ -257,14 +315,20 @@ class YakkiApiClient {
      */
     async healthCheck() {
         try {
-            console.log('API ヘルスチェック開始');
+            if (typeof debugLog === 'function') {
+                debugLog('API ヘルスチェック開始');
+            }
             const response = await this.fetchWithTimeout(`${this.baseUrl}/`);
             const data = await response.json();
-            console.log('API ヘルスチェック成功:', data);
+            if (typeof debugLog === 'function') {
+                debugLog('API ヘルスチェック成功:', data);
+            }
             this.serverStatus = 'online';
             return data;
         } catch (error) {
-            console.error('API ヘルスチェック失敗:', error);
+            if (typeof debugError === 'function') {
+                debugError('API ヘルスチェック失敗:', error);
+            }
             this.serverStatus = 'unknown';
             throw error;
         }
@@ -280,9 +344,18 @@ class YakkiApiClient {
      * @returns {Promise<Object>} チェック結果
      */
     async checkText(text, category, type, specialPoints = '', progressCallback = null) {
-        // リトライ機能付きでAPIコールを実行
-        return await this.callWithRetry(async () => {
-            console.log('🔍 薬機法チェック API呼び出し開始');
+        const checkStartTime = Date.now();
+        const debug = typeof isDebugMode === 'function' && isDebugMode();
+        if (debug) {
+            console.log('🔍 [checkText] 薬機法チェック開始:', new Date().toISOString());
+        }
+        
+        try {
+            // リトライ機能付きでAPIコールを実行
+            const result = await this.callWithRetry(async () => {
+                if (debug) {
+                console.log('🔍 薬機法チェック API呼び出し開始');
+            }
             
             // 進捗報告: 準備段階
             if (progressCallback) progressCallback({
@@ -307,19 +380,21 @@ class YakkiApiClient {
                 message: 'データを検証中...'
             });
             
-            console.log('📋 入力データ:', { 
-                text: sanitizedText.substring(0, 50) + '...', 
-                category: sanitizedCategory, 
-                type: sanitizedType,
-                specialPoints: sanitizedSpecialPoints ? sanitizedSpecialPoints.substring(0, 30) + '...' : '(なし)'
-            });
-            console.log('🌐 API URL:', `${this.baseUrl}/api/check`);
+            if (debug) {
+                console.log('📋 入力データ:', { 
+                    text: sanitizedText.substring(0, 50) + '...', 
+                    category: sanitizedCategory, 
+                    type: sanitizedType,
+                    specialPoints: sanitizedSpecialPoints ? sanitizedSpecialPoints.substring(0, 30) + '...' : '(なし)'
+                });
+                console.log('🌐 API URL:', `${this.baseUrl}/api/check`);
+            }
             
             // リクエストボディの構築
             const requestBody = {
                 text: sanitizedText,
                 category: sanitizedCategory,
-                type: sanitizedType
+                text_type: sanitizedType  // バックエンドは text_type を期待
             };
             
             // 特に訴求したいポイントが入力されている場合のみ追加
@@ -335,12 +410,18 @@ class YakkiApiClient {
                 }
             }
             
-            console.log('📦 リクエストボディ:', requestBody);
+            if (debug) {
+                console.log('📦 リクエストボディ:', requestBody);
+            }
 
             // バリデーション
-            console.log('✅ リクエストバリデーション実行中...');
+            if (debug) {
+                console.log('✅ リクエストバリデーション実行中...');
+            }
             this.validateCheckRequest(requestBody);
-            console.log('✅ リクエストバリデーション完了');
+            if (debug) {
+                console.log('✅ リクエストバリデーション完了');
+            }
 
             // 進捗報告: サーバーへ送信中
             if (progressCallback) progressCallback({
@@ -350,13 +431,17 @@ class YakkiApiClient {
             });
 
             // API呼び出し（進捗付き）
-            console.log('📡 fetchWithTimeout開始...');
+            if (debug) {
+                console.log('📡 fetchWithTimeout開始...');
+            }
             const response = await this.fetchWithTimeoutProgress(`${this.baseUrl}/api/check`, {
                 method: 'POST',
                 headers: this.getSecureHeaders(),
                 body: JSON.stringify(requestBody)
             }, progressCallback);
-            console.log('📡 fetchWithTimeout完了、レスポンス受信:', response.status);
+            if (debug) {
+                console.log('📡 fetchWithTimeout完了、レスポンス受信:', response.status);
+            }
 
             // 進捗報告: レスポンス処理中
             if (progressCallback) progressCallback({
@@ -366,14 +451,46 @@ class YakkiApiClient {
             });
 
             // レスポンス処理
-            console.log('📄 JSONパース開始...');
-            const data = await response.json();
-            console.log('📄 JSONパース完了:', data);
+            const jsonStartTime = Date.now();
+            
+            let data;
+            try {
+                if (debug) {
+                    console.log('📄 JSONパース開始...', new Date().toISOString());
+                }
+                data = await response.json();
+                const jsonTime = Date.now() - jsonStartTime;
+                if (debug) {
+                    console.log('📄 JSONパース完了:', new Date().toISOString());
+                    console.log('⏱️ JSONパース時間:', jsonTime, 'ms');
+                    console.log('📊 レスポンスデータ:', {
+                        hasData: !!data,
+                        overallRisk: data?.overall_risk,
+                        issuesCount: data?.issues?.length || 0,
+                        hasRewrittenTexts: !!data?.rewritten_texts
+                    });
+                }
+            } catch (jsonError) {
+                console.error('❌ JSONパースエラー:', jsonError);
+                console.error('📄 エラー詳細:', {
+                    errorMessage: jsonError.message,
+                    responseStatus: response.status,
+                    responseHeaders: {
+                        contentType: response.headers.get('content-type'),
+                        contentLength: response.headers.get('content-length')
+                    }
+                });
+                throw new Error('APIレスポンスのパースに失敗しました: ' + jsonError.message);
+            }
             
             // レスポンスバリデーション
-            console.log('✅ レスポンスバリデーション実行中...');
+            if (debug) {
+                console.log('✅ レスポンスバリデーション実行中...');
+            }
             this.validateCheckResponse(data);
-            console.log('✅ レスポンスバリデーション完了');
+            if (debug) {
+                console.log('✅ レスポンスバリデーション完了');
+            }
             
             // 進捗報告: 完了
             if (progressCallback) progressCallback({
@@ -382,10 +499,30 @@ class YakkiApiClient {
                 message: 'チェック完了！'
             });
             
-            console.log('🎉 薬機法チェック API呼び出し成功');
+            if (debug) {
+                console.log('🎉 薬機法チェック API呼び出し成功');
+            }
             return data;
 
-        }, '薬機法チェック', progressCallback);
+            }, '薬機法チェック', progressCallback);
+            
+            const checkEndTime = Date.now();
+            const totalTime = checkEndTime - checkStartTime;
+            if (debug) {
+                console.log('✅ [checkText] 薬機法チェック完了:', new Date().toISOString());
+                console.log('⏱️ [checkText] 総処理時間:', totalTime, 'ms (' + Math.floor(totalTime / 1000) + '秒)');
+            }
+            
+            return result;
+            
+        } catch (error) {
+            const checkEndTime = Date.now();
+            const totalTime = checkEndTime - checkStartTime;
+            // エラーは常に表示（重要）
+            console.error('❌ [checkText] 薬機法チェック失敗:', new Date().toISOString());
+            console.error('⏱️ [checkText] エラーまでの時間:', totalTime, 'ms (' + Math.floor(totalTime / 1000) + '秒)');
+            throw error;
+        }
     }
 
     /**
@@ -450,8 +587,37 @@ class YakkiApiClient {
      * @returns {Promise<Response>} fetch結果
      */
     async fetchWithTimeoutProgress(url, options = {}, progressCallback = null) {
+        // デバッグモードの場合のみ詳細ログ
+        const debug = typeof isDebugMode === 'function' && isDebugMode();
+        if (debug) {
+            console.log('⏱️ [fetchWithTimeoutProgress] 開始');
+            console.log('⏱️ タイムアウト設定:', this.timeout, 'ms');
+            console.log('⏱️ リクエストURL:', url);
+            console.log('⏱️ リクエストオプション:', options);
+        }
+        
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort('Request timeout'), this.timeout);
+        const startTime = Date.now();
+        let hasTimedOut = false;
+        
+        const timeoutId = setTimeout(() => {
+            hasTimedOut = true;
+            const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+            console.error('❌ [fetchWithTimeoutProgress] タイムアウト発生！');
+            console.error('⏱️ タイムアウト時間:', this.timeout, 'ms');
+            console.error('⏱️ 実際の経過時間:', elapsedSeconds, '秒');
+            console.error('📍 タイムアウト時刻:', new Date().toISOString());
+            
+            if (progressCallback) {
+                progressCallback({
+                    stage: 'error',
+                    progress: 0,
+                    message: `リクエストがタイムアウトしました (${elapsedSeconds}秒経過)`
+                });
+            }
+            
+            controller.abort('Request timeout');
+        }, this.timeout);
 
         // 進捗制御用の変数
         let currentProgress = 30;
@@ -476,49 +642,122 @@ class YakkiApiClient {
 
         // 進捗のスマートなシミュレーション（頻度制限付き）
         const progressInterval = setInterval(() => {
-            if (progressCallback && progressStep < progressSteps.length) {
-                const step = progressSteps[progressStep];
-                progressCallback({
-                    stage: 'uploading',
-                    progress: step.progress,
-                    message: step.message
-                });
-                progressStep++;
+            if (progressCallback) {
+                if (progressStep < progressSteps.length) {
+                    // 定義されたステップを処理
+                    const step = progressSteps[progressStep];
+                    // デバッグモードの場合のみログ出力
+                    if (typeof isDebugMode === 'function' && isDebugMode()) {
+                        console.log(`📊 [進捗] ステップ ${progressStep + 1}/${progressSteps.length}: ${step.message} (${step.progress}%)`);
+                    }
+                    progressCallback({
+                        stage: 'uploading',
+                        progress: step.progress,
+                        message: step.message
+                    });
+                    progressStep++;
+                } else {
+                    // すべてのステップ完了後も進捗を継続（80%から85%まで徐々に増加）
+                    const extraProgress = Math.min(85, 80 + (progressStep - progressSteps.length + 1) * 0.5);
+                    const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+                    
+                    // 30秒ごとまたはデバッグモードでログ出力
+                    if ((elapsedSeconds % 30 === 0 && progressStep === progressSteps.length) || 
+                        (typeof isDebugMode === 'function' && isDebugMode())) {
+                        console.log(`📊 [進捗] 処理中... (${extraProgress.toFixed(1)}%) - ${elapsedSeconds}秒経過`);
+                    }
+                    
+                    progressCallback({
+                        stage: 'uploading',
+                        progress: extraProgress,
+                        message: `AIによる詳細分析を実行中... (${elapsedSeconds}秒経過)`
+                    });
+                    
+                    progressStep++;
+                    
+                    // 90秒以上経過している場合は警告メッセージを表示
+                    if (elapsedSeconds > 90) {
+                        progressCallback({
+                            stage: 'uploading',
+                            progress: extraProgress,
+                            message: `処理に時間がかかっています。もうしばらくお待ちください... (${elapsedSeconds}秒経過)`
+                        });
+                    }
+                }
             }
         }, API_CONFIG.PROGRESS_UPDATE_INTERVAL); // 設定値を使用
 
         try {
             // 進捗報告: 送信開始
-            if (progressCallback) progressCallback({
-                stage: 'uploading',
-                progress: 30,
-                message: 'データを送信中...'
-            });
+            if (progressCallback) {
+                if (debug) {
+                    console.log('📊 [進捗報告] 送信開始');
+                }
+                progressCallback({
+                    stage: 'uploading',
+                    progress: 30,
+                    message: 'データを送信中...'
+                });
+            }
 
+            if (debug) {
+                console.log('🚀 [fetch] APIリクエスト開始:', new Date().toISOString());
+                console.log('📋 [fetch] リクエスト詳細:', {
+                    url: url,
+                    method: options.method || 'GET',
+                    headers: options.headers,
+                    bodyLength: options.body ? options.body.length : 0
+                });
+            }
+            
+            // fetchの前後でタイミングを計測
+            const fetchStartTime = Date.now();
             const response = await fetch(url, {
                 ...options,
                 signal: controller.signal
             });
-
+            const fetchEndTime = Date.now();
+            
             clearInterval(progressInterval);
+            
+            const elapsedTime = Date.now() - startTime;
+            const fetchTime = fetchEndTime - fetchStartTime;
+            
+            if (debug) {
+                console.log('✅ [fetch] APIレスポンス受信:', new Date().toISOString());
+                console.log('⏱️ [fetch] 総経過時間:', elapsedTime, 'ms');
+                console.log('⏱️ [fetch] fetch処理時間:', fetchTime, 'ms');
+                console.log('📡 [fetch] レスポンスステータス:', response.status);
+            }
 
             if (!response.ok) {
+                console.error('❌ [fetch] HTTPエラー:', response.status, response.statusText);
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
 
             // 進捗報告: 受信完了
-            if (progressCallback) progressCallback({
-                stage: 'receiving',
-                progress: 85,
-                message: 'レスポンスを受信中...'
-            });
+            if (progressCallback) {
+                if (debug) {
+                    console.log('📊 [進捗報告] 受信完了');
+                }
+                progressCallback({
+                    stage: 'receiving',
+                    progress: 85,
+                    message: 'レスポンスを受信中...'
+                });
+            }
 
             return response;
         } catch (error) {
             clearInterval(progressInterval);
             
+            const elapsedTime = Date.now() - startTime;
+            console.error('❌ [fetchWithTimeoutProgress] エラー発生:', error);
+            console.error('⏱️ エラー時点の経過時間:', elapsedTime, 'ms');
+            
             // AbortErrorの場合、より分かりやすいエラーメッセージを設定
             if (error.name === 'AbortError') {
+                console.error('❌ リクエストがタイムアウトしました（', this.timeout, 'ms）');
                 const timeoutError = new Error('Request timeout');
                 timeoutError.name = 'AbortError';
                 throw timeoutError;
