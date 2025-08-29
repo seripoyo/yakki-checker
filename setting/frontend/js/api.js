@@ -792,7 +792,7 @@ class YakkiApiClient {
         }
 
         const validTypes = ['キャッチコピー', 'LP見出し・タイトル', '商品説明文・広告文・通常テキスト', 'お客様の声'];
-        if (!validTypes.includes(requestBody.type)) {
+        if (!validTypes.includes(requestBody.text_type)) {
             throw new Error('文章の種類が正しく指定されていません');
         }
     }

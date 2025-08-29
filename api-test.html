@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>API動作テスト</title>
+    <style>
+        body { padding: 20px; font-family: sans-serif; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        #log { background: #f8f8f8; padding: 10px; font-family: monospace; white-space: pre-wrap; max-height: 400px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <h1>薬機法チェッカー API動作テスト</h1>
+    
+    <div class="test-section">
+        <h2>テストケース</h2>
+        <button id="test-normal">正常なリクエストをテスト</button>
+        <button id="test-validation">バリデーションテスト</button>
+        <button id="clear-log">ログクリア</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>ログ出力</h2>
+        <div id="log"></div>
+    </div>
+    
+    <!-- 必要なJavaScriptファイルを読み込み -->
+    <script src="setting/frontend/js/config.js"></script>
+    <script src="setting/frontend/js/security.js"></script>
+    <script src="setting/frontend/js/api.js"></script>
+    
+    <script>
+        const logDiv = document.getElementById('log');
+        
+        function addLog(message, isError = false) {
+            const timestamp = new Date().toLocaleTimeString();
+            const className = isError ? 'error' : 'success';
+            logDiv.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        // APIクライアントの初期化
+        window.addEventListener('load', async function() {
+            addLog('API テストページ初期化完了');
+            
+            // APIクライアントの確認
+            if (typeof window.yakkiApiClient !== 'undefined') {
+                addLog('✅ APIクライアント利用可能');
+                
+                // ヘルスチェック
+                try {
+                    const health = await window.yakkiApiClient.healthCheck();
+                    addLog('✅ バックエンド接続確認: ' + JSON.stringify(health.status));
+                } catch (error) {
+                    addLog('❌ バックエンド接続エラー: ' + error.message, true);
+                }
+            } else {
+                addLog('❌ APIクライアントが見つかりません', true);
+            }
+        });
+        
+        // 正常なリクエストのテスト
+        document.getElementById('test-normal').addEventListener('click', async function() {
+            addLog('\n=== 正常リクエストテスト開始 ===');
+            
+            const testData = {
+                text: 'このサプリメントで健康をサポート',
+                category: 'サプリメント',
+                type: '商品説明文・広告文・通常テキスト',
+                specialPoints: '健康維持をアピール'
+            };
+            
+            addLog('送信データ: ' + JSON.stringify(testData, null, 2));
+            
+            try {
+                // バリデーションテスト
+                const requestBody = {
+                    text: testData.text,
+                    category: testData.category,
+                    text_type: testData.type
+                };
+                
+                addLog('バリデーション開始...');
+                window.yakkiApiClient.validateCheckRequest(requestBody);
+                addLog('✅ バリデーション成功');
+                
+                // API呼び出し
+                addLog('API呼び出し開始...');
+                const result = await window.yakkiApiClient.checkText(
+                    testData.text,
+                    testData.category,
+                    testData.type,
+                    testData.specialPoints
+                );
+                
+                addLog('✅ APIレスポンス受信成功');
+                addLog('総合リスク: ' + result.overall_risk);
+                addLog('検出件数: ' + JSON.stringify(result.risk_counts));
+                
+            } catch (error) {
+                addLog('❌ エラー発生: ' + error.message, true);
+                addLog('スタックトレース: ' + error.stack, true);
+            }
+        });
+        
+        // バリデーションテスト
+        document.getElementById('test-validation').addEventListener('click', function() {
+            addLog('\n=== バリデーションテスト開始 ===');
+            
+            const testCases = [
+                {
+                    name: '正常なケース',
+                    data: {
+                        text: 'テストテキスト',
+                        category: 'サプリメント',
+                        text_type: '商品説明文・広告文・通常テキスト'
+                    }
+                },
+                {
+                    name: '空のテキスト',
+                    data: {
+                        text: '',
+                        category: 'サプリメント',
+                        text_type: '商品説明文・広告文・通常テキスト'
+                    }
+                },
+                {
+                    name: '不正なカテゴリ',
+                    data: {
+                        text: 'テストテキスト',
+                        category: '不正なカテゴリ',
+                        text_type: '商品説明文・広告文・通常テキスト'
+                    }
+                },
+                {
+                    name: '不正な文章タイプ',
+                    data: {
+                        text: 'テストテキスト',
+                        category: 'サプリメント',
+                        text_type: '不正なタイプ'
+                    }
+                }
+            ];
+            
+            testCases.forEach(testCase => {
+                addLog(`\nテスト: ${testCase.name}`);
+                try {
+                    window.yakkiApiClient.validateCheckRequest(testCase.data);
+                    addLog('✅ バリデーション成功');
+                } catch (error) {
+                    addLog('❌ バリデーションエラー: ' + error.message, true);
+                }
+            });
+        });
+        
+        // ログクリア
+        document.getElementById('clear-log').addEventListener('click', function() {
+            logDiv.innerHTML = '';
+            addLog('ログをクリアしました');
+        });
+    </script>
+</body>
+</html>
