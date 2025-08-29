@@ -68,31 +68,47 @@ mark:hover::after {
 .issue-card {
     background: white;
     border: 2px solid;
-    border-radius: var(--radius-lg);
-    padding: var(--spacing-5);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-6);
     margin-bottom: var(--spacing-4);
-    box-shadow: var(--shadow-sm);
-    transition: all var(--transition-fast);
+    box-shadow: var(--shadow-md);
+    transition: all var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+}
+
+.issue-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: currentColor;
+    opacity: 0.5;
 }
 
 .issue-card:hover {
-    box-shadow: var(--shadow-md);
-    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-3px) scale(1.01);
 }
 
 .issue-card.high-risk {
-    border-color: rgba(239, 68, 68, 0.3);
-    background-color: rgba(239, 68, 68, 0.03);
+    border-color: rgba(186, 26, 26, 0.3);
+    background: linear-gradient(135deg, rgba(186, 26, 26, 0.05) 0%, rgba(186, 26, 26, 0.02) 100%);
+    color: var(--risk-high);
 }
 
 .issue-card.medium-risk {
     border-color: rgba(245, 158, 11, 0.3);
-    background-color: rgba(245, 158, 11, 0.03);
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, rgba(245, 158, 11, 0.02) 100%);
+    color: var(--risk-medium);
 }
 
 .issue-card.low-risk {
-    border-color: rgba(16, 185, 129, 0.3);
-    background-color: rgba(16, 185, 129, 0.03);
+    border-color: rgba(49, 170, 160, 0.3);
+    background: linear-gradient(135deg, rgba(49, 170, 160, 0.05) 0%, rgba(49, 170, 160, 0.02) 100%);
+    color: var(--risk-low);
 }
 
 .issue-fragment {
@@ -164,16 +180,19 @@ mark:hover::after {
 }
 
 .suggestions-list li {
-    padding: var(--spacing-2) var(--spacing-3);
-    background-color: var(--color-gray-50);
+    padding: var(--spacing-3) var(--spacing-4);
+    background: linear-gradient(135deg, var(--color-gray-50) 0%, white 100%);
     border: 1px solid var(--color-gray-200);
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-lg);
     font-size: var(--font-size-sm);
     color: var(--color-gray-700);
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: all var(--transition-normal);
     position: relative;
-    padding-left: 2rem;
+    padding-left: 2.5rem;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
 }
 
 .suggestions-list li::before {
@@ -185,25 +204,27 @@ mark:hover::after {
 }
 
 .suggestions-list li:hover {
-    background-color: var(--color-primary);
+    background: linear-gradient(135deg, var(--lochinvar-500) 0%, var(--lochinvar-600) 100%);
     color: white;
     border-color: var(--color-primary);
+    transform: translateX(4px) scale(1.02);
+    box-shadow: var(--shadow-md);
 }
 
 /* ===== アニメーション効果 ===== */
 .fade-in {
-    animation: fadeInUp 0.5s ease;
+    animation: fadeInUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 @keyframes fadeInUp {
     from {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateY(30px) scale(0.95);
     }
 
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0) scale(1);
     }
 }
 
@@ -227,36 +248,61 @@ mark:hover::after {
 
 /* ===== 成功・エラーメッセージ ===== */
 .message {
-    padding: var(--spacing-4);
-    border-radius: var(--radius-md);
+    padding: var(--spacing-5);
+    border-radius: var(--radius-lg);
     margin-bottom: var(--spacing-4);
     display: flex;
     align-items: center;
     gap: var(--spacing-3);
+    position: relative;
+    overflow: hidden;
+    animation: slideInRight 0.4s ease;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.message::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: currentColor;
+    opacity: 0.5;
 }
 
 .message-success {
-    background-color: rgba(16, 185, 129, 0.1);
+    background: linear-gradient(135deg, rgba(49, 170, 160, 0.15) 0%, rgba(49, 170, 160, 0.05) 100%);
     color: var(--color-success);
-    border: 1px solid rgba(16, 185, 129, 0.3);
+    border: 1px solid rgba(49, 170, 160, 0.3);
 }
 
 .message-error {
-    background-color: rgba(239, 68, 68, 0.1);
+    background: linear-gradient(135deg, rgba(186, 26, 26, 0.15) 0%, rgba(186, 26, 26, 0.05) 100%);
     color: var(--color-danger);
-    border: 1px solid rgba(239, 68, 68, 0.3);
+    border: 1px solid rgba(186, 26, 26, 0.3);
 }
 
 .message-warning {
-    background-color: rgba(245, 158, 11, 0.1);
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.05) 100%);
     color: var(--color-warning);
     border: 1px solid rgba(245, 158, 11, 0.3);
 }
 
 .message-info {
-    background-color: rgba(6, 182, 212, 0.1);
-    color: var(--color-info);
-    border: 1px solid rgba(6, 182, 212, 0.3);
+    background: linear-gradient(135deg, rgba(98, 190, 184, 0.15) 0%, rgba(98, 190, 184, 0.05) 100%);
+    color: var(--lochinvar-500);
+    border: 1px solid rgba(98, 190, 184, 0.3);
 }
 
 .message-icon {
@@ -290,10 +336,27 @@ mark:hover::after {
 
 .progress-bar {
     height: 100%;
-    background: linear-gradient(90deg, var(--color-primary), var(--color-info));
+    background: linear-gradient(90deg, var(--color-primary), var(--color-secondary), var(--color-tertiary));
     border-radius: var(--radius-sm);
     transition: width 0.3s ease;
     animation: pulse 2s infinite;
+    position: relative;
+}
+
+.progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
 }
 
 @keyframes pulse {
@@ -377,17 +440,35 @@ mark:hover::after {
 
 /* ===== カード・コンテナ ===== */
 .card {
-    background: white;
+    background: linear-gradient(135deg, #f8fcfc 0%, var(--color-gray-50) 100%);
     border: 1px solid var(--color-gray-200);
-    border-radius: var(--radius-lg);
-    padding: var(--spacing-6);
-    box-shadow: var(--shadow-sm);
-    transition: all var(--transition-fast);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-8);
+    box-shadow: var(--shadow-md);
+    transition: all var(--transition-normal);
+    position: relative;
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--lochinvar-500), var(--lochinvar-400));
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    opacity: 0;
+    transition: opacity var(--transition-normal);
 }
 
 .card:hover {
-    box-shadow: var(--shadow-md);
-    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-4px) scale(1.01);
+}
+
+.card:hover::before {
+    opacity: 1;
 }
 
 .card-header {
@@ -507,17 +588,36 @@ mark:hover::after {
 }
 
 .rewritten-variant {
-    border: 1px solid var(--color-border);
-    border-radius: var(--border-radius-lg);
-    padding: var(--spacing-5);
-    background: var(--color-white);
-    box-shadow: var(--shadow-sm);
-    transition: all 0.3s ease;
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-6);
+    background: linear-gradient(135deg, #f8fcfc 0%, var(--color-gray-50) 100%);
+    box-shadow: var(--shadow-md);
+    transition: all var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+}
+
+.rewritten-variant::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, var(--color-primary-light) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity var(--transition-normal);
 }
 
 .rewritten-variant:hover {
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-lg);
     border-color: var(--color-primary);
+    transform: translateY(-3px) scale(1.01);
+}
+
+.rewritten-variant:hover::after {
+    opacity: 0.05;
 }
 
 .variant-header {
@@ -547,7 +647,7 @@ mark:hover::after {
 }
 
 .variant-content .rewritten-text {
-    background: var(--color-gray-50);
+    background: #f8fcfc;
     border: 1px solid var(--color-gray-200);
     border-radius: var(--border-radius);
     padding: var(--spacing-4);
@@ -724,7 +824,7 @@ mark:hover::after {
 }
 
 .btn-cta-primary {
-    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    background: linear-gradient(135deg, var(--lochinvar-500) 0%, var(--lochinvar-600) 100%);
     color: white;
     font-weight: 600;
     font-size: var(--font-size-base);
@@ -735,16 +835,16 @@ mark:hover::after {
     align-items: center;
     gap: var(--spacing-2);
     transition: all var(--transition-fast);
-    box-shadow: 0 4px 6px rgba(59, 130, 246, 0.25);
+    box-shadow: 0 4px 6px rgba(49, 170, 160, 0.25);
     border: none;
     min-width: 320px;
     justify-content: center;
 }
 
 .btn-cta-primary:hover {
-    background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+    background: linear-gradient(135deg, var(--lochinvar-600) 0%, var(--lochinvar-550) 100%);
     transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(59, 130, 246, 0.35);
+    box-shadow: 0 6px 12px rgba(49, 170, 160, 0.35);
 }
 
 
@@ -892,9 +992,10 @@ mark:hover::after {
     }
 
     .suggestions-list li {
-        font-size: var(--font-size-xs);
-        padding: var(--spacing-1) var(--spacing-2);
-        padding-left: var(--spacing-5);
+        font-size: var(--font-size-sm);
+        padding: var(--spacing-3) var(--spacing-3);
+        padding-left: var(--spacing-6);
+        min-height: 48px;
     }
 
     .issue-card {
@@ -938,12 +1039,15 @@ mark:hover::after {
 
 /* ===== 詳細進捗表示 ===== */
 .detailed-progress-container {
-    background: #f0f9ff;
-    border: 2px solid #3b82f6;
-    border-radius: var(--border-radius-lg);
+    background: linear-gradient(135deg, var(--color-gray-50) 0%, rgba(148, 211, 208, 0.08) 100%);
+    border: 2px solid var(--lochinvar-500);
+    border-radius: var(--radius-lg);
     padding: var(--spacing-4);
     margin: var(--spacing-4) 0;
     animation: fadeIn 0.3s ease;
+    box-shadow: 0 4px 12px rgba(49, 170, 160, 0.15);
+    position: relative;
+    overflow: hidden;
 }
 
 .progress-header {
@@ -955,20 +1059,21 @@ mark:hover::after {
 
 .progress-header h4 {
     margin: 0;
-    color: #1e40af;
+    color: var(--color-primary);
     font-size: var(--font-size-lg);
+    font-weight: 600;
 }
 
 .progress-percentage {
-    color: #3b82f6;
-    font-weight: 600;
+    color: var(--color-primary-dark);
+    font-weight: 700;
     font-size: var(--font-size-lg);
 }
 
 .progress-bar-container {
     width: 100%;
     height: 12px;
-    background: #e0e7ff;
+    background: rgba(148, 211, 208, 0.2);
     border-radius: 6px;
     overflow: hidden;
     margin-bottom: var(--spacing-3);
@@ -977,7 +1082,7 @@ mark:hover::after {
 
 .progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, #3b82f6, #60a5fa);
+    background: linear-gradient(90deg, var(--lochinvar-500), var(--lochinvar-400));
     transition: width 0.5s ease;
     position: relative;
 }
@@ -997,7 +1102,7 @@ mark:hover::after {
 }
 
 .progress-message {
-    color: #1e40af;
+    color: var(--lochinvar-600);
     font-size: var(--font-size-sm);
     margin: 0 0 var(--spacing-3) 0;
     font-style: italic;
@@ -1016,14 +1121,14 @@ mark:hover::after {
     text-align: center;
     padding: var(--spacing-1) var(--spacing-2);
     font-size: var(--font-size-xs);
-    color: #6b7280;
+    color: #FFF;
     border-radius: var(--border-radius-sm);
     transition: all 0.3s ease;
     position: relative;
 }
 
 .progress-stages .stage.active {
-    background: #3b82f6;
+    background: var(--lochinvar-500);
     color: white;
     font-weight: 600;
 }
@@ -1045,7 +1150,7 @@ mark:hover::after {
 /* ===== ストリーミング進捗表示 ===== */
 .streaming-progress {
     background: #f0f9ff;
-    border: 2px solid #3b82f6;
+    border: 2px solid var(--lochinvar-500);
     border-radius: var(--border-radius-lg);
     padding: var(--spacing-4);
     margin-bottom: var(--spacing-4);
@@ -1061,13 +1166,14 @@ mark:hover::after {
 
 .progress-header h4 {
     margin: 0;
-    color: #1e40af;
+    color: var(--color-primary);
     font-size: var(--font-size-lg);
+    font-weight: 600;
 }
 
 .progress-percentage {
-    color: #3b82f6;
-    font-weight: 600;
+    color: var(--color-primary-dark);
+    font-weight: 700;
     font-size: var(--font-size-lg);
 }
 
@@ -1082,7 +1188,7 @@ mark:hover::after {
 
 .progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, #3b82f6, #60a5fa);
+    background: linear-gradient(90deg, var(--lochinvar-500), var(--lochinvar-400));
     transition: width 0.5s ease;
     position: relative;
 }
@@ -1112,10 +1218,11 @@ mark:hover::after {
 }
 
 .progress-message {
-    color: #1e40af;
+    color: var(--color-gray-700);
     font-size: var(--font-size-sm);
     margin: 0 0 var(--spacing-2) 0;
     font-style: italic;
+    font-weight: 500;
 }
 
 .progress-steps {
@@ -1141,7 +1248,7 @@ mark:hover::after {
 /* ===== サーバー状況表示 ===== */
 .server-status-message {
     background: #f0f9ff;
-    border: 1px solid #3b82f6;
+    border: 1px solid var(--lochinvar-500);
     border-radius: var(--border-radius-lg);
     padding: var(--spacing-4);
     margin-bottom: var(--spacing-4);
@@ -1160,7 +1267,7 @@ mark:hover::after {
 }
 
 .status-text {
-    color: #1e40af;
+    color: var(--lochinvar-600);
     font-size: var(--font-size-base);
     flex-grow: 1;
 }
@@ -1173,7 +1280,7 @@ mark:hover::after {
 .spinner-dot {
     width: 8px;
     height: 8px;
-    background: #3b82f6;
+    background: var(--lochinvar-500);
     border-radius: 50%;
     animation: bounce 1.4s infinite ease-in-out both;
 }
@@ -1201,20 +1308,20 @@ mark:hover::after {
 
 /* ===== ステップ形式フォームスタイル ===== */
 .form-step {
-    background: white;
+    background: linear-gradient(135deg, #f8fcfc 0%, var(--color-gray-50) 100%);
     border: 2px solid var(--color-gray-200);
-    border-radius: var(--border-radius-lg);
-    padding: var(--spacing-5);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-6);
     margin-bottom: var(--spacing-6);
-    box-shadow: var(--shadow-sm);
-    transition: all var(--transition-fast);
+    box-shadow: var(--shadow-md);
+    transition: all var(--transition-normal);
     position: relative;
 }
 
 .form-step:hover {
     border-color: var(--color-primary);
-    box-shadow: var(--shadow-md);
-    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-3px) scale(1.01);
 }
 
 .step-header {
@@ -1232,13 +1339,26 @@ mark:hover::after {
     justify-content: center;
     width: 60px;
     height: 60px;
-    background: linear-gradient(135deg, var(--color-primary), var(--color-info));
+    background: linear-gradient(135deg, var(--lochinvar-500), var(--lochinvar-400));
     color: white;
     font-weight: 700;
     font-size: var(--font-size-sm);
     border-radius: 50%;
     flex-shrink: 0;
-    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 4px 12px rgba(49, 170, 160, 0.2);
+    position: relative;
+    transition: all var(--transition-normal);
+}
+
+.form-step:hover .step-number,
+.form-step:focus-within .step-number {
+    animation: float 3s ease-in-out infinite;
+    box-shadow: 0 6px 16px rgba(49, 170, 160, 0.3);
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
 }
 
 .step-title {
@@ -1364,7 +1484,7 @@ mark:hover::after {
 /* レスポンシブデザイン */
 @media (max-width: 768px) {
     .form-step {
-        padding: var(--spacing-4);
+        padding: var(--spacing-5);
         margin-bottom: var(--spacing-4);
     }
     
